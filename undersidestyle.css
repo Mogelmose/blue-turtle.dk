@@ -1,0 +1,186 @@
+{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========================================
+   Underside - GRUNDLÆGGENDE STYLING
+======================================== */
+
+.main-header {
+  background-color: #111;
+  height: 60px;
+  padding: 0 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+}
+
+.header-content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.main-header img {
+  height: 40px;
+  width: auto;
+}
+
+.logo-link img {
+  transition: transform 0.3s ease;
+}
+
+.logo-link img:hover {
+  transform: scale(1.2, 0.8);
+}
+
+.nav-logud ul {
+  list-style: none;
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-logud ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 7px 20px;
+  background-color: #0e72b9;
+  border-radius: 6px;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+
+.nav-logud ul li a:hover {
+  background-color: #0a5598;
+  text-decoration: none;
+}
+
+.banner-title {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+
+.underside-body {
+  background-color: white;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+
+
+/* ========================================
+   Underside layout
+======================================== */
+
+.underside-main {
+  text-align: center;
+  font-size: 2rem;
+  color: black;
+  text-transform: uppercase;
+}
+
+.underside-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-top: 2rem;
+  color: black;
+  text-transform: uppercase;
+}
+
+.album-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 20px;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.photo-grid img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transition: transform 0.3s ease;
+}
+
+
+/* ========================================
+   Footer layout
+======================================== */
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: white;
+  color: black;
+}
+
+footer {
+  height: 50px; /* lavere højde */
+  background-color: #111;
+  color: white;
+  display: flex; /* aktiverer flex layout */
+  align-items: center; /* centrerer lodret */
+  justify-content: center; /* centrerer vandret */
+  padding: 0 20px; /* lidt vandret luft */
+  box-sizing: border-box;
+}
+
+/* Responsivt for små skærme */
+@media (max-width: 500px) {
+  .profiles {
+    gap: 20px;
+  }
+  .profile {
+    width: 80px;
+  }
+  .profile img {
+    width: 80px;
+    height: 80px;
+  }
+  .profile-name {
+    font-size: 14px;
+  }
+  
+  .nav-logud ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
