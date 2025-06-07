@@ -3,6 +3,15 @@ const adgangskoder = {
   "Mads": "abcd",
   "Oliver": "kode123"
 };
+function playSuccessSoundAndRedirect() {
+  const successSound = new Audio('../sound/pissegodt.mp3'); 
+  successSound.addEventListener('ended', function() {
+    window.location.href = "forside.html";
+  });
+
+  // Start afspilningen af lyden
+  successSound.play();
+}
 function playErrorSound() {
   // Ret stien hvis nødvendigt. Dette er lyden for en fejl.
   const errorSound = new Audio('../sound/snake.mp3'); 
@@ -32,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fejlbesked = document.getElementById('fejlbesked');
 
     if (adgangskoder[bruger] === kode) {
-        window.location.href = "forside.html?login=success";
+      playSuccessSoundAndRedirect()
     } else {
       fejlbesked.textContent = "Forkert adgangskode";
       playErrorSound(); 

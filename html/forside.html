@@ -72,7 +72,6 @@
 	  </ul>
 	</nav>
 	  
-    <!-- Tilføj main her -->
     <main>
       <h1 class="event-title">Spilleaftner</h1>
 
@@ -89,7 +88,6 @@
 			<img src="../billeder/event3.jpg" alt="event 3" />
 			<p>Schildt Aalborg</p>
 		  </div>
-		  <!-- Gentag op til 10 -->
 		</div>
     </main>
 
@@ -99,18 +97,4 @@
 
   </div>
 </body>
-<script>
-  function playLoginSound() {
-    const loginSound = new Audio('../sound/pissegodt.mp3');
-    loginSound.play().catch(error => {
-      console.log('Autoplay af lyd blev forhindret:', error);
-    });
-  }
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('login') === 'success') {
-      playLoginSound();
-    }
-  });
-</script>
 </html>
