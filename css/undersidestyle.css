@@ -4,8 +4,15 @@
   padding: 0;
 }
 
+@font-face {
+  font-family: 'Votrag';
+  src: url('fonts/Votrag-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
 /* ========================================
-   Underside - GRUNDLÆGGENDE STYLING
+   Header - GRUNDLÆGGENDE STYLING
 ======================================== */
 
 .main-header {
@@ -43,6 +50,21 @@
   transform: scale(1.2, 0.8);
 }
 
+.banner-title {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
 .nav-logud ul {
   list-style: none;
   display: flex;
@@ -67,44 +89,80 @@
   text-decoration: none;
 }
 
-.banner-title {
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  margin: 0;
-}
-
+/* ========================================
+   Underside - GRUNDLÆGGENDE STYLING
+======================================== */
 
 .underside-body {
   background-color: white;
-  color: white;
+  color: black;
   font-family: 'Nunito', sans-serif;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   margin: 0;
+  padding: 0;
 }
-
-
-
-/* ========================================
-   Underside layout
-======================================== */
 
 .underside-main {
   text-align: center;
-  font-size: 2rem;
   color: black;
   text-transform: uppercase;
+  padding: 0;
 }
 
 .underside-title {
-  text-align: center;
-  font-size: 2rem;
-  margin-top: 2rem;
-  color: black;
+  font-family: 'Votrag', sans-serif;
+  font-size: 4rem;
+  margin: 0; 
+  padding: 1rem 20px; 
+  width: 100%;
+  background-color: #111;
+  color: white;
   text-transform: uppercase;
+  text-align: left;
+  box-sizing: border-box;
 }
+
+.nav-upload {
+  text-align: left;
+  padding-left: 20px;
+  margin-top: 0;
+}
+
+.nav-upload ul {
+  list-style: none;
+  display: flex;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+}
+
+.upload-btn {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 7px 20px;
+  background-color: #0e72b9;
+  border-radius: 6px;
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.upload-btn:hover {
+  background-color: #0a5598;
+  text-decoration: none;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+
+/* ========================================
+   Album - GRUNDLÆGGENDE STYLING
+======================================== */
 
 .album-container {
   max-width: 1200px;
@@ -165,19 +223,6 @@ footer {
 
 /* Responsivt for små skærme */
 @media (max-width: 500px) {
-  .profiles {
-    gap: 20px;
-  }
-  .profile {
-    width: 80px;
-  }
-  .profile img {
-    width: 80px;
-    height: 80px;
-  }
-  .profile-name {
-    font-size: 14px;
-  }
   
   .nav-logud ul {
     flex-direction: column;
