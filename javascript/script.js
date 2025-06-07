@@ -3,7 +3,11 @@ const adgangskoder = {
   "Mads": "abcd",
   "Oliver": "kode123"
 };
-
+function playErrorSound() {
+  // Ret stien hvis nødvendigt. Dette er lyden for en fejl.
+  const errorSound = new Audio('../sound/snake.mp3'); 
+  errorSound.play();
+}
 function showLogin(name) {
   document.querySelector('.profiles').style.display = 'none';
   document.getElementById('loginForm').classList.remove('hidden');
@@ -31,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = "forside.html?login=success";
     } else {
       fejlbesked.textContent = "Forkert adgangskode";
-      window.location.href = "login.html?login=failed";
+      playErrorSound(); 
       document.getElementById('kode').value = ''; // Nulstil kodefelt
     }
   });

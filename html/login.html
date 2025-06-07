@@ -78,18 +78,4 @@
   </main>
 
 </body>
-<script>
-  function playLoginSound() {
-    const loginSound = new Audio('../sound/snake.mp3');
-    loginSound.play().catch(error => {
-      console.log('Autoplay af lyd blev forhindret:', error);
-    });
-  }
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('login') === 'failed') {
-      playLoginSound();
-    }
-  });
-</script>
 </html>
