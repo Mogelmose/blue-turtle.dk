@@ -17,21 +17,6 @@
   <h1 class="banner-title">Spilleaften</h1>
 </header>
 
-<script>
-  function playLoginSound() {
-    const loginSound = new Audio('../sound/pissegodt.mp3');
-    loginSound.play().catch(error => {
-      console.log('Autoplay af lyd blev forhindret:', error);
-    });
-  }
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('login') === 'success') {
-      playLoginSound();
-    }
-  });
-</script>
-
   <main class="main">
     <h1>Log venligst ind</h1>
 
@@ -93,4 +78,18 @@
   </main>
 
 </body>
+<script>
+  function playLoginSound() {
+    const loginSound = new Audio('../sound/snake.mp3');
+    loginSound.play().catch(error => {
+      console.log('Autoplay af lyd blev forhindret:', error);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'failed') {
+      playLoginSound();
+    }
+  });
+</script>
 </html>

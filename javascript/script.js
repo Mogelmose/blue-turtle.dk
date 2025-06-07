@@ -28,10 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const fejlbesked = document.getElementById('fejlbesked');
 
     if (adgangskoder[bruger] === kode) {
-      window.location.href = "forside.html";
         window.location.href = "forside.html?login=success";
     } else {
       fejlbesked.textContent = "Forkert adgangskode";
+      window.location.href = "login.html?login=failed";
       document.getElementById('kode').value = ''; // Nulstil kodefelt
     }
   });

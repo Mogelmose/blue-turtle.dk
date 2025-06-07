@@ -9,21 +9,6 @@
   <link rel="stylesheet" href="../css/forsidestyle.css" />
 </head>
 
-<script>
-  function playLoginSound() {
-    const loginSound = new Audio('../sound/pissegodt.mp3');
-    loginSound.play().catch(error => {
-      console.log('Autoplay af lyd blev forhindret:', error);
-    });
-  }
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('login') === 'success') {
-      playLoginSound();
-    }
-  });
-</script>
-
 <body class="forside-body">
   <div class="page-container">
 
@@ -114,4 +99,18 @@
 
   </div>
 </body>
+<script>
+  function playLoginSound() {
+    const loginSound = new Audio('../sound/pissegodt.mp3');
+    loginSound.play().catch(error => {
+      console.log('Autoplay af lyd blev forhindret:', error);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'success') {
+      playLoginSound();
+    }
+  });
+</script>
 </html>
