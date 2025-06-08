@@ -9,11 +9,9 @@ function playSuccessSoundAndRedirect() {
     window.location.href = "forside.html";
   });
 
-  // Start afspilningen af lyden
   successSound.play();
 }
 function playErrorSound() {
-  // Ret stien hvis nødvendigt. Dette er lyden for en fejl.
   const errorSound = new Audio('../sound/snake.mp3'); 
   errorSound.play();
 }
@@ -41,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fejlbesked = document.getElementById('fejlbesked');
 
     if (adgangskoder[bruger] === kode) {
+      succesbesked.textContent = "Velkommen til Blue Turtle!";
       playSuccessSoundAndRedirect()
     } else {
       fejlbesked.textContent = "Forkert adgangskode";
