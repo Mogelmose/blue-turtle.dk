@@ -51,17 +51,18 @@
 }
 
 .profiles {
-  display: flex;
-  gap: 60px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr)); /* 5 profiler pr. række */
+  gap: 40px; /* eller 60px hvis du vil bevare det store mellemrum */
   justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .profile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 120px;
 }
 
 .profile img {
