@@ -1,6 +1,5 @@
 # Blue Turtle Web App
 
-Vibecoded Website for the Turtle Boys
 
 ## How to Run This Web App Locally
 
