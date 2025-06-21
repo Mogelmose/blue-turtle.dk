@@ -33,6 +33,7 @@ cp prisma/template_seed.js prisma/seed.js
 
 Open `.env` and fill in any required values (like database URL, secrets, and user passwords).  
 In `seed.js`, you can specify your seed data for the database.
+```
 
 **3. Install Dependencies**  
 ```bash
