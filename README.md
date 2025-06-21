@@ -1,2 +1,2 @@
 # blue-turtle.dk
-Website for the turtle boys
+Vibecoded Website for the turtle boys
