@@ -10,16 +10,16 @@ git clone https://github.com/Mogelmose/blue-turtle.dk.git
 cd blue-turtle.dk/blue-turtle-webapp
 ```
 
-**2. Install Dependencies**  
-```bash
-npm install
-```
-
-**3. Set Up Environment Variables**  
+**2. Set Up Environment Variables**  
 Copy the example environment file:  
 ```bash
 cp .env.example .env
 cp prisma/template_seed.js prisma/seed.js
+```
+
+**3. Install Dependencies**  
+```bash
+npm install
 ```
 
 Open `.env` and fill in any required values (like database URL, secrets, and user passwords).  
