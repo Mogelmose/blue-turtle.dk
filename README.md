@@ -15,15 +15,15 @@ Copy the example environment file:
 ```bash
 cp .env.example .env
 cp prisma/template_seed.js prisma/seed.js
+
+Open `.env` and fill in any required values (like database URL, secrets, and user passwords).  
+In `seed.js`, you can specify your seed data for the database.
 ```
 
 **3. Install Dependencies**  
 ```bash
 npm install
 ```
-
-Open `.env` and fill in any required values (like database URL, secrets, and user passwords).  
-In `seed.js`, you can specify your seed data for the database.
 
 **4. Generate the Database**  
 Run Prisma migrations to create the database tables:  
