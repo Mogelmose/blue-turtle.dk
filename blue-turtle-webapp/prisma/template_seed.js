@@ -40,7 +40,7 @@ const usersToCreate = [
 // Example album data. Customize this with the albums you want to create.
 const albumsToCreate = [
   { id: 'bday25', name: 'Birthday Party 2025', infoText: 'so fun', category: 'SPILLEAFTEN', coverImage: '/uploads/covers/example.jpg' },
-  { id: 'summer24', name: 'Summer Vacation 2024', infoText: 'A trip to the beach.', category: 'REJSER', coverImage: '/uploads/covers/example.jpg' },
+  { id: 'summer24', name: 'Summer Vacation 2024', infoText: 'A trip to the beach.', category: 'REJSER' },
   { id: 'julefrokost', name: 'Julefrokost', infoText: 'Julefrokost', category: 'JULEFROKOST', coverImage: '/uploads/covers/example.jpg' },
 ];
 
@@ -72,7 +72,8 @@ async function main() {
     console.log(`  - Created/updated user: ${user.username} (ID: ${user.id})`);
   }
 
-  console.log('\nCreating/updating albums...');
+  // Create albums
+  console.log('\nCreating albums...');
   for (const albumData of albumsToCreate) {
     const album = await prisma.album.upsert({
       where: { id: albumData.id },
@@ -80,14 +81,14 @@ async function main() {
         name: albumData.name,
         infoText: albumData.infoText,
         category: albumData.category,
-        coverImage: albumData.coverImage || null,
+        coverImage: albumData.coverImage,
       },
       create: {
         id: albumData.id,
         name: albumData.name,
         infoText: albumData.infoText,
         category: albumData.category,
-        coverImage: albumData.coverImage || null,
+        coverImage: albumData.coverImage,
       },
     });
     console.log(`  - Created/updated album: ${album.name} (ID: ${album.id})`);

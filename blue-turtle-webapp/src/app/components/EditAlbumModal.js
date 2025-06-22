@@ -1,68 +1,56 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import '../css/modal.css';
 
-export default function CreateAlbumModal({ isOpen, onClose }) {
+export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated }) {
   const [name, setName] = useState('');
   const [infoText, setInfoText] = useState('');
   const [category, setCategory] = useState('REJSER');
-  const [coverImage, setCoverImage] = useState(null);
+  const [coverImage, setCoverImage] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+
+  useEffect(() => {
+    if (album) {
+      setName(album.name || '');
+      setInfoText(album.infoText || '');
+      setCategory(album.category || 'REJSER');
+      setCoverImage(album.coverImage || '');
+    }
+  }, [album]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-
-    if (!name || !infoText) {
-      setError('Udfyld alle felter.');
-      return;
-    }
-
-    if ((category === 'SPILLEAFTEN' || category === 'JULEFROKOST') && !coverImage) {
-      setError('Vælg et billede til denne kategori');
-      return;
-    }
-
     setIsLoading(true);
 
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('infoText', infoText);
-    formData.append('category', category);
-    if (coverImage) {
-      formData.append('coverImage', coverImage);
-    }
-
     try {
-      const res = await fetch('/api/albums', {
-        method: 'POST',
-        body: formData,
+      const res = await fetch(`/api/albums/${album.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, infoText, category, coverImage }),
       });
 
       if (res.ok) {
-        setSuccess('Album oprettet!');
+        const updatedAlbum = await res.json();
+        setSuccess('Album opdateret!');
         setTimeout(() => {
-          setName('');
-          setInfoText('');
-          setCategory('REJSER');
-          setCoverImage(null);
-          setSuccess('');
+          onAlbumUpdated(updatedAlbum);
           onClose();
-          router.refresh();
+          setSuccess('');
         }, 1500);
       } else {
         const data = await res.json();
-        setError(data.message || 'Der skete en fejl');
+        setError(data.error || 'Der skete en fejl under opdateringen.');
       }
     } catch (error) {
       setError('En uventet fejl opstod.');
-      console.error('Der skete en fejl:', error);
+      console.error('Update error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -75,9 +63,10 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
       <div className="modal-content">
         <button onClick={onClose} className="modal-close-btn">&times;</button>
         <form onSubmit={handleSubmit} className="album-form">
-          <h2>Opret et nyt album</h2>
+          <h2>Rediger Album</h2>
           {error && <p className="error-message">{error}</p>}
           {success && <p className="success-message">{success}</p>}
+          
           <div className="form-group">
             <label htmlFor="name">Album Navn</label>
             <input
@@ -88,6 +77,7 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
               required
             />
           </div>
+
           <div className="form-group">
             <label htmlFor="infoText">Beskrivelse</label>
             <textarea
@@ -97,6 +87,7 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
               required
             ></textarea>
           </div>
+
           <div className="form-group">
             <label htmlFor="category">Kategori</label>
             <select
@@ -110,23 +101,20 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
               <option value="JULEFROKOST">Julefrokost</option>
             </select>
           </div>
-          {(category === 'SPILLEAFTEN' || category === 'JULEFROKOST') && (
-            <div className="form-group">
-              <label htmlFor="coverImage" className="file-upload-label">
-                {coverImage ? coverImage.name : 'Vælg et coverbillede...'}
-              </label>
-              <input
-                type="file"
-                id="coverImage"
-                onChange={(e) => setCoverImage(e.target.files[0])}
-                accept="image/*"
-                required
-                style={{ display: 'none' }}
-              />
-            </div>
-          )}
+
+          <div className="form-group">
+            <label htmlFor="coverImage">Cover Billede URL</label>
+            <input
+              type="text"
+              id="coverImage"
+              value={coverImage}
+              onChange={(e) => setCoverImage(e.target.value)}
+              placeholder="/uploads/covers/example.jpg"
+            />
+          </div>
+
           <button type="submit" className="btn btn-secondary btn-block" style={{ marginTop: '10px' }} disabled={isLoading}>
-            {isLoading ? <div className="spinner"></div> : 'Opret Album'}
+            {isLoading ? <div className="spinner"></div> : 'Gem Ændringer'}
           </button>
         </form>
       </div>

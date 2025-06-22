@@ -59,14 +59,13 @@ export default async function Homepage() {
     <div className="forside-body">
       <div className="page-container">
         <AppHeader />
-
         <div className="banner-container">
           <Image
             src="/static/banner.jpg"
             alt="Banner"
             className="banner-image"
-            width={1600}
-            height={600}
+            width={1920}
+            height={1080}
             priority
           />
         </div>
@@ -75,8 +74,8 @@ export default async function Homepage() {
           <ul>
             {rejser.map(album => (
               <li key={album.id}>
-                <Link href={`/albums/${album.id}`}>
-                  <h2>{album.name}</h2>
+                <Link href={`/albums/${album.id}`} className="btn btn-primary">
+                  {album.name}
                 </Link>
               </li>
             ))}

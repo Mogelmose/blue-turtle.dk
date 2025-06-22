@@ -144,10 +144,10 @@ export default function LoginPage() {
             <p id="succesbesked" style={{ color: 'green', marginTop: 10 }}>
               {succesbesked}
             </p>
-            <button type="submit" disabled={loading}>
+            <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '1rem' }} disabled={loading}>
               Log Ind
             </button>
-            <button type="button" onClick={handleGoBack} disabled={loading}>
+            <button type="button" className="btn btn-secondary btn-block" style={{ marginTop: '0.5rem' }} onClick={handleGoBack} disabled={loading}>
               Annuller
             </button>
           </form>

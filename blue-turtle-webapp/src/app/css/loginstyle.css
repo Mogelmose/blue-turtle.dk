@@ -124,22 +124,7 @@ form#loginForm input[type="checkbox"] {
   margin-right: 0.5rem;
 }
 
-form#loginForm button {
-  width: 100%;
-  padding: 0.75rem;
-  margin-top: 1rem;
-  background-color: #0e72b9;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
 
-form#loginForm button:hover {
-  background-color: #0a5598;
-}
 
 @media (max-width: 500px) {
   .profiles {

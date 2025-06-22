@@ -56,7 +56,7 @@ html, body {
 }
 
 .logo-link img:hover {
-  transform: scale(1.2, 0.8);
+  transform: scale(1.1, 0.9);
 }
 
 .banner-title {
@@ -73,37 +73,14 @@ html, body {
   margin: 0;
   padding: 0;
 }
-
-.nav-logud ul li a,
-.nav-logud ul li button {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 15px;
-  padding: 8px 20px;
-  background-color: #0e72b9;
-  border-radius: 8px;
-  display: inline-block;
-  transition: background-color 0.3s ease;
-  border: none;
-  cursor: pointer;
-  font-family: 'Nunito', sans-serif;
-}
-
-.nav-logud ul li a:hover,
-.nav-logud ul li button:hover {
-  background-color: #0a5598;
-  text-decoration: none;
-}
-
 footer {
-  height: 50px;
+  height: 40px;
   background-color: #111;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 20px;
+  padding: 0 10px;
   box-sizing: border-box;
   font-family: 'Nunito', sans-serif;
 }
@@ -114,4 +91,57 @@ footer {
     align-items: flex-start;
     gap: 15px;
   }
+}
+
+/* ========================================= */
+/* ========= Global Button Styles ========== */
+/* ========================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  text-transform: none;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #0e72b9;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0a5598;
+}
+
+.btn-secondary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #0056b3;
+}
+
+.btn-block {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+.btn.disabled,
+.btn:disabled,
+.btn[disabled] {
+  background-color: #555;
+  color: #aaa;
+  cursor: not-allowed;
+  opacity: 0.7;
 }

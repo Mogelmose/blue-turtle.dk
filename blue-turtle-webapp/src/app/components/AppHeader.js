@@ -31,14 +31,10 @@ export default function AppHeader() {
             {session && (
               <>
                 <li>
-                  <button onClick={() => setModalOpen(true)}>
-                    Opret Album
-                  </button>
+                  <button onClick={() => setIsModalOpen(true)} className="btn btn-primary">Opret Album</button>
                 </li>
                 <li>
-                  <button onClick={() => signOut({ callbackUrl: '/' })}>
-                    Log ud
-                  </button>
+                  <button onClick={() => signOut({ callbackUrl: '/login' })} className="btn btn-primary">Log ud</button>
                 </li>
               </>
             )}

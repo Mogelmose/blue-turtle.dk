@@ -65,21 +65,7 @@
   color: #fff;
 }
 
-.modal-content .album-form button[type="submit"] {
-  width: 100%;
-  padding: 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 10px;
-}
 
-.modal-content .album-form button[type="submit"]:hover {
-  background-color: #0056b3;
-}
 
 .modal-content .error-message {
   color: #ff4d4d;
@@ -130,11 +116,4 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Disabled button style */
-.modal-content .album-form button[type="submit"]:disabled {
-  background-color: #0056b3;
-  cursor: not-allowed;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+

@@ -3,11 +3,22 @@ import { useState } from 'react';
 import AppHeader from '../../components/AppHeader';
 import Image from 'next/image';
 import '../../css/sub-pagestyle.css';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import EditAlbumModal from '../../components/EditAlbumModal';
 
 export default function AlbumContent({ initialAlbum }) {
   const [album, setAlbum] = useState(initialAlbum);
   const [media, setMedia] = useState(initialAlbum?.media || []);
   const [uploading, setUploading] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  const handleAlbumUpdated = (updatedAlbum) => {
+    setAlbum(updatedAlbum);
+  };
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
@@ -55,8 +66,8 @@ export default function AlbumContent({ initialAlbum }) {
             src="/static/banner.jpg"
             alt="Banner"
             className="banner-image"
-            width={1600}
-            height={600}
+            width={1920}
+            height={1080}
             priority
           />
         </div>
@@ -70,8 +81,15 @@ export default function AlbumContent({ initialAlbum }) {
             <div className="header-controls">
               <div className="nav-upload">
                 <ul>
+                  {session?.user.role === 'ADMIN' && (
+                    <li>
+                      <button onClick={() => setIsEditModalOpen(true)} className="btn btn-primary">
+                        Rediger album
+                      </button>
+                    </li>
+                  )}
                   <li>
-                    <label htmlFor="file-upload" className={`upload-btn ${uploading ? 'disabled' : ''}`}>
+                    <label htmlFor="file-upload" className={`btn btn-primary ${uploading ? 'disabled' : ''}`}>
                       {uploading ? <span className="loading-spinner"></span> : 'Upload'}
                     </label>
                     <input id="file-upload" type="file" onChange={handleFileChange} disabled={uploading} accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/webm,video/quicktime" />
@@ -90,7 +108,7 @@ export default function AlbumContent({ initialAlbum }) {
                   src={item.url}
                   alt={item.alt || album.name}
                   width={400}
-                  height={300}
+                  height={400}
                   className="photo-grid-image"
                 />
               </div>
@@ -102,6 +120,12 @@ export default function AlbumContent({ initialAlbum }) {
           <p>&copy; 2025 Blue Turtle. Alle rettigheder forbeholdes.</p>
         </footer>
       </div>
+      <EditAlbumModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+        album={album} 
+        onAlbumUpdated={handleAlbumUpdated} 
+      />
     </div>
   );
 }

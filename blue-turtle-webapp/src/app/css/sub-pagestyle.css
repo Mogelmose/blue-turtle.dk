@@ -21,10 +21,10 @@
   justify-content: space-between;
   align-items: center;
   background-color: #111;
-  padding: 0 1rem 0 2rem;
+  padding: 0 1rem 0 1rem;
   box-sizing: border-box;
   width: 100%;
-  height: 90px;
+  height: 80px;
 }
 
 .header-controls {
@@ -43,7 +43,7 @@
 .underside-title {
   font-family: 'Votrag', sans-serif;
   font-size: 4rem;
-  margin: 12px;
+  margin: 10px;
   color: white;
   text-transform: uppercase;
   line-height: 1;
@@ -69,29 +69,7 @@
   padding: 0;
 }
 
-.upload-btn {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 20px;
-  padding: 8px 20px;
-  background-color: #0e72b9;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  transition: background-color 0.3s ease;
-  font-family: 'Nunito', sans-serif;
-  min-width: 120px;
-  min-height: 44px;
-}
 
-.upload-btn:hover {
-  background-color: #0a5598;
-  text-decoration: none;
-}
 
 input[type="file"] {
   display: none;
@@ -145,21 +123,18 @@ input[type="file"] {
   transition: transform 0.3s ease;
 }
 
-
-
 .photo-grid-item {
   position: relative;
   overflow: hidden;
   border-radius: 10px;
 }
 
-
 main {
   flex: 1;
   display: flex;
   flex-direction: column;
   padding: 20px;
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   color: black;
 }
 
