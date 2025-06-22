@@ -1,0 +1,95 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #2c2c2c; /* Dark background for the modal */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  border: 1px solid #444;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  color: #fff;
+}
+
+/* Re-using album-form styles from homepagestyle.css inside the modal */
+.modal-content .album-form h2 {
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.modal-content .album-form .form-group {
+  margin-bottom: 15px;
+}
+
+.modal-content .album-form label {
+  color: #ccc;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.modal-content .album-form input[type="text"],
+.modal-content .album-form textarea,
+.modal-content .album-form select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #555;
+  background-color: #333;
+  color: #fff;
+}
+
+.modal-content .album-form button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.modal-content .album-form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.modal-content .error-message {
+  color: #ff4d4d;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.modal-content .success-message {
+  color: #4dff4d;
+  text-align: center;
+  margin-bottom: 15px;
+}

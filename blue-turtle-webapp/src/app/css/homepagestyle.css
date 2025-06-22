@@ -89,9 +89,14 @@
   transform: scale(1.05);
 }
 
+.event a {
+  text-decoration: none; /* Remove underline from links */
+}
+
 .event p {
   margin-top: 0.5rem;
   font-weight: bold;
+  color: black; /* Ensure text is black */
 }
 
 main {

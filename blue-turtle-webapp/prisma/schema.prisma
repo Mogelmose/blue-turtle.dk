@@ -23,16 +23,25 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+enum Category {
+  REJSER
+  SPILLEAFTEN
+  JULEFROKOST
+}
+
 model Album {
-  id       String  @id
+  id       String   @id
   name     String
-  infoText String
-  media    Media[]
+  infoText String?
+  media      Media[]
+  category   Category @default(REJSER)
+  coverImage String?
 }
 
 model Media {
-  id      String @id @default(cuid())
-  url     String
-  album   Album  @relation(fields: [albumId], references: [id])
-  albumId String
+  id        String   @id @default(cuid())
+  url       String
+  album     Album    @relation(fields: [albumId], references: [id])
+  albumId   String
+  createdAt DateTime @default(now())
 }

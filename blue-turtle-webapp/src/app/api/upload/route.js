@@ -7,6 +7,7 @@ export async function POST(request) {
   try {
     const data = await request.formData();
     const file = data.get('file');
+    const albumId = data.get('albumId');
 
     const allowedFileTypes = [
       'image/jpeg',
@@ -19,45 +20,43 @@ export async function POST(request) {
       'video/quicktime',
     ];
 
-    if (!file || !allowedFileTypes.includes(file.type)) {
+    if (!allowedFileTypes.includes(file.type)) {
       return NextResponse.json({ success: false, error: 'Invalid file type.' }, { status: 400 });
-    }
-    const albumId = data.get('albumId');
-
-    if (!albumId) {
-      return NextResponse.json({ success: false, error: 'AlbumId missing' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create a unique filename
-    const filename = `${Date.now()}-${file.name}`;
-    const uploadDir = path.join(process.cwd(), 'media_uploads');
+    // Create a unique filename to avoid overwrites
+    const filename = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+    const albumUploadDir = path.join(process.cwd(), 'album_uploads', albumId);
 
-    // Ensure the upload directory exists
+    // Ensure the album-specific upload directory exists
     try {
-      await access(uploadDir);
+      await access(albumUploadDir);
     } catch {
-      await mkdir(uploadDir, { recursive: true });
+      await mkdir(albumUploadDir, { recursive: true });
     }
 
-    const filepath = path.join(uploadDir, filename);
+    const filepath = path.join(albumUploadDir, filename);
 
     // Save the file
     await writeFile(filepath, buffer);
 
+    // The URL must now point to a dedicated API endpoint to serve the file
+    const mediaUrl = `/api/media/${albumId}/${filename}`;
+
     // Save to database
     const newMedia = await prisma.media.create({
       data: {
-        url: `/api/media/${filename}`,
+        url: mediaUrl,
         albumId: albumId,
       },
     });
 
-    return NextResponse.json({ success: true, media: { ...newMedia } });
+    return NextResponse.json({ success: true, media: newMedia });
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Upload failed.' }, { status: 500 });
   }
 }

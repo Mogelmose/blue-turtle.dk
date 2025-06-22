@@ -41,8 +41,6 @@ export default function AlbumContent({ initialAlbum }) {
     setUploading(false);
   };
 
-  const bannerTitle = "Spilleaften";
-
   if (!album) {
     return <div>Album not found or failed to load.</div>;
   }
@@ -50,7 +48,7 @@ export default function AlbumContent({ initialAlbum }) {
   return (
     <div className="underside-body">
       <div className="page-container">
-        <AppHeader bannerTitle={bannerTitle} />
+        <AppHeader />
 
         <div className="banner-container">
           <Image
