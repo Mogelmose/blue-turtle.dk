@@ -18,7 +18,6 @@ model User {
   username  String   @unique
   password  String
   role      Role     @default(REGULAR)
-  image     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
