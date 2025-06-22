@@ -12,7 +12,7 @@
 }
 
 .modal-content {
-  background: #2c2c2c; /* Dark background for the modal */
+  background: #2c2c2c;
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -38,7 +38,6 @@
   color: #fff;
 }
 
-/* Re-using album-form styles from homepagestyle.css inside the modal */
 .modal-content .album-form h2 {
   color: #fff;
   text-align: center;
@@ -92,4 +91,50 @@
   color: #4dff4d;
   text-align: center;
   margin-bottom: 15px;
+}
+
+/* Custom file upload button */
+.file-upload-label {
+  display: block;
+  padding: 12px;
+  background-color: #444;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-upload-label:hover {
+  background-color: #555;
+}
+
+/* Spinner for loading state in buttons */
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid #fff;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Disabled button style */
+.modal-content .album-form button[type="submit"]:disabled {
+  background-color: #0056b3;
+  cursor: not-allowed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

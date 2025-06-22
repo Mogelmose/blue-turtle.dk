@@ -52,7 +52,7 @@ export default function AlbumContent({ initialAlbum }) {
 
         <div className="banner-container">
           <Image
-            src="/billeder/banner.jpg"
+            src="/static/banner.jpg"
             alt="Banner"
             className="banner-image"
             width={1600}

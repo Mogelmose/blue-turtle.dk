@@ -37,7 +37,7 @@ export default async function Homepage() {
           <div className="event" key={album.id}>
             <Link href={`/albums/${album.id}`}>
               <Image
-                src={album.coverImage || '/billeder/hent.jpg'}
+                src={album.coverImage || '/static/fallback.jpg'}
                 alt={album.name}
                 width={300}
                 height={200}
@@ -62,7 +62,7 @@ export default async function Homepage() {
 
         <div className="banner-container">
           <Image
-            src="/billeder/banner.jpg"
+            src="/static/banner.jpg"
             alt="Banner"
             className="banner-image"
             width={1600}

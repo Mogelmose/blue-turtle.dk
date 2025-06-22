@@ -87,7 +87,7 @@ export default function LoginPage() {
     <div className="body">
       <header className="header">
         <Image
-          src="/billeder/logo.png"
+          src="/static/logo.png"
           alt="Logo"
           className="logo-image"
           width={100}

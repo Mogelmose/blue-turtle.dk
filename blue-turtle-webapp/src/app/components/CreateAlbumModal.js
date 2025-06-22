@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import '../css/modal.css'; // We will create this file next
+import '../css/modal.css';
 
 export default function CreateAlbumModal({ isOpen, onClose }) {
   const [name, setName] = useState('');
@@ -11,6 +11,7 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
   const [coverImage, setCoverImage] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -28,6 +29,8 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
       return;
     }
 
+    setIsLoading(true);
+
     const formData = new FormData();
     formData.append('name', name);
     formData.append('infoText', infoText);
@@ -44,7 +47,6 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
 
       if (res.ok) {
         setSuccess('Album oprettet!');
-        // Reset form and close modal after a short delay
         setTimeout(() => {
           setName('');
           setInfoText('');
@@ -52,7 +54,7 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
           setCoverImage(null);
           setSuccess('');
           onClose();
-          router.refresh(); // Refresh the page to show the new album
+          router.refresh();
         }, 1500);
       } else {
         const data = await res.json();
@@ -61,6 +63,8 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
     } catch (error) {
       setError('En uventet fejl opstod.');
       console.error('Der skete en fejl:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -108,17 +112,22 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
           </div>
           {(category === 'SPILLEAFTEN' || category === 'JULEFROKOST') && (
             <div className="form-group">
-              <label htmlFor="coverImage">Cover Billede</label>
+              <label htmlFor="coverImage" className="file-upload-label">
+                {coverImage ? coverImage.name : 'Vælg et coverbillede...'}
+              </label>
               <input
                 type="file"
                 id="coverImage"
                 onChange={(e) => setCoverImage(e.target.files[0])}
                 accept="image/*"
                 required
+                style={{ display: 'none' }}
               />
             </div>
           )}
-          <button type="submit">Opret Album</button>
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? <div className="spinner"></div> : 'Opret Album'}
+          </button>
         </form>
       </div>
     </div>

@@ -16,7 +16,7 @@ export default function AppHeader() {
         <div className="header-left">
           <Link href="/homepage" className="logo-link">
             <Image
-              src="/billeder/logo.png"
+              src="/static/logo.png"
               alt="Blue Turtle Logo"
               className="logo-image"
               width={100}
