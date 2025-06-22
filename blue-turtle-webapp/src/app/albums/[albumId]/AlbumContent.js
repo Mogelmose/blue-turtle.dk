@@ -8,14 +8,12 @@ export default function AlbumContent({ initialAlbum }) {
   const [album, setAlbum] = useState(initialAlbum);
   const [media, setMedia] = useState(initialAlbum?.media || []);
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState('');
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     setUploading(true);
-    setMessage('Uploading...');
 
     const formData = new FormData();
     formData.append('file', file);
@@ -30,15 +28,13 @@ export default function AlbumContent({ initialAlbum }) {
       const data = await response.json();
 
       if (data.success && data.media) {
-        setMessage('Upload successful!');
         setMedia((prevMedia) => [...prevMedia, data.media]);
-        // Clear the message after a few seconds
-        setTimeout(() => setMessage(''), 3000);
       } else {
-        setMessage(`Upload failed: ${data.error}`);
+        alert(`Upload failed: ${data.error}`);
+        console.error(`Upload failed: ${data.error}`);
       }
     } catch (error) {
-      setMessage('An error occurred during upload.');
+      alert('An error occurred during upload.');
       console.error('Upload error:', error);
     }
 
@@ -73,30 +69,33 @@ export default function AlbumContent({ initialAlbum }) {
               <h1 className="underside-title">{album.name}</h1>
               <span className="info-text">{album.infoText}</span>
             </div>
-            <div className="nav-upload">
-              <ul>
-                <li>
-                  <label htmlFor="file-upload" className={`upload-btn ${uploading ? 'disabled' : ''}`}>
-                    {uploading ? 'Uploading...' : 'Upload'}
-                  </label>
-                  <input id="file-upload" type="file" onChange={handleFileChange} disabled={uploading} accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/webm,video/quicktime" />
-                </li>
-              </ul>
+            <div className="header-controls">
+              <div className="nav-upload">
+                <ul>
+                  <li>
+                    <label htmlFor="file-upload" className={`upload-btn ${uploading ? 'disabled' : ''}`}>
+                      {uploading ? <span className="loading-spinner"></span> : 'Upload'}
+                    </label>
+                    <input id="file-upload" type="file" onChange={handleFileChange} disabled={uploading} accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/webm,video/quicktime" />
+                  </li>
+                </ul>
+              </div>
             </div>
-            {message && <p>{message}</p>}
           </div>
         </main>
 
         <div className="album-container">
           <div className="photo-grid">
             {media.map((item) => (
-              <Image
-                key={item.id}
-                src={item.url}
-                alt={item.alt || album.name}
-                width={400}
-                height={300}
-              />
+              <div key={item.id} className="photo-grid-item">
+                <Image
+                  src={item.url}
+                  alt={item.alt || album.name}
+                  width={400}
+                  height={300}
+                  className="photo-grid-image"
+                />
+              </div>
             ))}
           </div>
         </div>

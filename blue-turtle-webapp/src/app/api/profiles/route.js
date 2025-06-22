@@ -1,16 +1,17 @@
-import prisma from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export const revalidate = 3600; // Revalidate every hour
 
 export async function GET() {
   try {
     const users = await prisma.user.findMany({
-      select: { username: true },
+      select: { id: true, username: true, image: true },
     });
     const profiles = users.map((user) => ({
+      id: user.id,
       name: user.username,
-      img: `/billeder/${user.username.toLowerCase()}.jpg`,
+      img: user.image || `/billeder/${user.username.toLowerCase()}.jpg`,
     }));
     return NextResponse.json(profiles);
   } catch (error) {
