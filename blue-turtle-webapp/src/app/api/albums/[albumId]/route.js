@@ -30,7 +30,7 @@ export async function PATCH(request, context) {
   }
 
   try {
-    const { albumId } = context.params;
+    const { albumId } = await context.params;
     const body = await request.json();
     const { name, infoText, category, coverImage } = body;
 
