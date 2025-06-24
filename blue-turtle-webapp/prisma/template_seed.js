@@ -73,22 +73,21 @@ async function main() {
   }
 
   // Create albums
-  console.log('\nCreating albums...');
+  console.log('\nCreating/updating albums...');
   for (const albumData of albumsToCreate) {
     const album = await prisma.album.upsert({
-      where: { id: albumData.id },
+      where: { name: albumData.name },
       update: {
         name: albumData.name,
         infoText: albumData.infoText,
         category: albumData.category,
-        coverImage: albumData.coverImage,
+        coverImage: albumData.coverImage || null,
       },
       create: {
-        id: albumData.id,
         name: albumData.name,
         infoText: albumData.infoText,
         category: albumData.category,
-        coverImage: albumData.coverImage,
+        coverImage: albumData.coverImage || null,
       },
     });
     console.log(`  - Created/updated album: ${album.name} (ID: ${album.id})`);

@@ -31,7 +31,7 @@ enum Category {
 
 model Album {
   id       String   @id @default(cuid())
-  name     String
+  name     String   @unique
   infoText String?
   media      Media[]
   category   Category @default(REJSER)
