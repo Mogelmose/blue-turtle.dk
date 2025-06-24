@@ -30,12 +30,20 @@ export async function PATCH(request, context) {
   }
 
   try {
-    const { albumId } = await context.params;
+    const { albumId } = context.params;
     const body = await request.json();
     const { name, infoText, category, coverImage } = body;
 
     if (!name || !category) {
-      return NextResponse.json({ success: false, error: 'Name and category are required.' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Navn og kategori er påkrævet' }, { status: 400 });
+    }
+    
+    if (name.length > 50) {
+      return NextResponse.json({ success: false, error: 'Navn skal være under 50 tegn.' }, { status: 400 });
+    }
+    
+    if (!['REJSER', 'SPILLEAFTEN', 'JULEFROKOST'].includes(category)) {
+      return NextResponse.json({ success: false, error: 'Invalid category.' }, { status: 400 });
     }
 
     const updatedAlbum = await prisma.album.update({

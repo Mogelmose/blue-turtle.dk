@@ -30,7 +30,7 @@ enum Category {
 }
 
 model Album {
-  id       String   @id
+  id       String   @id @default(cuid())
   name     String
   infoText String?
   media      Media[]

@@ -2,8 +2,16 @@ import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import mime from 'mime-types';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
 export async function GET(request, { params }) {
+   // Add authentication check
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
   try {
         const { slug } = await params;
 
@@ -13,6 +21,15 @@ export async function GET(request, { params }) {
     }
 
     const [albumId, filename] = slug;
+    
+    // Validate inputs to prevent path traversal
+    if (albumId.includes('..') || albumId.includes('/') || albumId.includes('\\')) {
+      return NextResponse.json({ error: 'Invalid album ID.' }, { status: 400 });
+    }
+    
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      return NextResponse.json({ error: 'Invalid filename.' }, { status: 400 });
+    }
 
     const filePath = path.join(process.cwd(), 'album_uploads', albumId, filename);
 

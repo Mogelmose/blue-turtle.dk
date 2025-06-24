@@ -65,8 +65,6 @@
   color: #fff;
 }
 
-
-
 .modal-content .error-message {
   color: #ff4d4d;
   text-align: center;
@@ -115,5 +113,3 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-

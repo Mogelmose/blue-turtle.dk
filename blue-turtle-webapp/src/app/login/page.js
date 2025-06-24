@@ -5,6 +5,9 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '../css/loginstyle.css';
 
+const [loginAttempts, setLoginAttempts] = useState(0);
+const [isBlocked, setIsBlocked] = useState(false);
+
 const playSuccessSound = () => {
   const audio = new Audio('/sound/pissegodt.mp3');
   audio.play().catch((error) => console.error('Audio play failed:', error));
@@ -54,6 +57,8 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isBlocked) return;
+
     setLoading(true);
     setFejlbesked('');
     setSuccesbesked('');
@@ -67,12 +72,23 @@ export default function LoginPage() {
       setSuccesbesked('Velkommen til Blue Turtle!');
       setFejlbesked('');
       playSuccessSound();
+      setLoginAttempts(0);
       router.push('/homepage');
     } else {
-      setFejlbesked('Forkert adgangskode');
-      setSuccesbesked('');
-      playErrorSound();
-      setKode('');
+     setFejlbesked('Forkert adgangskode');
+     setSuccesbesked('');
+     playErrorSound();
+     setKode('');
+     const newAttempts = loginAttempts + 1;
+     setLoginAttempts(newAttempts);
+     
+     if (newAttempts >= 3) {
+       setIsBlocked(true);
+       setTimeout(() => {
+         setIsBlocked(false);
+         setLoginAttempts(0);
+       }, 30000); // 30 second delay
+     }
     }
   };
 

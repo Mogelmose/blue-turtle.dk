@@ -69,8 +69,6 @@
   padding: 0;
 }
 
-
-
 input[type="file"] {
   display: none;
 }
@@ -137,4 +135,3 @@ main {
   background-color: rgb(255, 255, 255);
   color: black;
 }
-

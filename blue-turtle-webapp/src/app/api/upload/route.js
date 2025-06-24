@@ -2,12 +2,31 @@ import { NextResponse } from 'next/server';
 import { writeFile, access, mkdir } from 'fs/promises';
 import path from 'path';
 import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 
 export async function POST(request) {
+  const session = await getServerSession(authOptions);
+ 
+  if (!session) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+ 
   try {
     const data = await request.formData();
     const file = data.get('file');
     const albumId = data.get('albumId');
+    
+    // Validate albumId exists and sanitize
+    if (!albumId || typeof albumId !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(albumId)) {
+      return NextResponse.json({ success: false, error: 'Invalid album ID' }, { status: 400 });
+    }
+   
+    // Verify album exists
+    const album = await prisma.album.findUnique({ where: { id: albumId } });
+    if (!album) {
+      return NextResponse.json({ success: false, error: 'Album not found' }, { status: 404 });
+    }
 
     const allowedFileTypes = [
       'image/jpeg',
@@ -15,15 +34,20 @@ export async function POST(request) {
       'image/gif',
       'image/webp',
       'image/heic',
+      'image/heif',
       'video/mp4',
       'video/webm',
       'video/quicktime',
     ];
 
     if (!allowedFileTypes.includes(file.type)) {
-      return NextResponse.json({ success: false, error: 'Invalid file type.' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Ikke tilladt filtype.' }, { status: 400 });
     }
 
+    const maxFileSize = 50 * 1024 * 1024; // 50MB limit
+if (file.size > maxFileSize) {
+  return NextResponse.json({ success: false, error: 'Filen er for stor.' }, { status: 400 });
+}
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 

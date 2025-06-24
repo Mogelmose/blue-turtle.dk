@@ -6,14 +6,26 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
 // GET all albums
-export async function GET() {
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '10');
+  const skip = (page - 1) * limit;
+  
   try {
     const albums = await prisma.album.findMany({
+      skip,
+      take: limit,
       include: {
         media: true, // Include media to show a cover image
       },
     });
-    return NextResponse.json(albums);
+
+    const total = await prisma.album.count();
+    return NextResponse.json({
+      albums,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+    });
   } catch (error) {
     console.error('Error fetching albums:', error);
     return NextResponse.json({ message: 'Error fetching albums' }, { status: 500 });
@@ -34,10 +46,15 @@ export async function POST(request) {
     const infoText = formData.get('infoText');
     const category = formData.get('category');
     const coverImageFile = formData.get('coverImage');
+    const allowedCategories = ['SPILLEAFTEN', 'REJSER', 'JULEFROKOST']; // Update based on your schema
 
     if (!name || !infoText || !category) {
       return NextResponse.json({ message: 'Missing required text fields' }, { status: 400 });
     }
+    
+    if (!allowedCategories.includes(category)) {
+      return NextResponse.json({ message: 'Invalid category' }, { status: 400 });
+}
 
     let coverImageUrl = null;
 
@@ -52,9 +69,22 @@ export async function POST(request) {
       coverImageUrl = `/uploads/covers/${filename}`;
     }
 
+    async function generateUniqueAlbumId(name) {
+  let baseId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+  let id = baseId;
+  let counter = 1;
+  
+  while (await prisma.album.findUnique({ where: { id } })) {
+    id = `${baseId}-${counter}`;
+    counter++;
+  }
+  
+  return id;
+}
+
     const newAlbum = await prisma.album.create({
       data: {
-        id: name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''),
+        id: await generateUniqueAlbumId(),
         name,
         infoText,
         category,

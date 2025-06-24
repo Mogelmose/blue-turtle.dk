@@ -24,6 +24,14 @@ export default function AlbumContent({ initialAlbum }) {
     const file = event.target.files[0];
     if (!file) return;
 
+     // Validate file size (e.g., 20MB limit)
+    const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+    if (file.size > maxSize) {
+      alert('Filen skal være mindre end 20MB.');
+      event.target.value = ''; // Clear the input
+      return;
+    }
+
     setUploading(true);
 
     const formData = new FormData();

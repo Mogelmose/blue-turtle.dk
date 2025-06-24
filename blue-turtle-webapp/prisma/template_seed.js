@@ -39,9 +39,9 @@ const usersToCreate = [
 
 // Example album data. Customize this with the albums you want to create.
 const albumsToCreate = [
-  { id: 'bday25', name: 'Birthday Party 2025', infoText: 'so fun', category: 'SPILLEAFTEN', coverImage: '/uploads/covers/example.jpg' },
-  { id: 'summer24', name: 'Summer Vacation 2024', infoText: 'A trip to the beach.', category: 'REJSER' },
-  { id: 'julefrokost', name: 'Julefrokost', infoText: 'Julefrokost', category: 'JULEFROKOST', coverImage: '/uploads/covers/example.jpg' },
+  { name: 'Birthday Party 2025', infoText: 'so fun', category: 'SPILLEAFTEN', coverImage: '/uploads/covers/example.jpg' },
+  { name: 'Summer Vacation 2024', infoText: 'A trip to the beach.', category: 'REJSER' },
+  { name: 'Julefrokost', infoText: 'Julefrokost', category: 'JULEFROKOST', coverImage: '/uploads/covers/example.jpg' },
 ];
 
 async function main() {

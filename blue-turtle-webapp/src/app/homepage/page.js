@@ -37,7 +37,7 @@ export default async function Homepage() {
           <div className="event" key={album.id}>
             <Link href={`/albums/${album.id}`}>
               <Image
-                src={album.coverImage || '/static/fallback.jpg'}
+                src={album.coverImage || '/static/logo.png'}
                 alt={album.name}
                 width={300}
                 height={200}
@@ -83,8 +83,6 @@ export default async function Homepage() {
         </nav>
 
         <main>
-
-
           {renderAlbumGrid(spilleaftener, 'Spilleaftener')}
           {renderAlbumGrid(julefrokoster, 'Julefrokoster')}
         </main>

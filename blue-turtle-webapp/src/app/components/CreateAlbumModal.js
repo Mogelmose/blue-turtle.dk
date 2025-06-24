@@ -118,7 +118,24 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
               <input
                 type="file"
                 id="coverImage"
-                onChange={(e) => setCoverImage(e.target.files[0])}
+                onChange={(e) => {
+                 const file = e.target.files[0];
+                 if (file) {
+                    // Validate file size (5MB limit)
+                    if (file.size > 5 * 1024 * 1024) {
+                      setError('Coverbillede skal være mindre end 5MB');
+                      e.target.value = '';
+                      return;
+                    }
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                      setError('Kun billedfiler er tilladt');
+                      e.target.value = '';
+                      return;
+                    }
+                  }
+                  setCoverImage(file);
+                }}
                 accept="image/*"
                 required
                 style={{ display: 'none' }}

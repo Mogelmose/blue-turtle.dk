@@ -94,17 +94,4 @@ main {
 }
 
 @media (max-width: 500px) {
-  .profiles {
-    gap: 20px;
-  }
-  .profile {
-    width: 80px;
-  }
-  .profile img {
-    width: 80px;
-    height: 80px;
-  }
-  .profile-name {
-    font-size: 14px;
-  }
 }
