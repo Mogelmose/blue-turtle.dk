@@ -39,8 +39,8 @@ export default async function Homepage() {
               <Image
                 src={album.coverImage || '/static/logo.png'}
                 alt={album.name}
-                width={300}
-                height={200}
+                width={400}
+                height={400}
               />
               <p>{album.name}</p>
             </Link>

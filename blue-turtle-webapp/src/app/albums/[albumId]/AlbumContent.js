@@ -5,7 +5,6 @@ import Image from 'next/image';
 import '../../css/sub-pagestyle.css';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import EditAlbumModal from '../../components/EditAlbumModal';
 
 export default function AlbumContent({ initialAlbum }) {
@@ -110,17 +109,40 @@ export default function AlbumContent({ initialAlbum }) {
 
         <div className="album-container">
           <div className="photo-grid">
-            {media.map((item) => (
-              <div key={item.id} className="photo-grid-item">
-                <Image
-                  src={item.url}
-                  alt={item.alt || album.name}
-                  width={400}
-                  height={400}
-                  className="photo-grid-image"
-                />
-              </div>
-            ))}
+            {media.map((item) => {
+              // Determine file type by extension
+              const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'];
+              const videoExtensions = ['.mp4', '.webm', '.mov'];
+              const url = item.url.toLowerCase();
+              const isImage = imageExtensions.some(ext => url.endsWith(ext));
+              const isVideo = videoExtensions.some(ext => url.endsWith(ext));
+              return (
+                <div key={item.id} className="photo-grid-item">
+                  {isImage ? (
+                    <Image
+                      src={item.url}
+                      alt={item.alt || album.name}
+                      width={400}
+                      height={400}
+                      className="photo-grid-image"
+                    />
+                  ) : isVideo ? (
+                    <video
+                      src={item.url}
+                      controls
+                      width={400}
+                      height={400}
+                      className="photo-grid-image"
+                      style={{ objectFit: 'cover', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <span>Ukendt filtype</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
