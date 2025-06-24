@@ -6,7 +6,7 @@ Vibecoded Website for the Turtle Boys. This is a full-stack web application buil
 
 Before you begin, ensure you have the following installed on your system:
 
-***Node.js**: This project requires Node.js. You can check if it's installed by running:
+**Node.js**: This project requires Node.js. You can check if it's installed by running:
 
 ```bash
 node -v
@@ -14,7 +14,7 @@ node -v
 
 If you don't have it, you can download it from [nodejs.org](https://nodejs.org/).
 
-***npm (Node Package Manager)**: npm is distributed with Node.js, so it should be installed as
+**npm (Node Package Manager)**: npm is distributed with Node.js, so it should be installed as
 well. You can check the version with:
 
 ```bash
