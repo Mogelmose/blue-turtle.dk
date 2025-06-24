@@ -1,0 +1,143 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.body {
+  background-color: black;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background-color: #111;
+  height: 60px;
+  padding: 0 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.header img {
+  height: 40px;
+  width: auto;
+}
+
+.body .main {
+  background-color: black;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 20px;
+  gap: 40px;
+  text-align: center;
+}
+
+.body .main h1 {
+  margin-top: 90px;
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: white;
+}
+
+.profiles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 40px;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile img {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  margin-bottom: 12px;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.profile img:hover {
+  transform: scale(1.1);
+  border-color: #0077cc;
+}
+
+.body .profile-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.hidden {
+  display: none;
+}
+
+form#loginForm {
+  background: #1e1e1e;
+  padding: 2rem;
+  border-radius: 10px;
+  color: white;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+form#loginForm label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: bold;
+}
+
+form#loginForm input[type="text"],
+form#loginForm input[type="password"] {
+  width: 100%;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  border: none;
+  border-radius: 5px;
+  background-color: #2e2e2e;
+  color: white;
+  box-sizing: border-box;
+}
+
+form#loginForm input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+
+
+@media (max-width: 500px) {
+  .profiles {
+    gap: 20px;
+  }
+  .profile {
+    width: 80px;
+  }
+  .profile img {
+    width: 80px;
+    height: 80px;
+  }
+  .profile-name {
+    font-size: 14px;
+  }
+}
