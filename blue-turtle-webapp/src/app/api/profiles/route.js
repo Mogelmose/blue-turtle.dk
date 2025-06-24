@@ -11,7 +11,7 @@ export async function GET() {
     const profiles = users.map((user) => ({
       id: user.id,
       name: user.username,
-      img: user.image || `/uploads/profile/${user.username.toLowerCase().replace(/[^a-z0-9]/g, '_')}.jpg`,
+      img: user.image || `/uploads/profile/${user.username.toLowerCase().replace(/\s+/g, '').normalize('NFD').replace(/[^\p{L}0-9]/gu, '')}.jpg`
     }));
     return NextResponse.json(profiles);
   } catch (error) {

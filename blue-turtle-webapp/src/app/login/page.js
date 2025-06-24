@@ -5,9 +5,6 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import '../css/loginstyle.css';
 
-const [loginAttempts, setLoginAttempts] = useState(0);
-const [isBlocked, setIsBlocked] = useState(false);
-
 const playSuccessSound = () => {
   const audio = new Audio('/sound/pissegodt.mp3');
   audio.play().catch((error) => console.error('Audio play failed:', error));
@@ -25,6 +22,8 @@ export default function LoginPage() {
   const [succesbesked, setSuccesbesked] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
 

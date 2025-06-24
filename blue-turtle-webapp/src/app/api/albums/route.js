@@ -60,7 +60,7 @@ export async function POST(request) {
 
     if (coverImageFile && coverImageFile.size > 0) {
       const buffer = Buffer.from(await coverImageFile.arrayBuffer());
-      const filename = `${Date.now()}-${coverImageFile.name.replace(/\s/g, '_')}`;
+      const filename = `${Date.now()}-${coverImageFile.name.replace(/[^a-z0-9æøå]/gi, '_')}`;
       const uploadDir = path.join(process.cwd(), 'public/uploads/covers');
       const savePath = path.join(uploadDir, filename);
 
@@ -84,7 +84,7 @@ export async function POST(request) {
 
     const newAlbum = await prisma.album.create({
       data: {
-        id: await generateUniqueAlbumId(),
+        id: await generateUniqueAlbumId(name),
         name,
         infoText,
         category,
