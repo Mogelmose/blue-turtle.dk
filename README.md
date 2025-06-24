@@ -1,6 +1,7 @@
 # Blue Turtle Web App
 
 Vibecoded Website for the Turtle Boys. This is a full-stack web application built with Next.js, using Prisma for database management and NextAuth.js for authentication.
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/Mogelmose/blue-turtle.dk?utm_source=oss&utm_medium=github&utm_campaign=Mogelmose%2Fblue-turtle.dk&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 ## Prerequisites
 
