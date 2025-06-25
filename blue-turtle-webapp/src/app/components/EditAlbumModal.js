@@ -66,68 +66,74 @@ export default function EditAlbumModal({
   return (
     <div className="modal-backdrop">
       <div className="modal-content">
-        <button onClick={onClose} className="modal-close-btn">
+        <button 
+          onClick={onClose} 
+          className="modal-close-btn"
+          aria-label="Luk"
+        >
           &times;
         </button>
         <form onSubmit={handleSubmit} className="album-form">
-          <h2>Rediger Album</h2>
-          {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
+          <fieldset disabled={isLoading} style={{ border: 0, padding: 0, margin: 0 }}>
+            <h2>Rediger Album</h2>
+            {error && <p className="error-message">{error}</p>}
+            {success && <p className="success-message">{success}</p>}
 
-          <div className="form-group">
-            <label htmlFor="name">Album Navn</label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="name">Album Navn</label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="infoText">Beskrivelse</label>
-            <textarea
-              id="infoText"
-              value={infoText}
-              onChange={(e) => setInfoText(e.target.value)}
-              required
-            ></textarea>
-          </div>
+            <div className="form-group">
+              <label htmlFor="infoText">Beskrivelse</label>
+              <textarea
+                id="infoText"
+                value={infoText}
+                onChange={(e) => setInfoText(e.target.value)}
+                required
+              ></textarea>
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="category">Kategori</label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
+            <div className="form-group">
+              <label htmlFor="category">Kategori</label>
+              <select
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+              >
+                <option value="REJSER">Rejser</option>
+                <option value="SPILLEAFTEN">Spilleaften</option>
+                <option value="JULEFROKOST">Julefrokost</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="coverImage">Cover Billede URL</label>
+              <input
+                type="text"
+                id="coverImage"
+                value={coverImage}
+                onChange={(e) => setCoverImage(e.target.value)}
+                placeholder="/uploads/covers/example.jpg"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-secondary btn-block"
+              style={{ marginTop: "10px" }}
+              disabled={isLoading}
             >
-              <option value="REJSER">Rejser</option>
-              <option value="SPILLEAFTEN">Spilleaften</option>
-              <option value="JULEFROKOST">Julefrokost</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="coverImage">Cover Billede URL</label>
-            <input
-              type="text"
-              id="coverImage"
-              value={coverImage}
-              onChange={(e) => setCoverImage(e.target.value)}
-              placeholder="/uploads/covers/example.jpg"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-secondary btn-block"
-            style={{ marginTop: "10px" }}
-            disabled={isLoading}
-          >
-            {isLoading ? <div className="spinner"></div> : "Gem Ændringer"}
-          </button>
+              {isLoading ? <div className="spinner"></div> : "Gem Ændringer"}
+            </button>
+          </fieldset>
         </form>
       </div>
     </div>

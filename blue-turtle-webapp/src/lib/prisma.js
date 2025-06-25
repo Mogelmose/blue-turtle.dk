@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 // It ensures that only one instance of Prisma Client is created, preventing
 // resource exhaustion from too many database connections.
 
-const globalForPrisma = global;
+const globalForPrisma = globalThis;
 
 const prisma = globalForPrisma.prisma || new PrismaClient();
 

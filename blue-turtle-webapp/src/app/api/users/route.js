@@ -16,9 +16,10 @@ export async function GET() {
     });
     return NextResponse.json(users);
   } catch (error) {
-    console.error("Error fetching users:", error);
+    const errorId = crypto.randomUUID();
+    console.error(`[${errorId}] Error fetching users:`, error);
     return NextResponse.json(
-      { message: "Error fetching users" },
+      { message: "Internal server error", errorId },
       { status: 500 },
     );
   }

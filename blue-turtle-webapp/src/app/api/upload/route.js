@@ -18,8 +18,15 @@ export async function POST(request) {
   try {
     const data = await request.formData();
     const file = data.get("file");
+    // Validate file exists
+    if (!file) {
+      return NextResponse.json(
+        { success: false, error: "Missing file upload" },
+        { status: 400 },
+      );
+    }
+    
     const albumId = data.get("albumId");
-
     // Validate albumId exists and sanitize
     if (
       !albumId ||
@@ -53,7 +60,7 @@ export async function POST(request) {
       "video/quicktime",
     ];
 
-    if (!allowedFileTypes.includes(file.type)) {
+    if (!file.type || !allowedFileTypes.includes(file.type)) {
       return NextResponse.json(
         { success: false, error: "Ikke tilladt filtype." },
         { status: 400 },
@@ -71,7 +78,8 @@ export async function POST(request) {
     const buffer = Buffer.from(bytes);
 
     // Create a unique filename to avoid overwrites
-    const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+    const sanitized = path.basename(file.name).replace(/[^\w.-]/g, "_");
+    const filename  = `${Date.now()}-${sanitized}`;
     const albumUploadDir = path.join(process.cwd(), "album_uploads", albumId);
 
     // Ensure the album-specific upload directory exists
@@ -97,7 +105,11 @@ export async function POST(request) {
       },
     });
 
-    return NextResponse.json({ success: true, media: newMedia });
+    return NextResponse.json(
+      { success: true, media: newMedia },
+      { status: 201 },
+    );
+
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readFile } from "fs/promises";
+import { createReadStream, statSync } from "fs";
 import path from "path";
 import mime from "mime-types";
 import { getServerSession } from "next-auth/next";
@@ -52,19 +52,22 @@ export async function GET(request, { params }) {
     );
 
     // Read the file from the filesystem
-    const fileBuffer = await readFile(filePath);
+const fileStream = createReadStream(filePath);
+const { size } = statSync(filePath);
 
-    // Determine the content type from the filename
-    const contentType = mime.lookup(filename) || "application/octet-stream";
+// Determine the content type from the filename
+const contentType = mime.lookup(filename) || "application/octet-stream";
 
-    // Return the file with the correct headers
-    return new NextResponse(fileBuffer, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        "Content-Disposition": `inline; filename="${filename}"`,
-      },
-    });
+// Return the file with the correct headers
+return new NextResponse(fileStream, {
+  status: 200,
+  headers: {
+    "Content-Type": contentType,
+    "Content-Disposition": `inline; filename="${filename}"`,
+   "Content-Length": size,
+  },
+});
+
   } catch (error) {
     // If the file doesn't exist (ENOENT), return a 404
     if (error.code === "ENOENT") {

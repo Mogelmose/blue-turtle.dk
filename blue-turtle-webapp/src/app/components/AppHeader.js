@@ -32,6 +32,7 @@ export default function AppHeader() {
               <>
                 <li>
                   <button
+                    type="button"
                     onClick={() => setModalOpen(true)}
                     className="btn btn-primary"
                   >

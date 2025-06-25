@@ -5,15 +5,13 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import "../css/loginstyle.css";
 
-const playSuccessSound = () => {
-  const audio = new Audio("/sound/pissegodt.mp3");
-  audio.play().catch((error) => console.error("Audio play failed:", error));
-};
+const successAudio = typeof Audio !== "undefined" && new Audio("/sound/pissegodt.mp3");
+const playSuccessSound = () =>
+  successAudio?.play().catch((err) => console.error("Audio play failed:", err));
 
-const playErrorSound = () => {
-  const audio = new Audio("/sound/snake.mp3");
-  audio.play().catch((error) => console.error("Audio play failed:", error));
-};
+const errorAudio = typeof Audio !== "undefined" && new Audio("/sound/snake.mp3");
+const playErrorSound = () =>
+  errorAudio?.play().catch((err) => console.error("Audio play failed:", err));
 
 export default function LoginPage() {
   const [profiles, setProfiles] = useState([]);
@@ -78,16 +76,17 @@ export default function LoginPage() {
       setSuccesbesked("");
       playErrorSound();
       setKode("");
-      const newAttempts = loginAttempts + 1;
-      setLoginAttempts(newAttempts);
-
-      if (newAttempts >= 3) {
-        setIsBlocked(true);
-        setTimeout(() => {
-          setIsBlocked(false);
-          setLoginAttempts(0);
-        }, 30000); // 30 second delay
-      }
+      setLoginAttempts((prev) => {
+        const newAttempts = prev + 1;
+        if (newAttempts >= 3) {
+          setIsBlocked(true);
+          const timer = setTimeout(() => {
+            setIsBlocked(false);
+            setLoginAttempts(0);
+          }, 30_000);
+        }
+        return newAttempts;
+      });
     }
   };
 

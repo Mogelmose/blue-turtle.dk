@@ -51,13 +51,15 @@ export default async function Homepage() {
   );
 
   // Filter albums into categories based on the new 'category' field
-  const rejser = albums.filter((album) => album.category === "REJSER");
-  const spilleaftener = albums.filter(
-    (album) => album.category === "SPILLEAFTEN",
-  );
-  const julefrokoster = albums.filter(
-    (album) => album.category === "JULEFROKOST",
-  );
+const CATEGORY = {
+  REJSER: "REJSER",
+  SPILLEAFTEN: "SPILLEAFTEN",
+  JULEFROKOST: "JULEFROKOST",
+};
+
+const rejser = albums.filter((album) => album.category === CATEGORY.REJSER);
+const spilleaftener = albums.filter((album) => album.category === CATEGORY.SPILLEAFTEN);
+const julefrokoster = albums.filter((album) => album.category === CATEGORY.JULEFROKOST);
 
   return (
     <div className="forside-body">

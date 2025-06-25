@@ -68,7 +68,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
   // For loading, unauthenticated, or non-admin users, render nothing.
   // This ensures a silent experience before redirect.
   return null;
