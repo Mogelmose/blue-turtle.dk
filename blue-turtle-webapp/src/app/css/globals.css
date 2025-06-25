@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap");
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,15 +6,16 @@
 }
 
 @font-face {
-  font-family: 'Votrag';
-  src: url('../fonts/Votrag-Bold.ttf') format('truetype');
+  font-family: "Votrag";
+  src: url("../fonts/Votrag-Bold.ttf") format("truetype");
   font-display: swap;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
 }
 
 .page-container {
@@ -27,7 +28,7 @@ html, body {
   background-color: #111;
   height: 60px;
   padding: 0 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
 }
@@ -81,7 +82,7 @@ footer {
   justify-content: center;
   padding: 0 10px;
   box-sizing: border-box;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
 }
 
 @media (max-width: 500px) {
@@ -101,7 +102,7 @@ footer {
   align-items: center;
   justify-content: center;
   padding: 10px 20px;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
   font-weight: bold;
   font-size: 16px;
   border: none;
@@ -109,7 +110,10 @@ footer {
   cursor: pointer;
   text-decoration: none;
   text-transform: none;
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .btn-primary {

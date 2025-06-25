@@ -21,8 +21,8 @@
  *
  */
 
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -30,31 +30,47 @@ const prisma = new PrismaClient();
 // For each user, specify their username, role, and the EXACT name of the
 // environment variable that holds their password.
 const usersToCreate = [
-  { username: 'AdminUser',   role: 'ADMIN',   passwordEnvVar: 'PASSWORD_ADMIN' },
-  { username: 'UserOne',     role: 'REGULAR', passwordEnvVar: 'PASSWORD_USER1' },
-  { username: 'UserTwo',     role: 'REGULAR', passwordEnvVar: 'PASSWORD_USER2' },
-  { username: 'UserThree',   role: 'REGULAR', passwordEnvVar: 'PASSWORD_USER3' },
-  { username: 'UserFour',    role: 'REGULAR', passwordEnvVar: 'PASSWORD_USER4' },
+  { username: "AdminUser", role: "ADMIN", passwordEnvVar: "PASSWORD_ADMIN" },
+  { username: "UserOne", role: "REGULAR", passwordEnvVar: "PASSWORD_USER1" },
+  { username: "UserTwo", role: "REGULAR", passwordEnvVar: "PASSWORD_USER2" },
+  { username: "UserThree", role: "REGULAR", passwordEnvVar: "PASSWORD_USER3" },
+  { username: "UserFour", role: "REGULAR", passwordEnvVar: "PASSWORD_USER4" },
 ];
 
 // Example album data. Customize this with the albums you want to create.
 const albumsToCreate = [
-  { name: 'Birthday Party 2025', infoText: 'so fun', category: 'SPILLEAFTEN', coverImage: '/uploads/covers/example.jpg' },
-  { name: 'Summer Vacation 2024', infoText: 'A trip to the beach.', category: 'REJSER' },
-  { name: 'Julefrokost', infoText: 'Julefrokost', category: 'JULEFROKOST', coverImage: '/uploads/covers/example.jpg' },
+  {
+    name: "Birthday Party 2025",
+    infoText: "so fun",
+    category: "SPILLEAFTEN",
+    coverImage: "/uploads/covers/example.jpg",
+  },
+  {
+    name: "Summer Vacation 2024",
+    infoText: "A trip to the beach.",
+    category: "REJSER",
+  },
+  {
+    name: "Julefrokost",
+    infoText: "Julefrokost",
+    category: "JULEFROKOST",
+    coverImage: "/uploads/covers/example.jpg",
+  },
 ];
 
 async function main() {
-  console.log('Starting the seed script...');
+  console.log("Starting the seed script...");
 
   // Create users with unique passwords
-  console.log('Creating users...');
+  console.log("Creating users...");
   for (const userData of usersToCreate) {
     const password = process.env[userData.passwordEnvVar];
 
     if (!password) {
-      console.error(`\nERROR: Password environment variable '${userData.passwordEnvVar}' for user '${userData.username}' is not set in your .env file.`);
-      console.error('Please add it and try again.\n');
+      console.error(
+        `\nERROR: Password environment variable '${userData.passwordEnvVar}' for user '${userData.username}' is not set in your .env file.`,
+      );
+      console.error("Please add it and try again.\n");
       process.exit(1);
     }
 
@@ -73,7 +89,7 @@ async function main() {
   }
 
   // Create albums
-  console.log('\nCreating/updating albums...');
+  console.log("\nCreating/updating albums...");
   for (const albumData of albumsToCreate) {
     const album = await prisma.album.upsert({
       where: { name: albumData.name },
@@ -93,16 +109,16 @@ async function main() {
     console.log(`  - Created/updated album: ${album.name} (ID: ${album.id})`);
   }
 
-  console.log('\nSeeding finished successfully!');
+  console.log("\nSeeding finished successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error('An error occurred during seeding:');
+    console.error("An error occurred during seeding:");
     console.error(e);
     process.exit(1);
   })
   .finally(async () => {
-    console.log('Disconnecting Prisma Client...');
+    console.log("Disconnecting Prisma Client...");
     await prisma.$disconnect();
   });

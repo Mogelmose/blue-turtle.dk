@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
-import AppHeader from '../components/AppHeader';
-import '../css/homepagestyle.css';
+import Link from "next/link";
+import Image from "next/image";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import AppHeader from "../components/AppHeader";
+import "../css/homepagestyle.css";
 
 async function fetchAlbums() {
   try {
@@ -12,7 +12,7 @@ async function fetchAlbums() {
       include: {
         media: {
           orderBy: {
-            createdAt: 'asc',
+            createdAt: "asc",
           },
           take: 1,
         },
@@ -20,7 +20,7 @@ async function fetchAlbums() {
     });
     return albums;
   } catch (error) {
-    console.error('Error fetching albums:', error);
+    console.error("Error fetching albums:", error);
     return []; // Return an empty array on error
   }
 }
@@ -37,7 +37,7 @@ export default async function Homepage() {
           <div className="event" key={album.id}>
             <Link href={`/albums/${album.id}`}>
               <Image
-                src={album.coverImage || '/static/logo.png'}
+                src={album.coverImage || "/static/logo.png"}
                 alt={album.name}
                 width={400}
                 height={400}
@@ -51,9 +51,13 @@ export default async function Homepage() {
   );
 
   // Filter albums into categories based on the new 'category' field
-  const rejser = albums.filter(album => album.category === 'REJSER');
-  const spilleaftener = albums.filter(album => album.category === 'SPILLEAFTEN');
-  const julefrokoster = albums.filter(album => album.category === 'JULEFROKOST');
+  const rejser = albums.filter((album) => album.category === "REJSER");
+  const spilleaftener = albums.filter(
+    (album) => album.category === "SPILLEAFTEN",
+  );
+  const julefrokoster = albums.filter(
+    (album) => album.category === "JULEFROKOST",
+  );
 
   return (
     <div className="forside-body">
@@ -72,7 +76,7 @@ export default async function Homepage() {
 
         <nav className="nav-bar">
           <ul>
-            {rejser.map(album => (
+            {rejser.map((album) => (
               <li key={album.id}>
                 <Link href={`/albums/${album.id}`} className="btn btn-primary">
                   {album.name}
@@ -83,8 +87,8 @@ export default async function Homepage() {
         </nav>
 
         <main>
-          {renderAlbumGrid(spilleaftener, 'Spilleaftener')}
-          {renderAlbumGrid(julefrokoster, 'Julefrokoster')}
+          {renderAlbumGrid(spilleaftener, "Spilleaftener")}
+          {renderAlbumGrid(julefrokoster, "Julefrokoster")}
         </main>
 
         <footer>

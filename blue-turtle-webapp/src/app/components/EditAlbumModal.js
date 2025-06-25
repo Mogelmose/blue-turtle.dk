@@ -1,56 +1,61 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import '../css/modal.css';
+import { useState, useEffect } from "react";
+import "../css/modal.css";
 
-export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated }) {
-  const [name, setName] = useState('');
-  const [infoText, setInfoText] = useState('');
-  const [category, setCategory] = useState('REJSER');
-  const [coverImage, setCoverImage] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+export default function EditAlbumModal({
+  isOpen,
+  onClose,
+  album,
+  onAlbumUpdated,
+}) {
+  const [name, setName] = useState("");
+  const [infoText, setInfoText] = useState("");
+  const [category, setCategory] = useState("REJSER");
+  const [coverImage, setCoverImage] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (album) {
-      setName(album.name || '');
-      setInfoText(album.infoText || '');
-      setCategory(album.category || 'REJSER');
-      setCoverImage(album.coverImage || '');
+      setName(album.name || "");
+      setInfoText(album.infoText || "");
+      setCategory(album.category || "REJSER");
+      setCoverImage(album.coverImage || "");
     }
   }, [album]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     setIsLoading(true);
 
     try {
       const res = await fetch(`/api/albums/${album.id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, infoText, category, coverImage }),
       });
 
       if (res.ok) {
         const updatedAlbum = await res.json();
-        setSuccess('Album opdateret!');
+        setSuccess("Album opdateret!");
         setTimeout(() => {
           onAlbumUpdated(updatedAlbum);
           onClose();
-          setSuccess('');
+          setSuccess("");
         }, 1500);
       } else {
         const data = await res.json();
-        setError(data.error || 'Der skete en fejl under opdateringen.');
+        setError(data.error || "Der skete en fejl under opdateringen.");
       }
     } catch (error) {
-      setError('En uventet fejl opstod.');
-      console.error('Update error:', error);
+      setError("En uventet fejl opstod.");
+      console.error("Update error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -61,12 +66,14 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
   return (
     <div className="modal-backdrop">
       <div className="modal-content">
-        <button onClick={onClose} className="modal-close-btn">&times;</button>
+        <button onClick={onClose} className="modal-close-btn">
+          &times;
+        </button>
         <form onSubmit={handleSubmit} className="album-form">
           <h2>Rediger Album</h2>
           {error && <p className="error-message">{error}</p>}
           {success && <p className="success-message">{success}</p>}
-          
+
           <div className="form-group">
             <label htmlFor="name">Album Navn</label>
             <input
@@ -113,8 +120,13 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
             />
           </div>
 
-          <button type="submit" className="btn btn-secondary btn-block" style={{ marginTop: '10px' }} disabled={isLoading}>
-            {isLoading ? <div className="spinner"></div> : 'Gem Ændringer'}
+          <button
+            type="submit"
+            className="btn btn-secondary btn-block"
+            style={{ marginTop: "10px" }}
+            disabled={isLoading}
+          >
+            {isLoading ? <div className="spinner"></div> : "Gem Ændringer"}
           </button>
         </form>
       </div>

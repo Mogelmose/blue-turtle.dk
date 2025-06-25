@@ -23,7 +23,10 @@ export const authOptions = {
           return null;
         }
 
-        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+        const isValidPassword = await bcrypt.compare(
+          credentials.password,
+          user.password,
+        );
         if (!isValidPassword) {
           return null;
         }
@@ -33,8 +36,8 @@ export const authOptions = {
           name: user.username,
           role: user.role,
         };
-      }
-    })
+      },
+    }),
   ],
   pages: {
     signIn: "/login",
