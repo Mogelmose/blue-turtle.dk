@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function GET(request, context) {
   try {
@@ -12,21 +12,30 @@ export async function GET(request, context) {
     });
 
     if (!album) {
-      return NextResponse.json({ success: false, error: 'Album not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Album not found" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json(album);
   } catch (error) {
-    console.error('Failed to fetch album:', error);
-    return NextResponse.json({ success: false, error: 'Failed to fetch album' }, { status: 500 });
+    console.error("Failed to fetch album:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch album" },
+      { status: 500 },
+    );
   }
 }
 
 export async function PATCH(request, context) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== 'ADMIN') {
-    return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 401 });
+  if (!session || session.user.role !== "ADMIN") {
+    return NextResponse.json(
+      { success: false, error: "Not authorized" },
+      { status: 401 },
+    );
   }
 
   try {
@@ -35,15 +44,24 @@ export async function PATCH(request, context) {
     const { name, infoText, category, coverImage } = body;
 
     if (!name || !category) {
-      return NextResponse.json({ success: false, error: 'Navn og kategori er påkrævet' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Navn og kategori er påkrævet" },
+        { status: 400 },
+      );
     }
-    
+
     if (name.length > 50) {
-      return NextResponse.json({ success: false, error: 'Navn skal være under 50 tegn.' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Navn skal være under 50 tegn." },
+        { status: 400 },
+      );
     }
-    
-    if (!['REJSER', 'SPILLEAFTEN', 'JULEFROKOST'].includes(category)) {
-      return NextResponse.json({ success: false, error: 'Invalid category.' }, { status: 400 });
+
+    if (!["REJSER", "SPILLEAFTEN", "JULEFROKOST"].includes(category)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid category." },
+        { status: 400 },
+      );
     }
 
     const updatedAlbum = await prisma.album.update({
@@ -58,7 +76,10 @@ export async function PATCH(request, context) {
 
     return NextResponse.json(updatedAlbum);
   } catch (error) {
-    console.error('Failed to update album:', error);
-    return NextResponse.json({ success: false, error: 'Failed to update album' }, { status: 500 });
+    console.error("Failed to update album:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update album" },
+      { status: 500 },
+    );
   }
 }

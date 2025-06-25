@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap");
 .forside-body {
   background-color: rgb(255, 255, 255);
   color: white;
@@ -60,7 +60,7 @@
 
 .event img {
   width: 100%;
-  max-width: 240px; 
+  max-width: 240px;
   max-height: 269px;
   aspect-ratio: 1 / 1;
   object-fit: cover;
@@ -83,7 +83,7 @@
   color: black;
   font-size: 17px;
   text-align: center;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
 }
 
 main {
@@ -93,8 +93,5 @@ main {
   padding: 20px;
   background-color: white;
   color: black;
-  font-family: 'Nunito', sans-serif;
-}
-
-@media (max-width: 500px) {
+  font-family: "Nunito", sans-serif;
 }

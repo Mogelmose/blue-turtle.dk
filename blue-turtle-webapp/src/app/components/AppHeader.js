@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { signOut, useSession } from 'next-auth/react';
-import Link from 'next/link';
-import Image from 'next/image';
-import CreateAlbumModal from './CreateAlbumModal';
+import { useState } from "react";
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
+import Image from "next/image";
+import CreateAlbumModal from "./CreateAlbumModal";
 
 export default function AppHeader() {
   const { data: session } = useSession();
@@ -31,17 +31,31 @@ export default function AppHeader() {
             {session && (
               <>
                 <li>
-                  <button onClick={() => setModalOpen(true)} className="btn btn-primary">Opret Album</button>
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(true)}
+                    className="btn btn-primary"
+                  >
+                    Opret Album
+                  </button>
                 </li>
                 <li>
-                  <button onClick={() => signOut({ callbackUrl: '/login' })} className="btn btn-primary">Log ud</button>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    className="btn btn-primary"
+                  >
+                    Log ud
+                  </button>
                 </li>
               </>
             )}
           </ul>
         </nav>
       </div>
-      <CreateAlbumModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
+      <CreateAlbumModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+      />
     </header>
   );
 }

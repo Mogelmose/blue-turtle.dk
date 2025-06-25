@@ -1,11 +1,12 @@
-'use client';
-import { useState } from 'react';
-import AppHeader from '../../components/AppHeader';
-import Image from 'next/image';
-import '../../css/sub-pagestyle.css';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import EditAlbumModal from '../../components/EditAlbumModal';
+"use client";
+import { useState } from "react";
+import AppHeader from "../../components/AppHeader";
+import Image from "next/image";
+import "../../css/sub-pagestyle.css";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import EditAlbumModal from "../../components/EditAlbumModal";
+import ReactDOM from "react-dom";
 
 export default function AlbumContent({ initialAlbum }) {
   const [album, setAlbum] = useState(initialAlbum);
@@ -23,23 +24,42 @@ export default function AlbumContent({ initialAlbum }) {
     const file = event.target.files[0];
     if (!file) return;
 
-     // Validate file size (e.g., 20MB limit)
+    // Validate MIME type
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/heic",
+      "video/mp4",
+      "video/webm",
+      "video/quicktime",
+    ];
+    if (!allowedMimeTypes.includes(file.type)) {
+      alert(
+        "Filtypen er ikke tilladt. Vælg venligst et billede eller en video i et understøttet format."
+      );
+      event.target.value = ""; // Clear the input
+      return;
+    }
+
+    // Validate file size (e.g., 20MB limit)
     const maxSize = 20 * 1024 * 1024; // 20MB in bytes
     if (file.size > maxSize) {
-      alert('Filen skal være mindre end 20MB.');
-      event.target.value = ''; // Clear the input
+      alert("Filen skal være mindre end 20MB.");
+      event.target.value = ""; // Clear the input
       return;
     }
 
     setUploading(true);
 
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('albumId', album.id);
+    formData.append("file", file);
+    formData.append("albumId", album.id);
 
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
+      const response = await fetch("/api/upload", {
+        method: "POST",
         body: formData,
       });
 
@@ -52,8 +72,8 @@ export default function AlbumContent({ initialAlbum }) {
         console.error(`Upload failed: ${data.error}`);
       }
     } catch (error) {
-      alert('An error occurred during upload.');
-      console.error('Upload error:', error);
+      alert("An error occurred during upload.");
+      console.error("Upload error:", error);
     }
 
     setUploading(false);
@@ -88,18 +108,40 @@ export default function AlbumContent({ initialAlbum }) {
             <div className="header-controls">
               <div className="nav-upload">
                 <ul>
-                  {session?.user.role === 'ADMIN' && (
+                  {session?.user.role === "ADMIN" && (
                     <li>
-                      <button onClick={() => setIsEditModalOpen(true)} className="btn btn-primary">
+                      <button
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="btn btn-primary"
+                      >
                         Rediger album
                       </button>
                     </li>
                   )}
                   <li>
-                    <label htmlFor="file-upload" className={`btn btn-primary ${uploading ? 'disabled' : ''}`}>
-                      {uploading ? <span className="loading-spinner"></span> : 'Upload'}
-                    </label>
-                    <input id="file-upload" type="file" onChange={handleFileChange} disabled={uploading} accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/webm,video/quicktime" />
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("file-upload").click()}
+                      className="btn btn-primary"
+                      disabled={uploading}
+                      style={
+                        uploading ? { pointerEvents: "none", opacity: 0.6 } : {}
+                      }
+                    >
+                      {uploading ? (
+                        <span className="loading-spinner"></span>
+                      ) : (
+                        "Upload"
+                      )}
+                    </button>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      onChange={handleFileChange}
+                      disabled={uploading}
+                      accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/webm,video/quicktime"
+                      style={{ display: "none" }}
+                    />
                   </li>
                 </ul>
               </div>
@@ -111,11 +153,19 @@ export default function AlbumContent({ initialAlbum }) {
           <div className="photo-grid">
             {media.map((item) => {
               // Determine file type by extension
-              const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif'];
-              const videoExtensions = ['.mp4', '.webm', '.mov'];
+              const imageExtensions = [
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".gif",
+                ".webp",
+                ".heic",
+                ".heif",
+              ];
+              const videoExtensions = [".mp4", ".webm", ".mov"];
               const url = item.url.toLowerCase();
-              const isImage = imageExtensions.some(ext => url.endsWith(ext));
-              const isVideo = videoExtensions.some(ext => url.endsWith(ext));
+              const isImage = imageExtensions.some((ext) => url.endsWith(ext));
+              const isVideo = videoExtensions.some((ext) => url.endsWith(ext));
               return (
                 <div key={item.id} className="photo-grid-item">
                   {isImage ? (
@@ -133,7 +183,6 @@ export default function AlbumContent({ initialAlbum }) {
                       width={400}
                       height={400}
                       className="photo-grid-image"
-                      style={{ objectFit: 'cover', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}
                     >
                       Your browser does not support the video tag.
                     </video>
@@ -150,12 +199,18 @@ export default function AlbumContent({ initialAlbum }) {
           <p>&copy; 2025 Blue Turtle. Alle rettigheder forbeholdes.</p>
         </footer>
       </div>
-      <EditAlbumModal 
-        isOpen={isEditModalOpen} 
-        onClose={() => setIsEditModalOpen(false)} 
-        album={album} 
-        onAlbumUpdated={handleAlbumUpdated} 
-      />
+      {/* Render EditAlbumModal in a portal to keep it above all content */}
+      {typeof window !== "undefined" &&
+        isEditModalOpen &&
+        ReactDOM.createPortal(
+          <EditAlbumModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            album={album}
+            onAlbumUpdated={handleAlbumUpdated}
+          />,
+          document.body
+        )}
     </div>
   );
 }

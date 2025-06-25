@@ -1,7 +1,7 @@
 .underside-body {
   background-color: white;
   color: black;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -35,13 +35,13 @@
 
 .title-row {
   display: flex;
-  align-items: baseline; 
+  align-items: baseline;
   gap: 20px;
   align-self: flex-end;
 }
 
 .underside-title {
-  font-family: 'Votrag', sans-serif;
+  font-family: "Votrag", sans-serif;
   font-size: 4rem;
   margin: 10px;
   color: white;
@@ -112,12 +112,13 @@ input[type="file"] {
   }
 }
 
-.photo-grid img, .photo-grid-image {
+.photo-grid img,
+.photo-grid-image {
   width: 100%;
   height: auto;
   border-radius: 10px;
   object-fit: cover;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
 }
 
