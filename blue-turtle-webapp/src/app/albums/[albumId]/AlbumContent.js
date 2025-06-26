@@ -68,11 +68,11 @@ export default function AlbumContent({ initialAlbum }) {
       if (data.success && data.media) {
         setMedia((prevMedia) => [...prevMedia, data.media]);
       } else {
-        alert(`Upload failed: ${data.error}`);
-        console.error(`Upload failed: ${data.error}`);
+        alert(`Upload fejlede: ${data.error}`);
+        console.error(`Upload fejlede: ${data.error}`);
       }
     } catch (error) {
-      alert("An error occurred during upload.");
+      alert("En fejl skete under upload af fil.");
       console.error("Upload error:", error);
     }
 

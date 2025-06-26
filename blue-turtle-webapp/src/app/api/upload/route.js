@@ -21,7 +21,7 @@ export async function POST(request) {
     // Validate file exists
     if (!file) {
       return NextResponse.json(
-        { success: false, error: "Missing file upload" },
+        { success: false, error: "Mangler fil" },
         { status: 400 },
       );
     }
@@ -43,7 +43,7 @@ export async function POST(request) {
     const album = await prisma.album.findUnique({ where: { id: albumId } });
     if (!album) {
       return NextResponse.json(
-        { success: false, error: "Album not found" },
+        { success: false, error: "Album ikke fundet" },
         { status: 404 },
       );
     }
@@ -113,7 +113,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(
-      { success: false, error: "Upload failed." },
+      { success: false, error: "Upload fejlede." },
       { status: 500 },
     );
   }
