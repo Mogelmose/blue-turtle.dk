@@ -36,8 +36,7 @@ cd blue-turtle.dk/blue-turtle-webapp
 
 Before running the application, you need to created a dedicated database and user for it.
 
-## 2.1 Open the PostgreSQL command-line tool (psql).
-## 2.2 Run the following commands to create a user and a database. You can change the password, but make sure it matches what you set in your .env file in the next step
+#### 2.1 Open the PostgreSQL command-line tool (psql) and run the following commands to create a user and a database. Make sure the password matches what you set in your .env file in the database URL
 
 ```bash
 -- Create a new user (role) for your application.
