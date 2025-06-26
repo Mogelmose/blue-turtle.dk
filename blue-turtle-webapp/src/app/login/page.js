@@ -70,7 +70,7 @@ export default function LoginPage() {
       setFejlbesked("");
       playSuccessSound();
       setLoginAttempts(0);
-      router.push("/homepage");
+      window.location.href = "/homepage";
     } else {
       setFejlbesked("Forkert adgangskode");
       setSuccesbesked("");

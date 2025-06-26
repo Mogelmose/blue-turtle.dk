@@ -7,17 +7,13 @@
  * It supports unique passwords for every user by reading them from environment variables.
  *
  * HOW TO USE:
- * 1. Create a `.env` file in the root of your project.
- * 2. For EACH user you define below, add a corresponding password variable to your .env file:
+ * 1. For EACH user you define below, add a corresponding password variable to your .env file:
  *    PASSWORD_ADMIN="your_admin_password"
  *    PASSWORD_USER1="user_one_password"
  *    PASSWORD_USER2="another_password"
- *    ...
- * 3. Copy this file's content into `prisma/seed.js`.
- * 4. Customize the `usersToCreate` and `albumsToCreate` arrays below with your own data.
- * 5. Run `npx prisma db seed` to populate your database.
+ * 2. Customize the `usersToCreate` and `albumsToCreate` arrays below with your own data.
  *
- * IMPORTANT: `prisma/seed.js` should be in your .gitignore file!
+ * IMPORTANT: `prisma/seed.js` should be in your .gitignore file! (if you cloned this repo it is)
  *
  */
 
@@ -37,7 +33,7 @@ const usersToCreate = [
   { username: "UserFour", role: "REGULAR", passwordEnvVar: "PASSWORD_USER4" },
 ];
 
-// Example album data. Customize this with the albums you want to create.
+// Example album data. Customize this with the albums you want to create. (category REJSER does not support album covers)
 const albumsToCreate = [
   {
     name: "Birthday Party 2025",
@@ -76,13 +72,22 @@ async function main() {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const imagePath = `/uploads/profile/${userData.username
+      .toLowerCase()
+      .replace(/\s+/g, "")
+      .normalize("NFD")
+      .replace(/[^\p{L}0-9]/gu, "")}.jpg`;
+
     const user = await prisma.user.upsert({
       where: { username: userData.username },
-      update: {},
+      update: {
+        image: imagePath,
+      },
       create: {
         username: userData.username,
         password: hashedPassword,
         role: userData.role,
+        image: imagePath
       },
     });
     console.log(`  - Created/updated user: ${user.username} (ID: ${user.id})`);

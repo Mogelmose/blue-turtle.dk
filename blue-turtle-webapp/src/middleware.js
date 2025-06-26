@@ -3,13 +3,13 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req) {
+  let token = null
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   } catch (error) {
     console.error('Failed to get token:', error);
     // Treat as unauthenticated user
   }
-    const token = null;
   const { pathname } = req.nextUrl;
 
   // If user is not authenticated and not on /login, redirect to /login
@@ -30,6 +30,6 @@ export async function middleware(req) {
 
 export const config = {
   matcher: [
-    '/((?!api/auth|api/profiles|_next/static|_next/image|static|sound|css).*)',
+    '/((?!api/auth|api/profiles|_next/static|_next/image|uploads/profile|sound|css).*)',
   ],
 };

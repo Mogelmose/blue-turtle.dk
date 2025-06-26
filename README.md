@@ -21,6 +21,8 @@ well. You can check the version with:
 npm -v
 ```
 
+**PostgrSQL**: This project uses a PostgreSQL database. You need to have a PostgreSQL server installed and runnng locally
+
 ## How to Run This Web App Locally
 
 ### 1. Clone the Repository
@@ -30,7 +32,34 @@ git clone https://github.com/Mogelmose/blue-turtle.dk.git
 cd blue-turtle.dk/blue-turtle-webapp
 ```
 
-### 2. Set Up Environment Variables
+### 2. Set Up The loocal PostgreSQL Database
+
+Before running the application, you need to created a dedicated database and user for it.
+
+2.1 Open the PostgreSQL command-line tool (psql).
+2.2 Run the following commands to create a user and a database. You can change the password, but make sure it matches what you set in your .env file in the next step
+
+```bash
+-- Create a new user (role) for your application
+CREATE ROLE 'your_db_user' WITH LOGIN PASSWORD 'your_db_password';
+
+-- Create the database
+CREATE DATABASE 'database_name';
+
+-- Grant all privileges on the new database to the user
+GRANT ALL PRIVILEGES ON DATABASE 'database_name TO 'your_db_user';
+
+-- Grant privilege to create databases for migrations
+ALTER USER 'your_db_user' CREATEDB;
+
+-- Grant all rights on the public schema to db_user
+GRANT ALL ON SCHEMA public TO your_db_user;
+
+-- Change owner of the public schema to db_user
+ALTER SCHEMA public OWNER TO your_db_user;
+```
+
+### 3. Set Up Environment Variables
 
 Copy the example environment file:  
 
@@ -39,16 +68,23 @@ cp .env.example .env
 cp prisma/template_seed.js prisma/seed.js
 ```
 
-Open `.env` and fill in any required values (like database URL, secrets, and user passwords).  
+Open `.env` and fill in any required values (like database URL, nextauth_secret, and user passwords).
+you can generate a nextauth secret in multiple ways but here are two
+
+```bash
+npx auth secret
+openssl rand -base64 32
+```
+
 In `seed.js`, you can specify your seed data for the database.
 
-### 3. Install Dependencies
+### 4. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 4. Generate the Database
+### 5. Generate the Database
 
 Run Prisma migrations to create the database tables:  
 
@@ -56,13 +92,13 @@ Run Prisma migrations to create the database tables:
 npx prisma migrate dev --name init
 ```
 
-### 5. Seed the Database
+### 6. Seed the Database
 
 ```bash
 npx prisma db seed
 ```
 
-### 6. Start the Development Server
+### 7. Start the Development Server
 
 ```bash
 npm run dev

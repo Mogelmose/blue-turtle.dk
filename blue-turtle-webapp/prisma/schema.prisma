@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -41,7 +41,9 @@ model Album {
 model Media {
   id        String   @id @default(cuid())
   url       String
-  album     Album    @relation(fields: [albumId], references: [id])
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
   albumId   String
   createdAt DateTime @default(now())
+
+  @@index([albumId])
 }
