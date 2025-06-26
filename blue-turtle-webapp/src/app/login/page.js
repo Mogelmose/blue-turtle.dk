@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import "../css/loginstyle.css";
+import logoImage from 'public/static/logo.png';
 
 const successAudio = typeof Audio !== "undefined" && new Audio("/sound/pissegodt.mp3");
 const playSuccessSound = () =>
@@ -70,7 +71,9 @@ export default function LoginPage() {
       setFejlbesked("");
       playSuccessSound();
       setLoginAttempts(0);
-      window.location.href = "/homepage";
+      setTimeout(() => {
+        window.location.href = "/homepage";
+      }, 1150);
     } else {
       setFejlbesked("Forkert adgangskode");
       setSuccesbesked("");
@@ -101,7 +104,7 @@ export default function LoginPage() {
     <div className="body">
       <header className="header">
         <Image
-          src="/static/logo.png"
+          src={logoImage}
           alt="Logo"
           className="logo-image"
           width={100}
