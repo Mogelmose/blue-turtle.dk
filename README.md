@@ -40,16 +40,16 @@ Before running the application, you need to created a dedicated database and use
 
 ```bash
 -- Create a new user (role) for your application.
-CREATE ROLE 'your_db_user' WITH LOGIN PASSWORD 'your_db_password';
+CREATE ROLE your_db_user WITH LOGIN PASSWORD 'your_db_password';
 
 -- Create the database.
-CREATE DATABASE 'database_name';
+CREATE DATABASE database_name OWNER your_db_user;
 
 -- Grant all privileges on the new database to the user.
-GRANT ALL PRIVILEGES ON DATABASE 'database_name TO 'your_db_user';
+GRANT ALL PRIVILEGES ON DATABASE database_name TO your_db_user;
 
 -- Grant privilege to create databases for migrations.
-ALTER USER 'your_db_user' CREATEDB;
+ALTER USER your_db_user CREATEDB;
 
 -- Grant all rights on the public schema to db_user.
 GRANT ALL ON SCHEMA public TO your_db_user;
