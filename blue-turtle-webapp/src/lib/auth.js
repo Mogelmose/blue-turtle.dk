@@ -1,6 +1,6 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 
 export const authOptions = {
   providers: [
@@ -23,7 +23,7 @@ export const authOptions = {
           return null;
         }
 
-        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+        const isValidPassword = await bcrypt.compare(credentials.password, user.hashedPassword);
         if (!isValidPassword) {
           return null;
         }
