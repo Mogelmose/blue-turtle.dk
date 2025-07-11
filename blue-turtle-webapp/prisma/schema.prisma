@@ -16,7 +16,7 @@ enum Role {
 model User {
   id        String   @id @default(cuid())
   username  String   @unique
-  password  String
+  hashedPassword  String
   role      Role     @default(REGULAR)
   image     String?
   createdAt DateTime @default(now())

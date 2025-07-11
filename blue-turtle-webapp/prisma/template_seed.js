@@ -85,7 +85,7 @@ async function main() {
       },
       create: {
         username: userData.username,
-        password: hashedPassword,
+        hashedPassword: hashedPassword,
         role: userData.role,
         image: imagePath
       },
