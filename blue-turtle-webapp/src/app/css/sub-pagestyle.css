@@ -41,7 +41,8 @@
 }
 
 .underside-title {
-  font-family: "Votrag", sans-serif;
+  font-family: var(--font-votrag), sans-serif;
+  font-weight: 700;
   font-size: 4rem;
   margin: 10px;
   color: white;

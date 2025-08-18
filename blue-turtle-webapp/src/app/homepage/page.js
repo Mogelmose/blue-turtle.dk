@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { sessionAuthOptions as authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import AppHeader from "../components/AppHeader";
 import "../css/homepagestyle.css";

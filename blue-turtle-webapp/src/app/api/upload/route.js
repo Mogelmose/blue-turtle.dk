@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { writeFile, access, mkdir } from "fs/promises";
 import path from "path";
 import prisma from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
+import { sessionAuthOptions as authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
+
+export const runtime = "nodejs";
 
 export async function POST(request) {
   const session = await getServerSession(authOptions);

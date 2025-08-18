@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,7 +14,7 @@ const errorAudio = typeof Audio !== "undefined" && new Audio("/sound/snake.mp3")
 const playErrorSound = () =>
   errorAudio?.play().catch((err) => console.error("Audio play failed:", err));
 
-export default function LoginPage() {
+function LoginPageInner() {
   const [profiles, setProfiles] = useState([]);
   const [kode, setKode] = useState("");
   const [fejlbesked, setFejlbesked] = useState("");
@@ -182,5 +182,13 @@ export default function LoginPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
   );
 }

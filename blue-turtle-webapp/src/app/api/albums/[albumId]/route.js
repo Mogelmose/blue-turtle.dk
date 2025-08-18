@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { sessionAuthOptions as authOptions } from "@/lib/auth";
 
-export async function GET(request, context) {
+export const runtime = "nodejs";
+
+export async function GET(_request, { params }) {
   try {
-    const { albumId } = await context.params;
+    const { albumId } = params;
     const album = await prisma.album.findUnique({
       where: { id: albumId },
       include: { media: true },
@@ -28,7 +30,7 @@ export async function GET(request, context) {
   }
 }
 
-export async function PATCH(request, context) {
+export async function PATCH(request, { params }) {
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
@@ -39,7 +41,7 @@ export async function PATCH(request, context) {
   }
 
   try {
-    const { albumId } = await context.params;
+    const { albumId } = params;
     const body = await request.json();
     const { name, infoText, category, coverImage } = body;
 

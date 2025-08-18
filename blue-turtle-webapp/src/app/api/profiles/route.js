@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 
 export const revalidate = 3600; // Revalidate every hour
 
+export const runtime = "nodejs";
+
 export async function GET() {
   try {
     const users = await prisma.user.findMany({

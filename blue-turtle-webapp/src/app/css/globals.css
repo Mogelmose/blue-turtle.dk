@@ -5,13 +5,7 @@
   padding: 0;
 }
 
-@font-face {
-  font-family: "Votrag";
-  src: url("../fonts/Votrag-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* Votrag is loaded via next/font/local and exposed as --font-votrag */
 
 html,
 body {

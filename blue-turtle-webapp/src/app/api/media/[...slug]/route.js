@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { createReadStream, statSync } from "fs";
 import path from "path";
 import mime from "mime-types";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { sessionAuthOptions as authOptions } from "@/lib/auth";
 
-export async function GET(request, { params }) {
+export const runtime = "nodejs";
+
+export async function GET(_request, { params }) {
   // Add authentication check
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -13,7 +15,7 @@ export async function GET(request, { params }) {
   }
 
   try {
-    const { slug } = await params;
+    const { slug } = params;
 
     // Add defensive checks for the slug parameter
     if (!slug || slug.length < 2) {

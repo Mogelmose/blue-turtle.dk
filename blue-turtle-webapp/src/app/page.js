@@ -1,12 +1,6 @@
 import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
 
-export default async function RootPage() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect('/login');
-  } else {
-    redirect('/homepage');
-  }
+export default function RootPage() {
+  // Let middleware handle auth; send users to /homepage
+  redirect('/homepage');
 }
