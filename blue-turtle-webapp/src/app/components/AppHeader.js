@@ -5,12 +5,10 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import CreateAlbumModal from "./CreateAlbumModal";
-import ChangePasswordModal from "./ChangePasswordModal";
 
 export default function AppHeader() {
   const { data: session } = useSession();
   const [isModalOpen, setModalOpen] = useState(false);
-  const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
 
   return (
     <header className="main-header">
@@ -43,15 +41,6 @@ export default function AppHeader() {
                 </li>
                 <li>
                   <button
-                    type="button"
-                    onClick={() => setPasswordModalOpen(true)}
-                    className="btn btn-primary"
-                  >
-                    Skift Adgangskode
-                  </button>
-                </li>
-                <li>
-                  <button
                     onClick={() => signOut({ callbackUrl: "/login" })}
                     className="btn btn-primary"
                   >
@@ -66,10 +55,6 @@ export default function AppHeader() {
       <CreateAlbumModal
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
-      />
-      <ChangePasswordModal
-        isOpen={isPasswordModalOpen}
-        onClose={() => setPasswordModalOpen(false)}
       />
     </header>
   );
