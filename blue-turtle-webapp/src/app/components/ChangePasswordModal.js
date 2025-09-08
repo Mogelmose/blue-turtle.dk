@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 // NOTE: File is named `PasswordSchema.js` (capital P) – ensure matching case for Linux deploys
-import { changePasswordSchema } from "@/lib/PasswordSchema";
+import { changePasswordSchema } from "@/lib/passwordSchema";
 import "../css/modal.css";
 
 export default function ChangePasswordModal({ isOpen, onClose }) {
