@@ -3,6 +3,19 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req) {
+  const { pathname } = req.nextUrl;
+
+  // Allow static assets (images, audio, css) to pass through without auth checks
+  if (
+    pathname.startsWith('/static/') ||
+    pathname.startsWith('/uploads/') ||
+    pathname.startsWith('/sound/') ||
+    pathname.startsWith('/_next/') ||
+    /\.(?:png|jpg|jpeg|gif|svg|webp|ico|mp3|css)$/.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
   let token = null
   try {
     token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -10,7 +23,6 @@ export async function middleware(req) {
     console.error('Failed to get token:', error);
     // Treat as unauthenticated user
   }
-  const { pathname } = req.nextUrl;
 
   // If user is not authenticated and not on /login, redirect to /login
   if (!token && pathname !== '/login') {
@@ -30,6 +42,6 @@ export async function middleware(req) {
 
 export const config = {
   matcher: [
-    '/((?!api/auth|api/profiles|_next/static|_next/image|uploads/profile|sound|css).*)',
+  '/((?!api/auth|api/profiles|_next/static|_next/image).*)',
   ],
 };

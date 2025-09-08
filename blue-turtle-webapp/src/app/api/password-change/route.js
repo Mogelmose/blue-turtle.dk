@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { sessionAuthOptions as authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { changePasswordSchema } from "@/lib/PasswordSchema";
+import { changePasswordSchema } from "@/lib/passwordSchema";
 import { z } from "zod";
 
 export const runtime = "nodejs";

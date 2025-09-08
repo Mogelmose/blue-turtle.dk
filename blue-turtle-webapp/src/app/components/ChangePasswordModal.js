@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-// NOTE: File is named `PasswordSchema.js` (capital P) – ensure matching case for Linux deploys
 import { changePasswordSchema } from "@/lib/passwordSchema";
 import "../css/modal.css";
 
@@ -27,18 +26,18 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 
   // Password requirements checklist
   const requirements = useMemo(() => [
-    { label: "At least 12 characters", met: newPassword.length >= 12 },
-    { label: "At least 1 uppercase (A-Z)", met: /[A-Z]/.test(newPassword) },
-    { label: "At least 1 lowercase (a-z)", met: /[a-z]/.test(newPassword) },
-    { label: "At least 1 number (0-9)", met: /[0-9]/.test(newPassword) },
-    { label: "At least 1 special character", met: /[^A-Za-z0-9]/.test(newPassword) },
+    { label: "Minimum 12 karakterer", met: newPassword.length >= 12 },
+    { label: "Mindst 1 stort bogstav (A-Z)", met: /[A-Z]/.test(newPassword) },
+    { label: "Mindst 1 lille bogstav (a-z)", met: /[a-z]/.test(newPassword) },
+    { label: "Mindst 1 tal (0-9)", met: /[0-9]/.test(newPassword) },
+    { label: "Mindst 1 specialtegn", met: /[^A-Za-z0-9]/.test(newPassword) },
   ], [newPassword]);
 
   // Calculate password strength
   useEffect(() => {
     const metCount = requirements.filter((r) => r.met).length;
     const newStrength =
-      metCount < 3 ? "Weak" : metCount < 5 ? "Medium" : "Strong";
+      metCount < 3 ? "Svag" : metCount < 5 ? "Medium" : "Stærk";
     setStrength(newStrength);
   }, [requirements]);
 
@@ -47,7 +46,6 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
     setSuccess("");
 
     try {
-  // Backend route folder is `password-change`, adjust fetch path accordingly
   const response = await fetch("/api/password-change", {
         method: "POST",
         headers: {
@@ -91,93 +89,92 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
           &times;
         </button>
         <form onSubmit={handleSubmit(onSubmit)} className="album-form">
-          <h2>Change Password</h2>
-          
-          {serverError && <p className="error-message">{serverError}</p>}
-          {success && <p className="success-message">{success}</p>}
+          <fieldset disabled={isSubmitting} style={{ border: 0, padding: 0, margin: 0 }}>
+            <h2>Skift din Adgangskode</h2>
+            {serverError && <p className="error-message">{serverError}</p>}
+            {success && <p className="success-message">{success}</p>}
 
-          <div className="form-group">
-            <label htmlFor="currentPassword">Current Password</label>
-            <input
-              type="password"
-              id="currentPassword"
-              {...register("currentPassword")}
-              disabled={isSubmitting}
-            />
-            {errors.currentPassword && (
-              <p className="error-message">{errors.currentPassword.message}</p>
-            )}
-          </div>
+            <div className="form-group">
+              <label htmlFor="currentPassword">Nuværende Adgangskode</label>
+              <input
+                type="password"
+                id="currentPassword"
+                className="input-large"
+                {...register("currentPassword")}
+              />
+              {errors.currentPassword && (
+                <p className="error-message">{errors.currentPassword.message}</p>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="newPassword">New Password</label>
-            <input
-              type="password"
-              id="newPassword"
-              {...register("newPassword")}
-              disabled={isSubmitting}
-            />
-            {errors.newPassword && (
-              <p className="error-message">{errors.newPassword.message}</p>
-            )}
-          </div>
+            <div className="form-group">
+              <label htmlFor="newPassword">Ny Adgangskode</label>
+              <input
+                type="password"
+                id="newPassword"
+                className="input-large"
+                {...register("newPassword")}
+              />
+              {errors.newPassword && (
+                <p className="error-message">{errors.newPassword.message}</p>
+              )}
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmNewPassword">Confirm New Password</label>
-            <input
-              type="password"
-              id="confirmNewPassword"
-              {...register("confirmNewPassword")}
-              disabled={isSubmitting}
-            />
-            {errors.confirmNewPassword && (
-              <p className="error-message">{errors.confirmNewPassword.message}</p>
-            )}
-          </div>
+            <div className="form-group">
+              <label htmlFor="confirmNewPassword">Bekræft Ny Adgangskode</label>
+              <input
+                type="password"
+                id="confirmNewPassword"
+                className="input-large"
+                {...register("confirmNewPassword")}
+              />
+              {errors.confirmNewPassword && (
+                <p className="error-message">{errors.confirmNewPassword.message}</p>
+              )}
+            </div>
 
-          {/* Password strength indicator */}
-          {newPassword && (
-            <div className="password-strength">
-              <h4>
-                Password Strength:{" "}
-                <span
-                  style={{
-                    color:
-                      strength === "Strong"
-                        ? "green"
-                        : strength === "Medium"
-                        ? "orange"
-                        : "red",
-                  }}
-                >
-                  {strength}
-                </span>
-              </h4>
-              <ul className="requirements-list">
-                {requirements.map((req, i) => (
-                  <li
-                    key={i}
+            {newPassword && (
+              <div className="password-strength">
+                <h4>
+                  Adgangskode Styrke:{" "}
+                  <span
                     style={{
-                      color: req.met ? "green" : "#ccc",
-                      fontSize: "14px",
-                      marginBottom: "4px",
+                      color:
+                        strength === "Stærk"
+                          ? "green"
+                          : strength === "Medium"
+                          ? "orange"
+                          : "red",
                     }}
                   >
-                    {req.met ? "✅" : "❌"} {req.label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                    {strength}
+                  </span>
+                </h4>
+                <ul className="requirements-list">
+                  {requirements.map((req, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        color: req.met ? "green" : "#ccc",
+                        fontSize: "14px",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {req.met ? "✅" : "❌"} {req.label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-          <button
-            type="submit"
-            className="btn btn-secondary btn-block"
-            style={{ marginTop: "20px" }}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? <div className="spinner"></div> : "Change Password"}
-          </button>
+            <button
+              type="submit"
+              className="btn btn-secondary btn-block"
+              style={{ marginTop: "20px" }}
+            >
+              {isSubmitting ? <div className="spinner"></div> : "Skift Adgangskode"}
+            </button>
+          </fieldset>
         </form>
       </div>
     </div>
