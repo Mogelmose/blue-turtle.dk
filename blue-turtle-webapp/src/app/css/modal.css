@@ -117,3 +117,29 @@
     transform: rotate(360deg);
   }
 }
+
+/* Password strength indicator styles */
+.password-strength {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #1a1a1a;
+  border-radius: 5px;
+  border: 1px solid #444;
+}
+
+.password-strength h4 {
+  color: #fff;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.requirements-list li {
+  padding: 2px 0;
+  font-family: 'Nunito', sans-serif;
+}
