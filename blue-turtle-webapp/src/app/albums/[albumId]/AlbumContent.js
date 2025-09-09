@@ -174,6 +174,7 @@ export default function AlbumContent({ initialAlbum }) {
                       alt={item.alt || album.name}
                       width={400}
                       height={400}
+                      unoptimized
                       className="photo-grid-image"
                     />
                   ) : isVideo ? (

@@ -14,7 +14,7 @@ export async function POST(request) {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: "Ikke autoriseret" },
         { status: 401 }
       );
     }
@@ -33,7 +33,7 @@ export async function POST(request) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "User not found" },
+        { success: false, error: "Bruger ikke fundet" },
         { status: 404 }
       );
     }
@@ -46,7 +46,7 @@ export async function POST(request) {
 
     if (!isCurrentPasswordValid) {
       return NextResponse.json(
-        { success: false, error: "Current password is incorrect" },
+        { success: false, error: "Den nuværende adgangskode er forkert" },
         { status: 400 }
       );
     }
@@ -55,7 +55,7 @@ export async function POST(request) {
     const isSamePassword = await bcrypt.compare(newPassword, user.hashedPassword);
     if (isSamePassword) {
       return NextResponse.json(
-        { success: false, error: "New password must be different from current password" },
+        { success: false, error: "Den nye adgangskode skal være forskellig fra den nuværende adgangskode" },
         { status: 400 }
       );
     }
@@ -71,7 +71,7 @@ export async function POST(request) {
     });
 
     return NextResponse.json(
-      { success: true, message: "Password updated successfully" },
+      { success: true, message: "Adgangskode opdateret successfuldt" },
       { status: 200 }
     );
 
@@ -85,15 +85,14 @@ export async function POST(request) {
       );
     }
 
-    // Log error for debugging (never log passwords)
-    console.error("Password change error:", {
+    console.error("Fejl i ændring af adgangskode:", {
       userId: session?.user?.id,
       error: error.message,
       timestamp: new Date().toISOString()
     });
 
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Intern serverfejl" },
       { status: 500 }
     );
   }

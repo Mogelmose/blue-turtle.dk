@@ -15,7 +15,7 @@ export async function GET(_request, { params }) {
   }
 
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     // Add defensive checks for the slug parameter
     if (!slug || slug.length < 2) {

@@ -9,7 +9,7 @@ import "../css/modal.css";
 export default function ChangePasswordModal({ isOpen, onClose }) {
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState("");
-  const [strength, setStrength] = useState("Weak");
+  const [strength, setStrength] = useState("Svag");
 
   const {
     register,
@@ -57,7 +57,7 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
       const result = await response.json();
 
       if (result.success) {
-        setSuccess("Password updated successfully!");
+  setSuccess("Adgangskoden er opdateret!");
         setTimeout(() => {
           reset();
           setSuccess("");
@@ -65,10 +65,10 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
           onClose();
         }, 2000);
       } else {
-        setServerError(result.error || "Something went wrong");
+  setServerError(result.error || "Noget gik galt");
       }
     } catch (error) {
-      setServerError("Network error. Please try again.");
+  setServerError("Netværksfejl. Prøv igen.");
       console.error("Password change error:", error);
     }
   };
