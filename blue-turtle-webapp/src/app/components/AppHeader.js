@@ -6,6 +6,9 @@ import Link from "next/link";
 import Image from "next/image";
 import CreateAlbumModal from "./CreateAlbumModal";
 import ChangePasswordModal from "./ChangePasswordModal";
+import { Globe } from "lucide-react";
+import { MoreVertical } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 export default function AppHeader() {
   const { data: session } = useSession();
@@ -32,31 +35,65 @@ export default function AppHeader() {
           <ul>
             {session && (
               <>
+                {/* Geomap icon (ghost button) visible only when authenticated */}
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => setModalOpen(true)}
-                    className="btn btn-primary"
+                  <Link
+                    href="/geomap"
+                    aria-label="Geomap"
+                    className="icon-btn ghost"
+                    title="Geomap"
                   >
-                    Opret Album
-                  </button>
+                    <Globe size={20} strokeWidth={2} aria-hidden />
+                  </Link>
                 </li>
+                {/* Dropdown menu for account/actions */}
                 <li>
-                  <button
-                    type="button"
-                    onClick={() => setPasswordModalOpen(true)}
-                    className="btn btn-primary"
-                  >
-                    Skift Adgangskode
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/login" })}
-                    className="btn btn-primary"
-                  >
-                    Log ud
-                  </button>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <button
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                        aria-label="Menu"
+                        title="Menu"
+                        type="button"
+                      >
+                        <MoreVertical size={25} strokeWidth={2} aria-hidden />
+                      </button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content
+                        side="bottom"
+                        align="end"
+                        sideOffset={8}
+                        className="z-50 min-w-[12rem] rounded-md border border-white/10 bg-gray-800 p-1 text-gray-200 shadow-lg backdrop-blur-sm"
+                      >
+                        <DropdownMenu.Item
+                          className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-white/10 focus:bg-white/10"
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            setModalOpen(true);
+                          }}
+                        >
+                          Opret Album
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-white/10 focus:bg-white/10"
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            setPasswordModalOpen(true);
+                          }}
+                        >
+                          Skift Adgangskode
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Separator className="my-1 h-px bg-white/10" />
+                        <DropdownMenu.Item
+                          className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-300 outline-none hover:bg-white/10 focus:bg-white/10"
+                          onSelect={() => signOut({ callbackUrl: "/login" })}
+                        >
+                          Log ud
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
                 </li>
               </>
             )}
