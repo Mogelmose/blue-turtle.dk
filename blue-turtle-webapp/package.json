@@ -7,8 +7,7 @@
     "dev": "next dev --turbopack",
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "next lint",
-    "seed": "node prisma/seed.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -31,10 +30,15 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@fullhuman/postcss-purgecss": "^7.0.2",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.16",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.3.5",
     "eslint-config-next": "^0.2.4",
     "prisma": "^6.15.0",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4.1.13"
   }
 }

@@ -88,10 +88,6 @@
   color: white;
 }
 
-.hidden {
-  display: none;
-}
-
 form#loginForm {
   background: #1e1e1e;
   padding: 2rem;

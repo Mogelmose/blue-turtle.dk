@@ -31,7 +31,7 @@ export default function AppHeader() {
           </Link>
           <h1 className="banner-title">Spilleaften</h1>
         </div>
-        <nav className="nav-logud">
+        <nav className="nav-menu">
           <ul>
             {session && (
               <>
@@ -42,9 +42,9 @@ export default function AppHeader() {
                     aria-label="Geomap"
                     className="icon-btn ghost"
                     title="Geomap"
-                    style={{ padding: '8px', minHeight: '48px', minWidth: '48px' }}
+                    style={{ minHeight: '48px', minWidth: '48px' }}
                   >
-                    <Globe size={25} strokeWidth={2} aria-hidden />
+                    <Globe size={27.5} strokeWidth={2} aria-hidden />
                   </Link>
                 </li>
                 {/* Dropdown menu for account/actions */}
@@ -66,10 +66,10 @@ export default function AppHeader() {
                         align="end"
                         alignOffset={-20}
                         sideOffset={5}
-                        className="z-50 min-w-[15rem] rounded-md border border-white/10 bg-gray-800 p-2 text-gray-200 shadow-lg backdrop-blur-sm"
+                        className="z-50 min-w-[12rem] rounded-md border border-white/10 bg-gray-950 p-2 text-gray-200 shadow-lg backdrop-blur-sm"
                       >
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-4 py-4 text-lg outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="relative flex cursor-default select-none items-center rounded-sm px-10 py-10 text-xl outline-none hover:bg-white/10 focus:bg-white/10"
                           onSelect={(e) => {
                             e.preventDefault();
                             setModalOpen(true);
@@ -78,7 +78,7 @@ export default function AppHeader() {
                           Opret Album
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-4 py-4 text-lg outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="relative flex cursor-default select-none items-center rounded-sm px-10 py-10 text-xl outline-none hover:bg-white/10 focus:bg-white/10"
                           onSelect={(e) => {
                             e.preventDefault();
                             setPasswordModalOpen(true);
@@ -88,7 +88,7 @@ export default function AppHeader() {
                         </DropdownMenu.Item>
                         <DropdownMenu.Separator className="my-2 h-px bg-white/10" />
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-4 py-4 text-lg text-red-300 outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="relative flex cursor-default select-none items-center rounded-sm px-10 py-10 text-xl text-red-300 outline-none hover:bg-white/10 focus:bg-white/10"
                           onSelect={() => signOut({ callbackUrl: "/login" })}
                         >
                           Log ud

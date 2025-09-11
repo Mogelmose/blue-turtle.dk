@@ -5,9 +5,6 @@
   margin: 0;
   padding: 0;
 }
-
-/* Votrag is loaded via next/font/local and exposed as --font-votrag */
-
 html,
 body {
   height: 100%;
@@ -63,10 +60,10 @@ body {
   margin: 0;
 }
 
-.nav-logud ul {
+.nav-menu ul {
   list-style: none;
   display: flex;
-  gap: 10px;
+  gap: 5px;
   margin: 0;
   padding: 0;
 }
@@ -83,7 +80,7 @@ footer {
 }
 
 @media (max-width: 500px) {
-  .nav-logud ul {
+  .nav-menu ul {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
@@ -174,34 +171,6 @@ footer {
   outline: 2px solid #0e72b9;
   outline-offset: 2px;
 }
-
-/* Dropdown (shadcn-inspired) */
-.dropdown-content {
-  min-width: 200px;
-  background: #1f2937; /* gray-800 */
-  color: #e5e7eb; /* gray-200 */
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 6px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-}
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
 .dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-.dropdown-item.danger {
-  color: #fca5a5; /* red-300 */
-}
-.dropdown-separator {
-  height: 1px;
-  margin: 6px 4px;
   background: rgba(255, 255, 255, 0.08);
 }
