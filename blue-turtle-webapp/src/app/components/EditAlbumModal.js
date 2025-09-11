@@ -12,7 +12,11 @@ export default function EditAlbumModal({
   const [name, setName] = useState("");
   const [infoText, setInfoText] = useState("");
   const [category, setCategory] = useState("REJSER");
-  const [coverImage, setCoverImage] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
+  const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [locationName, setLocationName] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +26,11 @@ export default function EditAlbumModal({
       setName(album.name || "");
       setInfoText(album.infoText || "");
       setCategory(album.category || "REJSER");
-      setCoverImage(album.coverImage || "");
+      setCoverImageUrl(album.coverImage || "");
+      setCoverImage(null); // Reset file input when switching albums
+      setLatitude(album.latitude?.toString() || "");
+      setLongitude(album.longitude?.toString() || "");
+      setLocationName(album.locationName || "");
     }
   }, [album]);
 
@@ -33,12 +41,31 @@ export default function EditAlbumModal({
     setIsLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("infoText", infoText);
+      formData.append("category", category);
+      
+      // If a new cover image is selected, use it; otherwise keep the existing URL
+      if (coverImage) {
+        formData.append("coverImage", coverImage);
+      } else if (coverImageUrl) {
+        formData.append("coverImageUrl", coverImageUrl);
+      }
+      
+      if (latitude) {
+        formData.append("latitude", latitude);
+      }
+      if (longitude) {
+        formData.append("longitude", longitude);
+      }
+      if (locationName) {
+        formData.append("locationName", locationName);
+      }
+
       const res = await fetch(`/api/albums/${album.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, infoText, category, coverImage }),
+        body: formData,
       });
 
       if (res.ok) {
@@ -114,15 +141,71 @@ export default function EditAlbumModal({
               </select>
             </div>
 
+            {(category === "SPILLEAFTEN" || category === "JULEFROKOST") && (
+              <div className="form-group">
+                <label htmlFor="coverImage" className="file-upload-label">
+                  {coverImage ? coverImage.name : (coverImageUrl ? `Nuværende coverbillede: ${coverImageUrl.split('/').pop()}` : "Vælg et coverbillede...")}
+                </label>
+                <input
+                  type="file"
+                  id="coverImage"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      // Validate file size (5MB limit)
+                      if (file.size > 5 * 1024 * 1024) {
+                        setError("Coverbillede skal være mindre end 5MB");
+                        e.target.value = "";
+                        return;
+                      }
+                      // Validate file type
+                      if (!file.type.startsWith("image/")) {
+                        setError("Kun billedfiler er tilladt");
+                        e.target.value = "";
+                        return;
+                      }
+                      setError(""); // Clear any previous errors
+                    }
+                    setCoverImage(file);
+                  }}
+                  accept="image/*"
+                  style={{ display: "none" }}
+                />
+              </div>
+            )}
+
             <div className="form-group">
-              <label htmlFor="coverImage">Cover Billede URL</label>
+              <label htmlFor="locationName">Lokation Navn</label>
               <input
                 type="text"
-                id="coverImage"
-                value={coverImage}
-                onChange={(e) => setCoverImage(e.target.value)}
-                placeholder="/uploads/covers/example.jpg"
+                id="locationName"
+                value={locationName}
+                onChange={(e) => setLocationName(e.target.value)}
               />
+            </div>
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor="latitude">Breddegrad</label>
+                <input
+                  type="text"
+                  id="latitude"
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  placeholder="f.eks. 55.6761"
+                />
+              </div>
+
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor="longitude">Længdegrad</label>
+                <input
+                  type="text"
+                  id="longitude"
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  placeholder="f.eks. 12.5683"
+                />
+              </div>
             </div>
 
             <button

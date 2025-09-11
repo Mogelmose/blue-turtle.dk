@@ -51,6 +51,9 @@ export async function POST(request) {
     const infoText = formData.get("infoText");
     const category = formData.get("category");
     const coverImageFile = formData.get("coverImage");
+    const latitude = formData.get("latitude");
+    const longitude = formData.get("longitude");
+    const locationName = formData.get("locationName");
     const allowedCategories = ["SPILLEAFTEN", "REJSER", "JULEFROKOST"]; // Update based on your schema
 
     if (!name || !infoText || !category) {
@@ -103,6 +106,9 @@ export async function POST(request) {
         infoText,
         category,
         coverImage: coverImageUrl,
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
+        locationName: locationName || null,
       },
     });
 

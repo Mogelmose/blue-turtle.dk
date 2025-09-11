@@ -36,6 +36,9 @@ model Album {
   media      Media[]
   category   Category @default(REJSER)
   coverImage String?
+  latitude   Float?
+  longitude  Float?
+  locationName String?
 }
 
 model Media {

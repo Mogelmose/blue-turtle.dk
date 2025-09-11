@@ -9,6 +9,9 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
   const [infoText, setInfoText] = useState("");
   const [category, setCategory] = useState("REJSER");
   const [coverImage, setCoverImage] = useState(null);
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [locationName, setLocationName] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +44,15 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
     if (coverImage) {
       formData.append("coverImage", coverImage);
     }
+    if (latitude) {
+      formData.append("latitude", latitude);
+    }
+    if (longitude) {
+      formData.append("longitude", longitude);
+    }
+    if (locationName) {
+      formData.append("locationName", locationName);
+    }
 
     try {
       const res = await fetch("/api/albums", {
@@ -55,6 +67,9 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
           setInfoText("");
           setCategory("REJSER");
           setCoverImage(null);
+          setLatitude("");
+          setLongitude("");
+          setLocationName("");
           setSuccess("");
           onClose();
           router.refresh();
@@ -147,6 +162,42 @@ export default function CreateAlbumModal({ isOpen, onClose }) {
               />
             </div>
           )}
+          
+          <div className="form-group">
+            <label htmlFor="locationName">Lokation Navn</label>
+            <input
+              type="text"
+              id="locationName"
+              value={locationName}
+              onChange={(e) => setLocationName(e.target.value)}
+              placeholder="f.eks. Paris, Frankrig"
+            />
+          </div>
+
+          <div style={{ display: "flex", gap: "10px" }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label htmlFor="latitude">Breddegrad</label>
+              <input
+                type="text"
+                id="latitude"
+                value={latitude}
+                onChange={(e) => setLatitude(e.target.value)}
+                placeholder="f.eks. 55.6761"
+              />
+            </div>
+
+            <div className="form-group" style={{ flex: 1 }}>
+              <label htmlFor="longitude">Længdegrad</label>
+              <input
+                type="text"
+                id="longitude"
+                value={longitude}
+                onChange={(e) => setLongitude(e.target.value)}
+                placeholder="f.eks. 12.5683"
+              />
+            </div>
+          </div>
+
           <button
             type="submit"
             className="btn btn-secondary btn-block"

@@ -42,8 +42,9 @@ export default function AppHeader() {
                     aria-label="Geomap"
                     className="icon-btn ghost"
                     title="Geomap"
+                    style={{ padding: '8px', minHeight: '48px', minWidth: '48px' }}
                   >
-                    <Globe size={20} strokeWidth={2} aria-hidden />
+                    <Globe size={25} strokeWidth={2} aria-hidden />
                   </Link>
                 </li>
                 {/* Dropdown menu for account/actions */}
@@ -51,23 +52,24 @@ export default function AppHeader() {
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger asChild>
                       <button
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                        className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                         aria-label="Menu"
                         title="Menu"
                         type="button"
                       >
-                        <MoreVertical size={25} strokeWidth={2} aria-hidden />
+                        <MoreVertical size={30} strokeWidth={2} aria-hidden />
                       </button>
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Portal>
                       <DropdownMenu.Content
                         side="bottom"
                         align="end"
-                        sideOffset={8}
-                        className="z-50 min-w-[12rem] rounded-md border border-white/10 bg-gray-800 p-1 text-gray-200 shadow-lg backdrop-blur-sm"
+                        alignOffset={-20}
+                        sideOffset={5}
+                        className="z-50 min-w-[15rem] rounded-md border border-white/10 bg-gray-800 p-2 text-gray-200 shadow-lg backdrop-blur-sm"
                       >
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="relative flex cursor-default select-none items-center rounded-sm px-4 py-4 text-lg outline-none hover:bg-white/10 focus:bg-white/10"
                           onSelect={(e) => {
                             e.preventDefault();
                             setModalOpen(true);
@@ -76,7 +78,7 @@ export default function AppHeader() {
                           Opret Album
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="relative flex cursor-default select-none items-center rounded-sm px-4 py-4 text-lg outline-none hover:bg-white/10 focus:bg-white/10"
                           onSelect={(e) => {
                             e.preventDefault();
                             setPasswordModalOpen(true);
@@ -84,9 +86,9 @@ export default function AppHeader() {
                         >
                           Skift Adgangskode
                         </DropdownMenu.Item>
-                        <DropdownMenu.Separator className="my-1 h-px bg-white/10" />
+                        <DropdownMenu.Separator className="my-2 h-px bg-white/10" />
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm text-red-300 outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="relative flex cursor-default select-none items-center rounded-sm px-4 py-4 text-lg text-red-300 outline-none hover:bg-white/10 focus:bg-white/10"
                           onSelect={() => signOut({ callbackUrl: "/login" })}
                         >
                           Log ud

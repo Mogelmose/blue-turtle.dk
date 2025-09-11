@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { sessionAuthOptions as authOptions } from "@/lib/auth";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 
 export const runtime = "nodejs";
 
@@ -42,8 +44,15 @@ export async function PATCH(request, { params }) {
 
   try {
     const { albumId } = params;
-    const body = await request.json();
-    const { name, infoText, category, coverImage } = body;
+    const formData = await request.formData();
+    const name = formData.get("name");
+    const infoText = formData.get("infoText");
+    const category = formData.get("category");
+    const coverImageFile = formData.get("coverImage");
+    const coverImageUrl = formData.get("coverImageUrl");
+    const latitude = formData.get("latitude");
+    const longitude = formData.get("longitude");
+    const locationName = formData.get("locationName");
 
     if (!name || !category) {
       return NextResponse.json(
@@ -66,13 +75,30 @@ export async function PATCH(request, { params }) {
       );
     }
 
+    // Handle cover image upload
+    let finalCoverImageUrl = coverImageUrl; // Keep existing URL as default
+
+    if (coverImageFile && coverImageFile.size > 0) {
+      const buffer = Buffer.from(await coverImageFile.arrayBuffer());
+      const filename = `${Date.now()}-${coverImageFile.name.replace(/[^a-z0-9æøå]/gi, "_")}`;
+      const uploadDir = path.join(process.cwd(), "public/uploads/covers");
+      const savePath = path.join(uploadDir, filename);
+
+      await mkdir(uploadDir, { recursive: true });
+      await writeFile(savePath, buffer);
+      finalCoverImageUrl = `/uploads/covers/${filename}`;
+    }
+
     const updatedAlbum = await prisma.album.update({
       where: { id: albumId },
       data: {
         name,
         infoText,
         category,
-        coverImage,
+        coverImage: finalCoverImageUrl,
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
+        locationName: locationName || null,
       },
     });
 
