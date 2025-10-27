@@ -1,11 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    // Add any other paths where you use Tailwind classes
   ],
   theme: {
     extend: {
@@ -33,6 +29,19 @@ module.exports = {
           500: '#007acc',
           600: '#005a99',
         },
+        // Grayscale palette
+        gray: {
+          50: '#f9fafb',
+          100: '#f3f4f6',
+          200: '#e5e7eb',
+          300: '#d1d5db',
+          400: '#9ca3af',
+          500: '#6b7280',
+          600: '#4b5563',
+          700: '#374151',
+          800: '#1f2937',
+          900: '#111827',
+        },
         dark: {
           base: '#000000',
           surface: '#111111',
@@ -55,13 +64,36 @@ module.exports = {
           DEFAULT: '#ffa500',
           dark: '#f59e0b',
         },
+        text: {
+          DEFAULT: '#000000',
+          dark: '#ffffff',
+          secondary: {
+            light: '#4b5563',
+            dark: '#cccccc',
+          },
+          tertiary: {
+            dark: '#aaaaaa',
+          }
+        }
       },
       
-      // Custom spacing (matches your design system)
       spacing: {
+        '0': '0rem',      //0px
+        '1': '0.25rem',   //4px
+        '2': '0.5rem',    //8px
+        '3': '0.75rem',   //12px
+        '4': '1rem',      // 16px
+        '5': '1.25rem',   // 20px
+        '6': '1.5rem',    // 24px
+        '8': '2rem',      // 32px
+        '10': '2.5rem',   // 40px
+        '12': '3rem',     // 48px
+        '14': '3.5rem',   // 56px
+        '16': '4rem',     // 64px
         '18': '4.5rem',   // 72px
+        '20': '5rem',     // 80px
         '22': '5.5rem',   // 88px
-        '26': '6.5rem',   // 104px
+        '24': '6rem',     // 96px
       },
       
       // Custom font sizes
@@ -83,6 +115,21 @@ module.exports = {
       fontFamily: {
         sans: ['Nunito', 'sans-serif'],
         heading: ['Nunito', 'sans-serif'],
+      },
+      
+      // Custom font weights
+      fontWeight: {
+        normal: '400',
+        medium: '600',
+        bold: '700',
+      },
+      
+      // Custom line heights
+      lineHeight: {
+        tight: '1',
+        snug: '1.2',
+        normal: '1.5',
+        relaxed: '1.75',
       },
       
       // Custom border radius
