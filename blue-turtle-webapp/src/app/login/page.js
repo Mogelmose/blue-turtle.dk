@@ -3,7 +3,7 @@ import { useEffect, useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import "../css/loginstyle.css";
+
 import logoImage from 'public/static/logo.png';
 
 const successAudio = typeof Audio !== "undefined" && new Audio("/sound/pissegodt.mp3");
@@ -101,78 +101,77 @@ function LoginPageInner() {
   };
 
   return (
-    <div className="body">
-      <header className="header">
+    <div className="flex min-h-screen flex-col bg-gray-900 text-white">
+      <header className="flex items-center justify-center gap-4 bg-gray-900 p-4 text-white shadow-md">
         <Image
           src={logoImage}
           alt="Logo"
-          className="logo-image"
+          className="h-10 w-auto"
           width={100}
           height={100}
           priority
         />
-        <h1 className="banner-title">Spilleaften</h1>
+        <h1 className="text-2xl font-bold">Spilleaften</h1>
       </header>
-      <main className="main">
-        <h1>Log venligst ind</h1>
+      <main className="flex flex-1 flex-col items-center justify-center p-4">
+        <h1 className="mb-8 text-3xl font-bold">Log venligst ind</h1>
         {!selectedProfile ? (
-          <div className="profiles" id="profileSelection">
+          <div id="profileSelection" className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {profiles.map((profile) => (
               <div
-                className="profile"
                 key={profile.name}
                 onClick={() => handleProfileClick(profile.name)}
-                style={{ cursor: "pointer" }}
+                className="cursor-pointer rounded-lg bg-gray-800 p-4 text-center transition-transform duration-200 hover:scale-105 hover:bg-gray-700"
               >
                 <Image
                   src={profile.img}
                   alt={`Profilbillede af ${profile.name}`}
                   width={200}
                   height={200}
-                  className="profile-img"
+                  className="mx-auto mb-4 h-32 w-32 rounded-full object-cover"
                   priority
                 />
-                <div className="profile-name">{profile.name}</div>
+                <div className="text-lg font-semibold">{profile.name}</div>
               </div>
             ))}
           </div>
         ) : (
-          <form id="loginForm" onSubmit={handleSubmit}>
-            <label htmlFor="bruger">Bruger</label>
-            <input
-              type="text"
-              id="bruger"
-              name="bruger"
-              value={selectedProfile}
-              readOnly
-            />
-            <label htmlFor="kode">Adgangskode</label>
-            <input
-              type="password"
-              id="kode"
-              name="kode"
-              value={kode}
-              onChange={(e) => setKode(e.target.value)}
-              disabled={loading}
-            />
-            <p id="fejlbesked" style={{ color: "red", marginTop: 10 }}>
-              {fejlbesked}
-            </p>
-            <p id="succesbesked" style={{ color: "green", marginTop: 10 }}>
-              {succesbesked}
-            </p>
+          <form id="loginForm" onSubmit={handleSubmit} className="w-full max-w-sm">
+            <div className="mb-4">
+              <label htmlFor="bruger" className="mb-2 block text-sm font-bold text-gray-400">Bruger</label>
+              <input
+                type="text"
+                id="bruger"
+                name="bruger"
+                value={selectedProfile}
+                readOnly
+                className="w-full rounded-md border border-dark-border bg-dark-input px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <div className="mb-6">
+              <label htmlFor="kode" className="mb-2 block text-sm font-bold text-gray-400">Adgangskode</label>
+              <input
+                type="password"
+                id="kode"
+                name="kode"
+                value={kode}
+                onChange={(e) => setKode(e.target.value)}
+                disabled={loading}
+                className="w-full rounded-md border border-dark-border bg-dark-input px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            {fejlbesked && <p className="mb-4 text-center text-error">{fejlbesked}</p>}
+            {succesbesked && <p className="mb-4 text-center text-success">{succesbesked}</p>}
             <button
               type="submit"
-              className="btn btn-primary btn-block"
-              style={{ marginTop: "1rem" }}
+              className="btn btn-primary btn-block mb-2 w-full"
               disabled={loading}
             >
               Log Ind
             </button>
             <button
               type="button"
-              className="btn btn-secondary btn-block"
-              style={{ marginTop: "0.5rem" }}
+              className="btn btn-secondary btn-block w-full"
               onClick={handleGoBack}
               disabled={loading}
             >

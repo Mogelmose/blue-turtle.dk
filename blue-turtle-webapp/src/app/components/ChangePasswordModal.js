@@ -1,15 +1,14 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { changePasswordSchema } from "@/lib/passwordSchema";
-import "../css/modal.css";
+import { useState, useEffect, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { changePasswordSchema } from '@/lib/passwordSchema';
 
 export default function ChangePasswordModal({ isOpen, onClose }) {
-  const [serverError, setServerError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [strength, setStrength] = useState("Svag");
+  const [serverError, setServerError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [strength, setStrength] = useState('Svag');
 
   const {
     register,
@@ -21,35 +20,35 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
     resolver: zodResolver(changePasswordSchema),
   });
 
-  // Watch new password for real-time validation
-  const newPassword = watch("newPassword", "");
+  const newPassword = watch('newPassword', '');
 
-  // Password requirements checklist
-  const requirements = useMemo(() => [
-    { label: "Minimum 12 karakterer", met: newPassword.length >= 12 },
-    { label: "Mindst 1 stort bogstav (A-Z)", met: /[A-Z]/.test(newPassword) },
-    { label: "Mindst 1 lille bogstav (a-z)", met: /[a-z]/.test(newPassword) },
-    { label: "Mindst 1 tal (0-9)", met: /[0-9]/.test(newPassword) },
-    { label: "Mindst 1 specialtegn", met: /[^A-Za-z0-9]/.test(newPassword) },
-  ], [newPassword]);
+  const requirements = useMemo(
+    () => [
+      { label: 'Minimum 12 karakterer', met: newPassword.length >= 12 },
+      { label: 'Mindst 1 stort bogstav (A-Z)', met: /[A-Z]/.test(newPassword) },
+      { label: 'Mindst 1 lille bogstav (a-z)', met: /[a-z]/.test(newPassword) },
+      { label: 'Mindst 1 tal (0-9)', met: /[0-9]/.test(newPassword) },
+      { label: 'Mindst 1 specialtegn', met: /[^A-Za-z0-9]/.test(newPassword) },
+    ],
+    [newPassword]
+  );
 
-  // Calculate password strength
   useEffect(() => {
     const metCount = requirements.filter((r) => r.met).length;
     const newStrength =
-      metCount < 3 ? "Svag" : metCount < 5 ? "Medium" : "Stærk";
+      metCount < 3 ? 'Svag' : metCount < 5 ? 'Medium' : 'Stærk';
     setStrength(newStrength);
   }, [requirements]);
 
   const onSubmit = async (data) => {
-    setServerError("");
-    setSuccess("");
+    setServerError('');
+    setSuccess('');
 
     try {
-  const response = await fetch("/api/password-change", {
-        method: "POST",
+      const response = await fetch('/api/password-change', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
       });
@@ -57,110 +56,127 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
       const result = await response.json();
 
       if (result.success) {
-  setSuccess("Adgangskoden er opdateret!");
+        setSuccess('Adgangskoden er opdateret!');
         setTimeout(() => {
           reset();
-          setSuccess("");
-          setServerError("");
+          setSuccess('');
+          setServerError('');
           onClose();
         }, 2000);
       } else {
-  setServerError(result.error || "Noget gik galt");
+        setServerError(result.error || 'Noget gik galt');
       }
     } catch (error) {
-  setServerError("Netværksfejl. Prøv igen.");
-      console.error("Password change error:", error);
+      setServerError('Netværksfejl. Prøv igen.');
+      console.error('Password change error:', error);
     }
   };
 
   const handleClose = () => {
     reset();
-    setServerError("");
-    setSuccess("");
+    setServerError('');
+    setSuccess('');
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal-content">
-        <button onClick={handleClose} className="modal-close-btn">
+    <div className="fixed inset-0 z-modal-backdrop flex items-center justify-center bg-black/60">
+      <div className="relative w-full max-w-md rounded-lg border border-dark-border bg-dark-elevated p-6 shadow-lg">
+        <button
+          onClick={handleClose}
+          className="absolute right-4 top-4 text-gray-400 hover:text-white"
+        >
           &times;
         </button>
-        <form onSubmit={handleSubmit(onSubmit)} className="album-form">
-          <fieldset disabled={isSubmitting} style={{ border: 0, padding: 0, margin: 0 }}>
-            <h2>Skift din Adgangskode</h2>
-            {serverError && <p className="error-message">{serverError}</p>}
-            {success && <p className="success-message">{success}</p>}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <fieldset disabled={isSubmitting} className="space-y-4">
+            <h2 className="text-center text-xl font-bold text-white">Skift din Adgangskode</h2>
+            {serverError && <p className="text-center text-error">{serverError}</p>}
+            {success && <p className="text-center text-success">{success}</p>}
 
-            <div className="form-group">
-              <label htmlFor="currentPassword">Nuværende Adgangskode</label>
+            <div>
+              <label
+                htmlFor="currentPassword"
+                className="mb-1 block text-sm font-medium text-gray-400"
+              >
+                Nuværende Adgangskode
+              </label>
               <input
                 type="password"
                 id="currentPassword"
-                className="input-large"
-                {...register("currentPassword")}
+                {...register('currentPassword')}
+                className="w-full rounded-md border border-dark-border bg-dark-input px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               {errors.currentPassword && (
-                <p className="error-message">{errors.currentPassword.message}</p>
+                <p className="mt-1 text-sm text-error">{errors.currentPassword.message}</p>
               )}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="newPassword">Ny Adgangskode</label>
+            <div>
+              <label
+                htmlFor="newPassword"
+                className="mb-1 block text-sm font-medium text-gray-400"
+              >
+                Ny Adgangskode
+              </label>
               <input
                 type="password"
                 id="newPassword"
-                className="input-large"
-                {...register("newPassword")}
+                {...register('newPassword')}
+                className="w-full rounded-md border border-dark-border bg-dark-input px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               {errors.newPassword && (
-                <p className="error-message">{errors.newPassword.message}</p>
+                <p className="mt-1 text-sm text-error">{errors.newPassword.message}</p>
               )}
             </div>
 
-            <div className="form-group">
-              <label htmlFor="confirmNewPassword">Bekræft Ny Adgangskode</label>
+            <div>
+              <label
+                htmlFor="confirmNewPassword"
+                className="mb-1 block text-sm font-medium text-gray-400"
+              >
+                Bekræft Ny Adgangskode
+              </label>
               <input
                 type="password"
                 id="confirmNewPassword"
-                className="input-large"
-                {...register("confirmNewPassword")}
+                {...register('confirmNewPassword')}
+                className="w-full rounded-md border border-dark-border bg-dark-input px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               {errors.confirmNewPassword && (
-                <p className="error-message">{errors.confirmNewPassword.message}</p>
+                <p className="mt-1 text-sm text-error">
+                  {errors.confirmNewPassword.message}
+                </p>
               )}
             </div>
 
             {newPassword && (
-              <div className="password-strength">
-                <h4>
-                  Adgangskode Styrke:{" "}
+              <div className="rounded-md border border-dark-border bg-dark-surface p-4">
+                <h4 className="mb-2 text-base font-semibold text-white">
+                  Adgangskode Styrke:{' '}
                   <span
-                    style={{
-                      color:
-                        strength === "Stærk"
-                          ? "green"
-                          : strength === "Medium"
-                          ? "orange"
-                          : "red",
-                    }}
+                    className={`${(
+                      strength === 'Stærk'
+                        ? 'text-success'
+                        : strength === 'Medium'
+                        ? 'text-warning'
+                        : 'text-error'
+                    )}`}
                   >
                     {strength}
                   </span>
                 </h4>
-                <ul className="requirements-list">
+                <ul className="space-y-1">
                   {requirements.map((req, i) => (
                     <li
                       key={i}
-                      style={{
-                        color: req.met ? "green" : "#ccc",
-                        fontSize: "14px",
-                        marginBottom: "4px",
-                      }}
+                      className={`text-sm ${
+                        req.met ? 'text-success' : 'text-gray-400'
+                      }`}
                     >
-                      {req.met ? "✅" : "❌"} {req.label}
+                      {req.met ? '✅' : '❌'} {req.label}
                     </li>
                   ))}
                 </ul>
@@ -169,10 +185,13 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 
             <button
               type="submit"
-              className="btn btn-secondary btn-block"
-              style={{ marginTop: "20px" }}
+              className="btn btn-secondary btn-block mt-4 w-full"
             >
-              {isSubmitting ? <div className="spinner"></div> : "Skift Adgangskode"}
+              {isSubmitting ? (
+                <div className="spinner"></div>
+              ) : (
+                'Skift Adgangskode'
+              )}
             </button>
           </fieldset>
         </form>

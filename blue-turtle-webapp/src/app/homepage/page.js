@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { sessionAuthOptions as authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import AppHeader from "../components/AppHeader";
-import "../css/homepagestyle.css";
 
 async function fetchAlbums() {
   try {
@@ -30,19 +29,22 @@ export default async function Homepage() {
   const albums = await fetchAlbums();
 
   const renderAlbumGrid = (albumList, title) => (
-    <div className="event-section">
-      <h1 className="event-title">{title}</h1>
-      <div className="event-grid">
+    <div className="py-8">
+      <h1 className="mb-8 text-center text-4xl font-bold text-gray-800">{title}</h1>
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {albumList.map((album) => (
-          <div className="event" key={album.id}>
-            <Link href={`/albums/${album.id}`}>
-              <Image
-                src={album.coverImage || "/static/logo.png"}
-                alt={album.name}
-                width={400}
-                height={400}
-              />
-              <p>{album.name}</p>
+          <div key={album.id} className="text-center">
+            <Link href={`/albums/${album.id}`} className="group">
+              <div className="overflow-hidden rounded-lg border-2 border-primary-500">
+                <Image
+                  src={album.coverImage || "/static/logo.png"}
+                  alt={album.name}
+                  width={400}
+                  height={400}
+                  className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+              <p className="mt-4 text-lg font-bold text-gray-800">{album.name}</p>
             </Link>
           </div>
         ))}
@@ -51,33 +53,37 @@ export default async function Homepage() {
   );
 
   // Filter albums into categories based on the new 'category' field
-const CATEGORY = {
-  REJSER: "REJSER",
-  SPILLEAFTEN: "SPILLEAFTEN",
-  JULEFROKOST: "JULEFROKOST",
-};
+  const CATEGORY = {
+    REJSER: "REJSER",
+    SPILLEAFTEN: "SPILLEAFTEN",
+    JULEFROKOST: "JULEFROKOST",
+  };
 
-const rejser = albums.filter((album) => album.category === CATEGORY.REJSER);
-const spilleaftener = albums.filter((album) => album.category === CATEGORY.SPILLEAFTEN);
-const julefrokoster = albums.filter((album) => album.category === CATEGORY.JULEFROKOST);
+  const rejser = albums.filter((album) => album.category === CATEGORY.REJSER);
+  const spilleaftener = albums.filter(
+    (album) => album.category === CATEGORY.SPILLEAFTEN
+  );
+  const julefrokoster = albums.filter(
+    (album) => album.category === CATEGORY.JULEFROKOST
+  );
 
   return (
-    <div className="forside-body">
-      <div className="page-container">
+    <div className="bg-white text-gray-800">
+      <div className="flex min-h-screen flex-col">
         <AppHeader />
-        <div className="banner-container">
+        <div className="w-full">
           <Image
             src="/static/banner.jpg"
             alt="Banner"
-            className="banner-image"
+            className="w-full object-cover"
             width={1920}
             height={1080}
             priority
           />
         </div>
 
-        <nav className="nav-bar">
-          <ul>
+        <nav className="bg-white p-4">
+          <ul className="flex flex-wrap justify-center gap-4">
             {rejser.map((album) => (
               <li key={album.id}>
                 <Link href={`/albums/${album.id}`} className="btn btn-primary">
@@ -88,12 +94,12 @@ const julefrokoster = albums.filter((album) => album.category === CATEGORY.JULEF
           </ul>
         </nav>
 
-        <main>
+        <main className="flex-1 bg-white px-4 py-8 text-black">
           {renderAlbumGrid(spilleaftener, "Spilleaftener")}
           {renderAlbumGrid(julefrokoster, "Julefrokoster")}
         </main>
 
-        <footer>
+        <footer className="bg-gray-900 p-4 text-center text-white">
           <p>© 2025 Blue Turtle. Alle rettigheder forbeholdes.</p>
         </footer>
       </div>

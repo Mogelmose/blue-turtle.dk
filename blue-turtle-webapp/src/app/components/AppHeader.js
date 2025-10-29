@@ -16,60 +16,53 @@ export default function AppHeader() {
   const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
 
   return (
-    <header className="main-header">
-      <div className="header-content">
-        <div className="header-left">
-          <Link href="/homepage" className="logo-link">
+    <header class="bg-gray-900 text-white shadow-md">
+      <div class="container mx-auto flex h-header items-center justify-between px-2 sm:px-4">
+        <div class="flex items-center gap-2 sm:gap-4">
+          <Link href="/homepage" class="flex items-center gap-2">
             <Image
               src="/static/logo.png"
               alt="Blue Turtle Logo"
-              className="logo-image"
+              class="h-8 w-auto sm:h-10"
               width={100}
               height={100}
               priority
             />
           </Link>
-          <h1 className="banner-title">Spilleaften</h1>
+          <h1 class="text-xl font-bold sm:text-2xl">Spilleaften</h1>
         </div>
-        <nav className="nav-menu">
-          <ul>
-            {session && (
-              <>
-                {/* Geomap icon (ghost button) visible only when authenticated */}
-                <li>
-                  <Link
-                    href="/geomap"
-                    aria-label="Geomap"
-                    className="icon-btn ghost"
-                    title="Geomap"
-                    style={{ minHeight: '48px', minWidth: '48px' }}
+        <nav class="flex items-center gap-2 sm:gap-4">
+          {session && (
+            <>
+              <Link
+                href="/geomap"
+                aria-label="Geomap"
+                class="flex h-12 w-12 items-center justify-center rounded-md text-gray-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                title="Geomap"
+              >
+                <Globe size={28} strokeWidth={2} aria-hidden />
+              </Link>
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button
+                    className="flex h-12 w-12 items-center justify-center rounded-md text-gray-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                    aria-label="Menu"
+                    title="Menu"
+                    type="button"
                   >
-                    <Globe size={27.5} strokeWidth={2} aria-hidden />
-                  </Link>
-                </li>
-                {/* Dropdown menu for account/actions */}
-                <li>
-                  <DropdownMenu.Root>
-                    <DropdownMenu.Trigger asChild>
-                      <button
-                        className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
-                        aria-label="Menu"
-                        title="Menu"
-                        type="button"
-                      >
-                        <MoreVertical size={30} strokeWidth={2} aria-hidden />
-                      </button>
-                    </DropdownMenu.Trigger>
+                    <MoreVertical size={30} strokeWidth={2} aria-hidden />
+                  </button>
+                </DropdownMenu.Trigger>
                     <DropdownMenu.Portal>
                       <DropdownMenu.Content
                         side="bottom"
                         align="end"
-                        alignOffset={-20}
-                        sideOffset={5}
-                        className="z-50 min-w-[12rem] rounded-md border border-white/10 bg-gray-950 p-2 text-gray-200 shadow-lg backdrop-blur-sm"
+                        alignOffset={-5}
+                        sideOffset={10}
+                        className="z-modal min-w-[14rem] rounded-lg border border-dark-border bg-dark-elevated p-2 text-text-dark shadow-lg backdrop-blur-sm"
                       >
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-10 py-10 text-xl outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="flex cursor-pointer select-none items-center rounded-md px-3 py-2 text-base outline-none hover:bg-dark-hover focus:bg-dark-hover"
                           onSelect={(e) => {
                             e.preventDefault();
                             setModalOpen(true);
@@ -78,7 +71,7 @@ export default function AppHeader() {
                           Opret Album
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-10 py-10 text-xl outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="flex cursor-pointer select-none items-center rounded-md px-3 py-2 text-base outline-none hover:bg-dark-hover focus:bg-dark-hover"
                           onSelect={(e) => {
                             e.preventDefault();
                             setPasswordModalOpen(true);
@@ -86,9 +79,9 @@ export default function AppHeader() {
                         >
                           Skift Adgangskode
                         </DropdownMenu.Item>
-                        <DropdownMenu.Separator className="my-2 h-px bg-white/10" />
+                        <DropdownMenu.Separator className="my-2 h-px bg-dark-border" />
                         <DropdownMenu.Item
-                          className="relative flex cursor-default select-none items-center rounded-sm px-10 py-10 text-xl text-red-300 outline-none hover:bg-white/10 focus:bg-white/10"
+                          className="flex cursor-pointer select-none items-center rounded-md px-3 py-2 text-base text-error outline-none hover:bg-dark-hover focus:bg-dark-hover"
                           onSelect={() => signOut({ callbackUrl: "/login" })}
                         >
                           Log ud
@@ -96,10 +89,8 @@ export default function AppHeader() {
                       </DropdownMenu.Content>
                     </DropdownMenu.Portal>
                   </DropdownMenu.Root>
-                </li>
-              </>
-            )}
-          </ul>
+            </>
+          )}
         </nav>
       </div>
       <CreateAlbumModal
