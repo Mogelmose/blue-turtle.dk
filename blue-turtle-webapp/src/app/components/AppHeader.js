@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import CreateAlbumModal from "./CreateAlbumModal";
 import ChangePasswordModal from "./ChangePasswordModal";
+import ThemeToggle from "./ThemeToggle";
 import { Globe } from "lucide-react";
 import { MoreVertical } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -42,6 +43,7 @@ export default function AppHeader() {
               >
                 <Globe size={28} strokeWidth={2} aria-hidden />
               </Link>
+              <ThemeToggle />
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
                   <button

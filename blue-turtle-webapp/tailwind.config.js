@@ -3,78 +3,24 @@ export default {
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
-      // Your custom color palette
       colors: {
-        primary: {
-          50: '#e6f2fb',
-          100: '#b3daf5',
-          200: '#80c1ef',
-          300: '#4da9e9',
-          400: '#2691d9',
-          500: '#0e72b9', // Main brand color
-          600: '#0a5598',
-          700: '#083d70',
-          800: '#052648',
-          900: '#031320',
-        },
-        secondary: {
-          400: '#007bff',
-          500: '#0056b3',
-          600: '#004085',
-        },
-        info: {
-          400: '#0099dd',
-          500: '#007acc',
-          600: '#005a99',
-        },
-        // Grayscale palette
-        gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
-        },
-        dark: {
-          base: '#000000',
-          surface: '#111111',
-          elevated: '#1e1e1e',
-          'elevated-hover': '#2c2c2c',
-          border: '#2e2e2e',
-          input: '#333333',
-          hover: '#444444',
-          'border-light': '#555555',
-        },
-        success: {
-          DEFAULT: '#4dff4d',
-          dark: '#22c55e',
-        },
-        error: {
-          DEFAULT: '#ff4d4d',
-          dark: '#ef4444',
-        },
-        warning: {
-          DEFAULT: '#ffa500',
-          dark: '#f59e0b',
-        },
-        text: {
-          DEFAULT: '#000000',
-          dark: '#ffffff',
-          secondary: {
-            light: '#4b5563',
-            dark: '#cccccc',
-          },
-          tertiary: {
-            dark: '#aaaaaa',
-          }
-        }
+        "bg-dark": "var(--bg-dark)",
+        bg: "var(--bg)",
+        "bg-light": "var(--bg-light)",
+        text: "var(--text)",
+        "text-muted": "var(--text-muted)",
+        highlight: "var(--highlight)",
+        border: "var(--border)",
+        "border-muted": "var(--border-muted)",
+        primary: "var(--primary)",
+        secondary: "var(--secondary)",
+        danger: "var(--danger)",
+        warning: "var(--warning)",
+        success: "var(--success)",
+        info: "var(--info)",
       },
       
       spacing: {
@@ -111,10 +57,10 @@ export default {
         '6xl': '64px',
       },
       
-      // Custom font families
+      // Custom font families (consume next/font CSS variables)
       fontFamily: {
-        sans: ['Nunito', 'sans-serif'],
-        heading: ['Nunito', 'sans-serif'],
+        sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-nunito)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       
       // Custom font weights

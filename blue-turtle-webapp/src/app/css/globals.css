@@ -1,10 +1,96 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap");
+/* Tailwind CSS v4 single import */
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Theme variables: dark as default, light via media or .light */
+:root {
+  /* Dark theme (default) */
+  --bg-dark: oklch(0.1 0.055 237);
+  --bg: oklch(0.15 0.055 237);
+  --bg-light: oklch(0.2 0.055 237);
+  --text: oklch(0.96 0.1 237);
+  --text-muted: oklch(0.76 0.1 237);
+  --highlight: oklch(0.5 0.11 237);
+  --border: oklch(0.4 0.11 237);
+  --border-muted: oklch(0.3 0.11 237);
+  --primary: oklch(0.76 0.11 237);
+  --secondary: oklch(0.76 0.11 57);
+  --danger: oklch(0.7 0.11 30);
+  --warning: oklch(0.7 0.11 100);
+  --success: oklch(0.7 0.11 160);
+  --info: oklch(0.7 0.11 260);
+  color-scheme: dark;
+}
+
+/* If user prefers light, adopt light vars by default */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-dark: oklch(0.92 0.055 237);
+    --bg: oklch(0.96 0.055 237);
+    --bg-light: oklch(1 0.055 237);
+    --text: oklch(0.15 0.11 237);
+    --text-muted: oklch(0.4 0.11 237);
+    --highlight: oklch(1 0.11 237);
+    --border: oklch(0.6 0.11 237);
+    --border-muted: oklch(0.7 0.11 237);
+    --primary: oklch(0.4 0.11 237);
+    --secondary: oklch(0.4 0.11 57);
+    --danger: oklch(0.5 0.11 30);
+    --warning: oklch(0.5 0.11 100);
+    --success: oklch(0.5 0.11 160);
+    --info: oklch(0.5 0.11 260);
+    color-scheme: light;
+  }
+}
+
+/* Force light or dark via class overrides */
+.light {
+  --bg-dark: oklch(0.92 0.055 237);
+  --bg: oklch(0.96 0.055 237);
+  --bg-light: oklch(1 0.055 237);
+  --text: oklch(0.15 0.11 237);
+  --text-muted: oklch(0.4 0.11 237);
+  --highlight: oklch(1 0.11 237);
+  --border: oklch(0.6 0.11 237);
+  --border-muted: oklch(0.7 0.11 237);
+  --primary: oklch(0.4 0.11 237);
+  --secondary: oklch(0.4 0.11 57);
+  --danger: oklch(0.5 0.11 30);
+  --warning: oklch(0.5 0.11 100);
+  --success: oklch(0.5 0.11 160);
+  --info: oklch(0.5 0.11 260);
+  color-scheme: light;
+}
+
+.dark {
+  --bg-dark: oklch(0.1 0.055 237);
+  --bg: oklch(0.15 0.055 237);
+  --bg-light: oklch(0.2 0.055 237);
+  --text: oklch(0.96 0.1 237);
+  --text-muted: oklch(0.76 0.1 237);
+  --highlight: oklch(0.5 0.11 237);
+  --border: oklch(0.4 0.11 237);
+  --border-muted: oklch(0.3 0.11 237);
+  --primary: oklch(0.76 0.11 237);
+  --secondary: oklch(0.76 0.11 57);
+  --danger: oklch(0.7 0.11 30);
+  --warning: oklch(0.7 0.11 100);
+  --success: oklch(0.7 0.11 160);
+  --info: oklch(0.7 0.11 260);
+  color-scheme: dark;
+}
 
 html,
 body {
-  font-family: "Nunito", sans-serif;
+  /* Default to Inter (from next/font) for UI/body */
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Use Nunito for headings by default */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-nunito), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
