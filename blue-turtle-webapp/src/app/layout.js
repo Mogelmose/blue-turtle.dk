@@ -20,7 +20,7 @@ const nunito = Nunito({
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="da">
+    <html lang="da" suppressHydrationWarning={true}>
       <head>
         {/* Initialize theme early to avoid flashes */}
         <script

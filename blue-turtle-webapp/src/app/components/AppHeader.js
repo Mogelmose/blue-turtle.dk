@@ -17,28 +17,28 @@ export default function AppHeader() {
   const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
 
   return (
-    <header class="bg-gray-900 text-white shadow-md">
-      <div class="container mx-auto flex h-header items-center justify-between px-2 sm:px-4">
-        <div class="flex items-center gap-2 sm:gap-4">
-          <Link href="/homepage" class="flex items-center gap-2">
+    <header className="bg-gray-900 text-white shadow-md">
+      <div className="container mx-auto flex h-header items-center justify-between px-2 sm:px-4">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link href="/homepage" className="flex items-center gap-2">
             <Image
               src="/static/logo.png"
               alt="Blue Turtle Logo"
-              class="h-8 w-auto sm:h-10"
+              className="h-8 w-auto sm:h-10"
               width={100}
               height={100}
               priority
             />
           </Link>
-          <h1 class="text-xl font-bold sm:text-2xl">Spilleaften</h1>
+          <h1 className="text-xl font-bold sm:text-2xl">Spilleaften</h1>
         </div>
-        <nav class="flex items-center gap-2 sm:gap-4">
+        <nav className="flex items-center gap-2 sm:gap-4">
           {session && (
             <>
               <Link
                 href="/geomap"
                 aria-label="Geomap"
-                class="flex h-12 w-12 items-center justify-center rounded-md text-gray-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                className="flex h-12 w-12 items-center justify-center rounded-md text-gray-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 title="Geomap"
               >
                 <Globe size={28} strokeWidth={2} aria-hidden />
