@@ -2,79 +2,126 @@
 
 /* Theme variables: dark as default, light via media or .light */
 :root {
-  /* Dark theme (default) */
-  --bg-dark: oklch(0.1 0.055 237);
-  --bg: oklch(0.15 0.055 237);
-  --bg-light: oklch(0.2 0.055 237);
-  --text: oklch(0.96 0.1 237);
-  --text-muted: oklch(0.76 0.1 237);
-  --highlight: oklch(0.5 0.11 237);
-  --border: oklch(0.4 0.11 237);
-  --border-muted: oklch(0.3 0.11 237);
-  --primary: oklch(0.76 0.11 237);
-  --secondary: oklch(0.76 0.11 185);
-  --danger: oklch(0.7 0.11 30);
-  --warning: oklch(0.7 0.11 100);
-  --success: oklch(0.7 0.11 160);
-  --info: oklch(0.7 0.11 260);
+  /* Dark theme (default): Deep Ocean */
+  --bg-dark: oklch(0.15 0.08 240);
+  --bg: oklch(0.2 0.08 240);
+  --bg-light: oklch(0.25 0.08 240);
+  --text: oklch(0.95 0.02 240);
+  --text-muted: oklch(0.7 0.05 240);
+  --border: oklch(0.3 0.08 240);
+  --border-muted: oklch(0.25 0.08 240);
+  --primary: oklch(0.8 0.15 190); /* Bright Cyan */
+  --primary-foreground: oklch(0.1 0.08 240);
+  --secondary: oklch(0.6 0.1 240); /* Muted Blue */
+  --secondary-foreground: oklch(0.95 0.02 240);
+  --danger: oklch(0.7 0.2 15); /* Coral Red */
+  --danger-foreground: oklch(0.95 0.02 240);
+  --warning: oklch(0.8 0.2 80); /* Sandy Yellow */
+  --warning-foreground: oklch(0.1 0.08 240);
+  --success: oklch(0.7 0.2 150); /* Seafoam Green */
+  --success-foreground: oklch(0.1 0.08 240);
+  --info: oklch(0.7 0.2 220);
+  --info-foreground: oklch(0.1 0.08 240);
+  --muted: oklch(0.25 0.08 240);
+  --muted-foreground: oklch(0.7 0.05 240);
+  --accent: oklch(0.8 0.15 190);
+  --accent-foreground: oklch(0.1 0.08 240);
+  --card: oklch(0.22 0.08 240);
+  --card-foreground: oklch(0.95 0.02 240);
   color-scheme: dark;
 }
 
 /* If user prefers light, adopt light vars by default */
 @media (prefers-color-scheme: light) {
   :root {
-    --bg-dark: oklch(0.92 0.055 237);
-    --bg: oklch(0.96 0.055 237);
-    --bg-light: oklch(1 0.055 237);
-    --text: oklch(0.15 0.11 237);
-    --text-muted: oklch(0.4 0.11 237);
-    --highlight: oklch(1 0.11 237);
-    --border: oklch(0.6 0.11 237);
-    --border-muted: oklch(0.7 0.11 237);
-    --primary: oklch(0.4 0.11 237);
-    --secondary: oklch(0.4 0.11 185);
-    --danger: oklch(0.5 0.11 30);
-    --warning: oklch(0.5 0.11 100);
-    --success: oklch(0.5 0.11 160);
-    --info: oklch(0.5 0.11 260);
+    /* Light theme: Ocean Surface */
+    --bg-dark: oklch(0.9 0.02 200);
+    --bg: oklch(0.95 0.01 200);
+    --bg-light: oklch(1 0 0);
+    --text: oklch(0.1 0.08 240);
+    --text-muted: oklch(0.4 0.06 240);
+    --border: oklch(0.8 0.03 200);
+    --border-muted: oklch(0.9 0.02 200);
+    --primary: oklch(0.5 0.2 240); /* Deep Blue */
+    --primary-foreground: oklch(0.95 0.02 200);
+    --secondary: oklch(0.8 0.05 240); /* Light Blue */
+    --secondary-foreground: oklch(0.1 0.08 240);
+    --danger: oklch(0.6 0.25 15); /* Coral Red */
+    --danger-foreground: oklch(1 0 0);
+    --warning: oklch(0.7 0.25 80); /* Sandy Yellow */
+    --warning-foreground: oklch(0.1 0.08 240);
+    --success: oklch(0.5 0.25 150); /* Seafoam Green */
+    --success-foreground: oklch(0.1 0.08 240);
+    --info: oklch(0.6 0.2 220);
+    --info-foreground: oklch(1 0 0);
+    --muted: oklch(0.9 0.02 200);
+    --muted-foreground: oklch(0.4 0.06 240);
+    --accent: oklch(0.8 0.05 240);
+    --accent-foreground: oklch(0.1 0.08 240);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.1 0.08 240);
     color-scheme: light;
   }
 }
 
 /* Force light or dark via class overrides */
 .light {
-  --bg-dark: oklch(0.92 0.055 237);
-  --bg: oklch(0.96 0.055 237);
-  --bg-light: oklch(1 0.055 237);
-  --text: oklch(0.15 0.11 237);
-  --text-muted: oklch(0.4 0.11 237);
-  --highlight: oklch(1 0.11 237);
-  --border: oklch(0.6 0.11 237);
-  --border-muted: oklch(0.7 0.11 237);
-  --primary: oklch(0.4 0.11 237);
-  --secondary: oklch(0.4 0.11 57);
-  --danger: oklch(0.5 0.11 30);
-  --warning: oklch(0.5 0.11 100);
-  --success: oklch(0.5 0.11 160);
-  --info: oklch(0.5 0.11 260);
+  /* Light theme: Ocean Surface */
+  --bg-dark: oklch(0.9 0.02 200);
+  --bg: oklch(0.95 0.01 200);
+  --bg-light: oklch(1 0 0);
+  --text: oklch(0.1 0.08 240);
+  --text-muted: oklch(0.4 0.06 240);
+  --border: oklch(0.8 0.03 200);
+  --border-muted: oklch(0.9 0.02 200);
+  --primary: oklch(0.5 0.2 240); /* Deep Blue */
+  --primary-foreground: oklch(0.95 0.02 200);
+  --secondary: oklch(0.8 0.05 240); /* Light Blue */
+  --secondary-foreground: oklch(0.1 0.08 240);
+  --danger: oklch(0.6 0.25 15); /* Coral Red */
+  --danger-foreground: oklch(1 0 0);
+  --warning: oklch(0.7 0.25 80); /* Sandy Yellow */
+  --warning-foreground: oklch(0.1 0.08 240);
+  --success: oklch(0.5 0.25 150); /* Seafoam Green */
+  --success-foreground: oklch(0.1 0.08 240);
+  --info: oklch(0.6 0.2 220);
+  --info-foreground: oklch(1 0 0);
+  --muted: oklch(0.9 0.02 200);
+  --muted-foreground: oklch(0.4 0.06 240);
+  --accent: oklch(0.8 0.05 240);
+  --accent-foreground: oklch(0.1 0.08 240);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.1 0.08 240);
   color-scheme: light;
 }
 
 .dark {
-  --bg-dark: oklch(0.1 0.055 237);
-  --bg: oklch(0.15 0.055 237);
-  --bg-light: oklch(0.2 0.055 237);
-  --text: oklch(0.96 0.1 237);
-  --text-muted: oklch(0.76 0.1 237);
-  --highlight: oklch(0.5 0.11 237);
-  --border: oklch(0.4 0.11 237);
-  --border-muted: oklch(0.3 0.11 237);
-  --primary: oklch(0.76 0.11 237);
-  --secondary: oklch(0.76 0.11 57);
-  --danger: oklch(0.7 0.11 30);
-  --warning: oklch(0.7 0.11 100);
-  --success: oklch(0.7 0.11 160);
-  --info: oklch(0.7 0.11 260);
+  /* Dark theme (default): Deep Ocean */
+  --bg-dark: oklch(0.15 0.08 240);
+  --bg: oklch(0.2 0.08 240);
+  --bg-light: oklch(0.25 0.08 240);
+  --text: oklch(0.95 0.02 240);
+  --text-muted: oklch(0.7 0.05 240);
+  --border: oklch(0.3 0.08 240);
+  --border-muted: oklch(0.25 0.08 240);
+  --primary: oklch(0.8 0.15 190); /* Bright Cyan */
+  --primary-foreground: oklch(0.1 0.08 240);
+  --secondary: oklch(0.6 0.1 240); /* Muted Blue */
+  --secondary-foreground: oklch(0.95 0.02 240);
+  --danger: oklch(0.7 0.2 15); /* Coral Red */
+  --danger-foreground: oklch(0.95 0.02 240);
+  --warning: oklch(0.8 0.2 80); /* Sandy Yellow */
+  --warning-foreground: oklch(0.1 0.08 240);
+  --success: oklch(0.7 0.2 150); /* Seafoam Green */
+  --success-foreground: oklch(0.1 0.08 240);
+  --info: oklch(0.7 0.2 220);
+  --info-foreground: oklch(0.1 0.08 240);
+  --muted: oklch(0.25 0.08 240);
+  --muted-foreground: oklch(0.7 0.05 240);
+  --accent: oklch(0.8 0.15 190);
+  --accent-foreground: oklch(0.1 0.08 240);
+  --card: oklch(0.22 0.08 240);
+  --card-foreground: oklch(0.95 0.02 240);
   color-scheme: dark;
 }
 

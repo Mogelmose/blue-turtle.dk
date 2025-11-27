@@ -1,6 +1,7 @@
 import Providers from "./Providers";
 import { Inter, Nunito } from "next/font/google";
 import "./css/globals.css";
+import "./css/design-system.css";
 
 // Primary UI/body font
 const inter = Inter({

@@ -1,35 +1,12 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap");
-@import "tailwindcss";
-
-/* ============================================
-   BASE STYLES & RESETS
-   ============================================ */
-
-@layer base {
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-    font-family: 'Nunito', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  input[type="file"] {
-    display: none;
-  }
-}
-
 /* ============================================
    COMPLEX COMPONENTS
    These are patterns too complex for inline Tailwind
    ============================================ */
+
+/* Hides the default file input button */
+input[type="file"] {
+  display: none;
+}
 
 /* Loading Spinner - Complex animation */
 .spinner {

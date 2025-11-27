@@ -3,7 +3,7 @@ import { useEffect, useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { Button } from "@/app/components/Button";
 import logoImage from 'public/static/logo.png';
 
 const successAudio = typeof Audio !== "undefined" && new Audio("/sound/pissegodt.mp3");
@@ -101,8 +101,8 @@ function LoginPageInner() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-900 text-white">
-      <header className="flex items-center justify-center gap-4 bg-gray-900 p-4 text-white shadow-md">
+    <div className="flex min-h-screen flex-col bg-bg-dark text-text">
+      <header className="flex items-center justify-start gap-4 bg-bg-dark p-4 text-text shadow-md">
         <Image
           src={logoImage}
           alt="Logo"
@@ -121,7 +121,7 @@ function LoginPageInner() {
               <div
                 key={profile.name}
                 onClick={() => handleProfileClick(profile.name)}
-                className="cursor-pointer rounded-lg bg-gray-800 p-4 text-center transition-transform duration-200 hover:scale-105 hover:bg-gray-700"
+                className="cursor-pointer rounded-lg bg-bg p-4 text-center transition-transform duration-200 hover:scale-105 hover:bg-bg-light"
               >
                 <Image
                   src={profile.img}
@@ -138,18 +138,18 @@ function LoginPageInner() {
         ) : (
           <form id="loginForm" onSubmit={handleSubmit} className="w-full max-w-sm">
             <div className="mb-4">
-              <label htmlFor="bruger" className="mb-2 block text-sm font-bold text-gray-400">Bruger</label>
+              <label htmlFor="bruger" className="mb-2 block text-sm font-bold text-text-muted">Bruger</label>
               <input
                 type="text"
                 id="bruger"
                 name="bruger"
                 value={selectedProfile}
                 readOnly
-                className="w-full rounded-md border border-dark-border bg-dark-input px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-md border border-border bg-bg px-3 py-2 text-text focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <div className="mb-6">
-              <label htmlFor="kode" className="mb-2 block text-sm font-bold text-gray-400">Adgangskode</label>
+              <label htmlFor="kode" className="mb-2 block text-sm font-bold text-text-muted">Adgangskode</label>
               <input
                 type="password"
                 id="kode"
@@ -157,26 +157,27 @@ function LoginPageInner() {
                 value={kode}
                 onChange={(e) => setKode(e.target.value)}
                 disabled={loading}
-                className="w-full rounded-md border border-dark-border bg-dark-input px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full rounded-md border border-border bg-bg px-3 py-2 text-text focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
-            {fejlbesked && <p className="mb-4 text-center text-error">{fejlbesked}</p>}
+            {fejlbesked && <p className="mb-4 text-center text-danger">{fejlbesked}</p>}
             {succesbesked && <p className="mb-4 text-center text-success">{succesbesked}</p>}
-            <button
+            <Button
               type="submit"
-              className="btn btn-primary btn-block mb-2 w-full"
+              className="w-full mb-2"
               disabled={loading}
             >
               Log Ind
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn btn-secondary btn-block w-full"
+              variant="secondary"
+              className="w-full"
               onClick={handleGoBack}
               disabled={loading}
             >
               Annuller
-            </button>
+            </Button>
           </form>
         )}
       </main>
