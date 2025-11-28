@@ -10,10 +10,14 @@ const votrag = localFont({
   variable: "--font-votrag",
 });
 
+
 export default function RootLayout({ children }) {
   return (
     <html lang="da">
-  <body className={votrag.variable}>
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+      </head>
+      <body className={votrag.variable}>
         <Providers>{children}</Providers>
       </body>
     </html>
