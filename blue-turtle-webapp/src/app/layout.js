@@ -1,15 +1,5 @@
 import Providers from "./Providers";
-import localFont from "next/font/local";
 import "./css/globals.css";
-
-const votrag = localFont({
-  src: "./fonts/Votrag-Bold.ttf",
-  weight: "700",
-  style: "normal",
-  display: "swap",
-  variable: "--font-votrag",
-});
-
 
 export default function RootLayout({ children }) {
   return (
@@ -17,7 +7,7 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
       </head>
-      <body className={votrag.variable}>
+      <body className={"bg-gray-100"}>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
-import AppHeader from "../../components/AppHeader";
+import Header from "../../components/layout/Header";
 import Image from "next/image";
 import "../../css/sub-pagestyle.css";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import EditAlbumModal from "../../components/EditAlbumModal";
+import Footer from "../../components/layout/Footer";
 import ReactDOM from "react-dom";
 
 export default function AlbumContent({ initialAlbum }) {
@@ -86,7 +87,7 @@ export default function AlbumContent({ initialAlbum }) {
   return (
     <div className="underside-body">
       <div className="page-container">
-        <AppHeader />
+        <Header />
 
         <div className="banner-container">
           <Image
@@ -196,9 +197,7 @@ export default function AlbumContent({ initialAlbum }) {
           </div>
         </div>
 
-        <footer>
-          <p>&copy; 2025 Blue Turtle. Alle rettigheder forbeholdes.</p>
-        </footer>
+        <Footer />
       </div>
       {/* Render EditAlbumModal in a portal to keep it above all content */}
       {typeof window !== "undefined" &&

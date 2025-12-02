@@ -3,7 +3,8 @@ import Image from "next/image";
 import { getServerSession } from "next-auth";
 import { sessionAuthOptions as authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import AppHeader from "../components/AppHeader";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
 import "../css/homepagestyle.css";
 
 async function fetchAlbums() {
@@ -64,7 +65,7 @@ const julefrokoster = albums.filter((album) => album.category === CATEGORY.JULEF
   return (
     <div className="forside-body">
       <div className="page-container">
-        <AppHeader />
+        <Header />
         <div className="banner-container">
           <Image
             src="/static/banner.jpg"
@@ -93,9 +94,7 @@ const julefrokoster = albums.filter((album) => album.category === CATEGORY.JULEF
           {renderAlbumGrid(julefrokoster, "Julefrokoster")}
         </main>
 
-        <footer>
-          <p>© 2025 Blue Turtle. Alle rettigheder forbeholdes.</p>
-        </footer>
+        <Footer />
       </div>
     </div>
   );
