@@ -1,5 +1,4 @@
 import Providers from "./Providers";
-import "./css/globals.css";
 
 export default function RootLayout({ children }) {
   return (
@@ -7,7 +6,7 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
       </head>
-      <body className={"bg-gray-100"}>
+      <body className="bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text transition-colors duration-300">
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -13,7 +13,7 @@ export default function Header() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-40 w-full bg-white-200 backdrop-blur-sm">
       <Container className="flex items-center justify-between h-16">
         <Link href="/homepage" className="flex items-center gap-2">
           <img src="/static/logo.png" alt="Blue Turtle Logo" className="h-8 w-auto" />

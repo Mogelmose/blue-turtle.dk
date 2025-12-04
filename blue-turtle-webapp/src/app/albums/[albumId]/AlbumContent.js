@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
-import Header from "../../components/layout/Header";
+import Header from "../../../components/layout/Header";
 import Image from "next/image";
 import "../../css/sub-pagestyle.css";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import EditAlbumModal from "../../components/EditAlbumModal";
-import Footer from "../../components/layout/Footer";
+import Footer from "../../../components/layout/Footer";
 import ReactDOM from "react-dom";
 
 export default function AlbumContent({ initialAlbum }) {

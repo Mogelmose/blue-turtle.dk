@@ -5,7 +5,7 @@ import { sessionAuthOptions as authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import "../css/homepagestyle.css";
+
 
 async function fetchAlbums() {
   try {
