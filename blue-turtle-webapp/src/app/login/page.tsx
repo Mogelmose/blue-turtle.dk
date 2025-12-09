@@ -116,37 +116,39 @@ function LoginPageInner() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-light-background dark:bg-dark-background p-4">
-      <header className="absolute top-0 left-0 w-full flex justify-center items-center py-6 px-4">
-        <Image src={logoImage} alt="Blue Turtle Logo" width={60} height={60} />
-        <h1 className="ml-4 text-2xl font-bold tracking-tight text-light-text dark:text-dark-text">
+    <div className="flex flex-col min-h-screen bg-page text-main">
+      <header className="flex items-center gap-4 p-4 sm:p-6">
+        <Image src={logoImage} alt="Blue Turtle Logo" width={50} height={50} className="full w-fit" />
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
           Blue Turtle
         </h1>
       </header>
 
-      <main className="flex flex-col items-center justify-center w-full flex-1">
-        {!selectedProfile ? (
-          <ProfileSelection 
-            profiles={profiles} 
-            handleProfileClick={handleProfileClick}
-            fejlbesked={fejlbesked}
-          />
-        ) : (
-          <LoginForm
-            selectedProfile={selectedProfile}
-            kode={kode}
-            setKode={setKode}
-            handleSubmit={handleSubmit}
-            handleGoBack={handleGoBack}
-            loading={loading}
-            isBlocked={isBlocked}
-            fejlbesked={fejlbesked}
-            succesbesked={succesbesked}
-          />
-        )}
+      <main className="flex flex-1 flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {!selectedProfile ? (
+            <ProfileSelection 
+              profiles={profiles} 
+              handleProfileClick={handleProfileClick}
+              fejlbesked={fejlbesked}
+            />
+          ) : (
+            <LoginForm
+              selectedProfile={selectedProfile}
+              kode={kode}
+              setKode={setKode}
+              handleSubmit={handleSubmit}
+              handleGoBack={handleGoBack}
+              loading={loading}
+              isBlocked={isBlocked}
+              fejlbesked={fejlbesked}
+              succesbesked={succesbesked}
+            />
+          )}
+        </div>
       </main>
 
-      <footer className="w-full text-center p-4 text-xs text-light-text-muted dark:text-dark-text-muted">
+      <footer className="w-full p-4 text-center text-xs text-muted">
         © {new Date().getFullYear()} Blue Turtle. All rights reserved.
       </footer>
     </div>
@@ -163,9 +165,9 @@ export default function LoginPage() {
 }
 
 function LoadingSpinner() {
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-light-background dark:bg-dark-background">
-            <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-light-primary dark:border-dark-primary"></div>
-        </div>
-    );
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-page">
+      <div className="h-16 w-16 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent"></div>
+    </div>
+  );
 }

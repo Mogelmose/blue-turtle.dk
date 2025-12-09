@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+@theme {
+  /* Ocean color palette */
+  --color-ocean-50: hsl(195, 100%, 95%);
+  --color-ocean-100: hsl(195, 77%, 88%);
+  --color-ocean-200: hsl(192, 84%, 78%);
+  --color-ocean-300: hsl(192, 100%, 67%);
+  --color-ocean-400: hsl(191, 100%, 56%);
+  --color-ocean-500: hsl(195, 100%, 46%);
+  --color-ocean-600: hsl(199, 97%, 37%);
+  --color-ocean-700: hsl(217, 91%, 27%);
+  --color-ocean-800: hsl(217, 91%, 22%);
+  --color-ocean-900: hsl(217, 91%, 17%);
+}
+
+@layer utilities {
+  /* Background utilities */
+  .bg-page {
+    background-color: var(--color-ocean-50);
+  }
+  
+  .bg-surface {
+    background-color: var(--color-ocean-100);
+  }
+  
+  .bg-surface-elevated {
+    background-color: var(--color-ocean-200);
+  }
+  
+  /* Text utilities */
+  .text-main {
+    color: var(--color-ocean-900);
+  }
+  
+  .text-muted {
+    color: var(--color-ocean-700);
+  }
+  
+  /* Primary button/action utilities */
+  .bg-primary {
+    background-color: var(--color-ocean-500);
+  }
+  
+  .text-primary {
+    color: var(--color-ocean-500);
+  }
+  
+  /* Border utilities */
+  .border-default {
+    border-color: var(--color-ocean-300);
+  }
+  
+  /* Combined button utilities */
+  .btn-primary {
+    background-color: var(--color-ocean-500);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--color-ocean-600);
+  }
+  
+  /* Card utilities */
+  .card {
+    background-color: var(--color-ocean-100);
+    border: 1px solid var(--color-ocean-300);
+  }
+  
+  .card-elevated {
+    background-color: var(--color-ocean-200);
+    border: 1px solid var(--color-ocean-300);
+  }
+  
+  /* Dark mode variants */
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) .bg-page {
+      background-color: hsl(217, 91%, 12%);
+    }
+    
+    :root:not(.light) .bg-surface {
+      background-color: var(--color-ocean-900);
+    }
+    
+    :root:not(.light) .bg-surface-elevated {
+      background-color: var(--color-ocean-800);
+    }
+    
+    :root:not(.light) .text-main {
+      color: var(--color-ocean-50);
+    }
+    
+    :root:not(.light) .text-muted {
+      color: var(--color-ocean-100);
+    }
+    
+    :root:not(.light) .bg-primary {
+      background-color: var(--color-ocean-300);
+    }
+    
+    :root:not(.light) .text-primary {
+      color: var(--color-ocean-300);
+    }
+    
+    :root:not(.light) .border-default {
+      border-color: var(--color-ocean-700);
+    }
+    
+    :root:not(.light) .btn-primary {
+      background-color: var(--color-ocean-300);
+    }
+    
+    :root:not(.light) .btn-primary:hover {
+      background-color: var(--color-ocean-200);
+    }
+    
+    :root:not(.light) .card {
+      background-color: var(--color-ocean-900);
+      border-color: var(--color-ocean-700);
+    }
+    
+    :root:not(.light) .card-elevated {
+      background-color: var(--color-ocean-800);
+      border-color: var(--color-ocean-700);
+    }
+  }
+  
+  /* Manual dark mode with .dark class */
+  .dark .bg-page {
+    background-color: hsl(217, 91%, 12%);
+  }
+  
+  .dark .bg-surface {
+    background-color: var(--color-ocean-900);
+  }
+  
+  .dark .bg-surface-elevated {
+    background-color: var(--color-ocean-800);
+  }
+  
+  .dark .text-main {
+    color: var(--color-ocean-50);
+  }
+  
+  .dark .text-muted {
+    color: var(--color-ocean-100);
+  }
+  
+  .dark .bg-primary {
+    background-color: var(--color-ocean-300);
+  }
+  
+  .dark .text-primary {
+    color: var(--color-ocean-300);
+  }
+  
+  .dark .border-default {
+    border-color: var(--color-ocean-700);
+  }
+  
+  .dark .btn-primary {
+    background-color: var(--color-ocean-300);
+  }
+  
+  .dark .btn-primary:hover {
+    background-color: var(--color-ocean-200);
+  }
+  
+  .dark .card {
+    background-color: var(--color-ocean-900);
+    border-color: var(--color-ocean-700);
+  }
+  
+  .dark .card-elevated {
+    background-color: var(--color-ocean-800);
+    border-color: var(--color-ocean-700);
+  }
+}

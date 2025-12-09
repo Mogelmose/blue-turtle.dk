@@ -1,10 +1,10 @@
-import AppHeader from "../components/AppHeader";
+import Header from "@/components/layout/Header";
 import { Globe } from "lucide-react";
 
 export default function GeomapPage() {
   return (
     <div className="page-container">
-      <AppHeader />
+      <Header />
       <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
         <div style={{ textAlign: "center" }}>
           <div

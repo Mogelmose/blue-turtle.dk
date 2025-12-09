@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Image from 'next/image';
 
@@ -16,7 +15,7 @@ interface ProfileSelectionProps {
 
 const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handleProfileClick, fejlbesked }) => {
   return (
-    <div className="w-full max-w-4xl text-center">
+    <div className="w-full max-w-5xl text-center">
       <h2 className="text-3xl font-bold text-light-text dark:text-dark-text mb-2">Hvem logger ind?</h2>
       <p className="text-lg text-light-text-muted dark:text-dark-text-muted mb-8">Vælg din profil for at fortsætte.</p>
 
@@ -32,7 +31,7 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
             <div
               key={profile.name}
               onClick={() => handleProfileClick(profile.name, profile.img)}
-              className="p-3 rounded-2xl bg-light-surface dark:bg-dark-surface hover:bg-light-surface-elevated dark:hover:bg-dark-surface-elevated shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary"
+              className="p-3 rounded-2xl bg-light-surface dark:bg-dark-surface hover:bg-light-surface-elevated dark:hover:bg-dark-surface-elevated shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary group"
               tabIndex={0}
               role="button"
               aria-label={`Vælg ${profile.name}`}
@@ -45,7 +44,7 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
                   className="object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                 />
               </div>
-              <span className="font-bold text-light-text dark:text-dark-text text-center">{profile.name}</span>
+              <span className="font-bold text-light-text dark:text-dark-text text-center wrap-break-words">{profile.name}</span>
             </div>
           ))}
         </div>

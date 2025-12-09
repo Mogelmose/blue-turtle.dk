@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Image from 'next/image';
 import {LockClosedIcon, ArrowLeftIcon, ExclamationTriangleIcon, CheckCircleIcon} from '@heroicons/react/24/solid';
@@ -28,7 +27,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   succesbesked,
 }) => {
   return (
-    <div className="w-full max-w-sm p-4 md:p-8 space-y-6 bg-light-surface dark:bg-dark-surface rounded-2xl shadow-xl">
+    <div className="w-full max-w-sm p-4 md:p-8 space-y-6 bg-light-surface dark:bg-dark-surface rounded-2xl shadow-xl text-center">
       <button
         onClick={handleGoBack}
         className="flex items-center text-sm font-medium text-light-text-muted dark:text-dark-text-muted hover:text-light-primary dark:hover:text-dark-primary transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary rounded-md"
@@ -38,7 +37,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         Vælg en anden profil
       </button>
 
-      <div className="">
+      <div className="flex flex-col items-center">
         <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-light-border dark:border-dark-border shadow-md">
           <Image
             src={selectedProfile.img}
@@ -55,7 +54,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <div className="relative">
           <label htmlFor="kode" className="sr-only">Adgangskode</label>
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <LockClosedIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            <LockClosedIcon className="h-5 w-5 text-light-text-muted dark:text-dark-text-muted" aria-hidden="true" />
           </div>
           <input
             type="password"
@@ -66,27 +65,27 @@ const LoginForm: React.FC<LoginFormProps> = ({
             disabled={loading || isBlocked}
             placeholder="Adgangskode"
             required
-            className="w-full h-12 min-h-12 pl-10 pr-4 text-light-text dark:text-dark-text bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border rounded-lg shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 min-h-12 pl-10 pr-4 text-light-text dark:text-dark-text bg-light-background dark:bg-dark-background border border-light-border dark:border-dark-border rounded-lg shadow-sm placeholder:text-light-text-muted dark:placeholder:text-dark-text-muted focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
 
         {fejlbesked && (
             <div className="flex items-center p-3 text-sm font-medium text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-300 rounded-lg" role="alert">
-                <ExclamationTriangleIcon className="h-5 w-5 mr-2 flex-shrink-0" />
+                <ExclamationTriangleIcon className="h-5 w-5 mr-2 shrink-0" />
                 <span>{fejlbesked}</span>
             </div>
         )}
 
         {succesbesked && (
             <div className="flex items-center p-3 text-sm font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-300 rounded-lg" role="alert">
-                <CheckCircleIcon className="h-5 w-5 mr-2 flex-shrink-0" />
+                <CheckCircleIcon className="h-5 w-5 mr-2 shrink-0" />
                 <span>{succesbesked}</span>
             </div>
         )}
         
         {isBlocked && (
             <div className="flex items-center p-3 text-sm font-medium text-yellow-700 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300 rounded-lg" role="alert">
-                <ExclamationTriangleIcon className="h-5 w-5 mr-2 flex-shrink-0" />
+                <ExclamationTriangleIcon className="h-5 w-5 mr-2 shrink-0" />
                 <span>For mange forkerte forsøg. Prøv igen om 30 sekunder.</span>
             </div>
         )}
@@ -94,7 +93,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <button
           type="submit"
           disabled={loading || isBlocked || !kode}
-          className="w-full h-12 min-h-12 flex justify-center items-center px-4 font-semibold text-white bg-light-primary hover:bg-light-primary-hover dark:bg-dark-primary dark:hover:bg-dark-primary-hover rounded-lg shadow-md transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary disabled:bg-opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-12 min-h-12 flex justify-center items-center px-4 font-semibold text-white bg-light-primary hover:bg-light-primary-hover dark:bg-dark-primary dark:text-black dark:hover:bg-dark-primary-hover rounded-lg shadow-md transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-light-primary dark:focus-visible:ring-dark-primary disabled:bg-opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
