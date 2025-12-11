@@ -81,7 +81,7 @@ function LoginPageInner() {
     setLoading(false);
 
     if (result?.ok) {
-      setSuccesbesked("Logger ind... Velkommen!");
+      setSuccesbesked("Velkommen til Blue Turtle!");
       playSuccessSound();
       setLoginAttempts(0);
       // Redirect using Next.js router for client-side navigation
@@ -124,8 +124,8 @@ function LoginPageInner() {
         </h1>
       </header>
 
-      <main className="flex flex-1 flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md">
+      <main className="flex flex-1 flex-col items-center justify-center">
+        <div className="w-full max-w-7xl">
           {!selectedProfile ? (
             <ProfileSelection 
               profiles={profiles} 
