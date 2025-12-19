@@ -30,15 +30,17 @@ enum Category {
 }
 
 model Album {
-  id       String   @id @default(cuid())
-  name     String   @unique
-  infoText String?
-  media      Media[]
-  category   Category @default(REJSER)
-  coverImage String?
-  latitude   Float?
-  longitude  Float?
+  id           String   @id @default(cuid())
+  name         String   @unique
+  infoText     String?
+  media        Media[]
+  category     Category @default(REJSER)
+  coverImage   String?
+  latitude     Float?
+  longitude    Float?
   locationName String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 }
 
 model Media {

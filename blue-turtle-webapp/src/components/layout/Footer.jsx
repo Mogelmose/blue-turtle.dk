@@ -3,8 +3,8 @@ import Container from './Container';
 
 export default function Footer() {
   return (
-    <footer className="bg-light-surface dark:bg-dark-surface border-t border-light-border dark:border-dark-border">
-      <Container className="py-4 flex justify-center items-center">
+    <footer className="">
+      <Container className="w-full p-4 text-center text-xs text-muted">
         <p className="text-sm">&copy; {new Date().getFullYear()} Blue Turtle. Alle rettigheder forbeholdes.</p>
       </Container>
     </footer>

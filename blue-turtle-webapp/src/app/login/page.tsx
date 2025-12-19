@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "../../components/auth/LoginForm";
 import ProfileSelection from "../../components/auth/ProfileSelection";
+import Footer from "../../components/layout/Footer";
 
 // --- Type Definitions ---
 interface Profile {
@@ -148,9 +149,7 @@ function LoginPageInner() {
         </div>
       </main>
 
-      <footer className="w-full p-4 text-center text-xs text-muted">
-        © {new Date().getFullYear()} Blue Turtle. All rights reserved.
-      </footer>
+      <Footer />
     </div>
   );
 }
