@@ -35,8 +35,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   }, [handleGoBack]);
 
   return (
-    <div className="w-full mx-auto max-w-sm md:max-w-md lg:max-w-lg p-5 md:p-8 lg:p-10 card rounded-2xl shadow-xl text-center relative">
-      {/* Close button */}
+    <div className="w-full mx-auto max-w-92 md:max-w-md lg:max-w-lg p-5 md:p-8 lg:p-10 card rounded-2xl shadow-xl text-center relative">
       <button
         onClick={handleGoBack}
         className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-muted hover:text-primary transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
