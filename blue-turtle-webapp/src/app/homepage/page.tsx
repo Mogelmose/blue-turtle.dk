@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import Image from "next/image";
 import { getServerSession } from "next-auth";
@@ -6,6 +5,7 @@ import prisma from "@/lib/prisma";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { Album } from "@prisma/client";
+import { Plus } from "lucide-react";
 
 async function fetchAlbums() {
   try {
@@ -26,29 +26,44 @@ interface AlbumCardProps {
 }
 
 const AlbumCard: React.FC<AlbumCardProps> = ({ album }) => (
-  <Link href={`/albums/${album.id}`} className="group block">
-    <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-200 xl:aspect-w-7 xl:aspect-h-8">
+  <Link 
+    href={`/albums/${album.id}`}
+    className="card p-0 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+  >
+    <div className="aspect-square relative bg-surface-elevated">
       <Image
         src={album.coverImage || "/static/logo.png"}
         alt={album.name}
         fill
-        className="object-cover object-center transition-opacity duration-300 group-hover:opacity-80"
+        className="object-cover"
       />
     </div>
-    <h3 className="mt-4 text-sm text-gray-700 dark:text-gray-200">{album.name}</h3>
-    <p className="mt-1 text-lg font-medium text-gray-900 dark:text-white">{album.infoText}</p>
+    <div className="p-3">
+      <h3 className="font-semibold text-main truncate">
+        {album.name}
+      </h3>
+    </div>
   </Link>
 );
 
 const renderAlbumGrid = (albumList: Album[], title: string) => (
-  <div className="py-8">
-    <h2 className="text-2xl font-bold tracking-tight text-light-text dark:text-dark-text">{title}</h2>
-    <div className="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-      {albumList.map((album) => (
-        <AlbumCard key={album.id} album={album} />
-      ))}
-    </div>
-  </div>
+  <section className="mb-12">
+    <h2 className="text-2xl font-semibold text-main mb-6">
+      {title}
+    </h2>
+    
+    {albumList.length > 0 ? (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {albumList.map((album) => (
+          <AlbumCard key={album.id} album={album} />
+        ))}
+      </div>
+    ) : (
+      <div className="card text-center py-12">
+        <p className="text-muted">Ingen albums i {title} endnu</p>
+      </div>
+    )}
+  </section>
 );
 
 export default async function Homepage() {
@@ -66,37 +81,25 @@ export default async function Homepage() {
   const julefrokoster = albums.filter((album) => album.category === CATEGORY.JULEFROKOST);
 
   return (
-    <div className="bg-light-background dark:bg-dark-background">
+    <div className="min-h-screen flex flex-col bg-page">
       <Header />
-      <div className="relative h-64 w-full sm:h-80 md:h-96">
-        <Image
-          src="/static/banner.jpg"
-          alt="Banner"
-          fill
-          className="object-cover object-center"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/30" />
-      </div>
+      {/* Main Content */}
+      <main className="flex-1 max-w-full mx-auto w-full px-4 py-8">
+        {/* Header with Create Button */}
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-main">Mine Albums</h1>
+          <Link href="placeholder" className="btn btn-primary">
+            <Plus size={20} />
+            <span className="hidden sm:inline">Opret album</span>
+          </Link>
+        </div>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <nav className="my-8">
-          <ul className="flex flex-wrap items-center justify-center gap-4">
-            {rejser.map((album) => (
-              <li key={album.id}>
-                <Link 
-                  href={`/albums/${album.id}`} 
-                  className="px-4 py-2 text-sm font-semibold rounded-full border border-light-border dark:border-dark-border text-light-text dark:text-dark-text bg-light-surface dark:bg-dark-surface hover:bg-light-surface-elevated dark:hover:bg-dark-surface-elevated transition-colors"
-                >
-                  {album.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {renderAlbumGrid(spilleaftener, "Spilleaftener")}
-        {renderAlbumGrid(julefrokoster, "Julefrokoster")}
+        {/* Album Categories */}
+        <div className="space-y-12">
+          {renderAlbumGrid(rejser, "Rejser")}
+          {renderAlbumGrid(spilleaftener, "Spilleaftener")}
+          {renderAlbumGrid(julefrokoster, "Julefrokoster")}
+        </div>
       </main>
 
       <Footer />

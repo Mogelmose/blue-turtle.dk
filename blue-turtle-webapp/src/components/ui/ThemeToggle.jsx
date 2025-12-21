@@ -20,7 +20,7 @@ export default function ThemeToggle() {
   }
 
   return (
-    <button onClick={toggleTheme} className="p-2 rounded-lg bg-[var(--surface)]">
+    <button onClick={toggleTheme} className="p-2 rounded-lg bg-page">
       {theme === 'light' ? '🌙' : '☀️'}
     </button>
   )
