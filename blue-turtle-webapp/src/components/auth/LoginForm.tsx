@@ -35,18 +35,18 @@ const LoginForm: React.FC<LoginFormProps> = ({
   }, [handleGoBack]);
 
   return (
-    <div className="w-full mx-auto max-w-92 md:max-w-md lg:max-w-lg p-5 md:p-8 lg:p-10 card rounded-2xl shadow-xl text-center relative">
+    <div className="w-full mx-auto max-w-90 md:max-w-md lg:max-w-lg p-4 md:p-6 lg:p-8 card rounded shadow-xl text-center relative">
       <button
         onClick={handleGoBack}
-        className="absolute top-4 right-4 md:top-6 md:right-6 p-2 text-muted hover:text-primary transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
         aria-label="Gå tilbage til profilvalg"
+        className="absolute top-4 right-4 md:top-6 md:right-6 p-1 text-main hover:text-muted transition-[transform,color] duration-200 ease-in-out hover:scale-125 active:scale-95"
       >
-        <XMarkIcon className="h-6 w-6 md:h-8 md:w-8" />
+        <XMarkIcon className="h-7 w-7 md:h-8 md:w-8" />
       </button>
 
       {/* Profile info */}
-      <div className="flex flex-col items-center mt-4 md:mt-2">
-        <div className="relative w-32 h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 xl:w-44 xl:h-44 2xl:w-48 2xl:h-48 rounded-full overflow-hidden border-4 border-default shadow-md">
+      <div className="flex flex-col items-center">
+        <div className="relative size-40 md:size-44 lg:size-48 xl:size-52 2xl:size-56 rounded-full overflow-hidden border-4 border-default shadow-md">
           <Image
             src={selectedProfile.img}
             alt={`Profilbillede af ${selectedProfile.name}`}

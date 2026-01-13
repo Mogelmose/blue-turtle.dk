@@ -37,6 +37,8 @@ function LoginPageInner() {
   const [isBlocked, setIsBlocked] = useState(false);
   
   const searchParams = useSearchParams();
+  const router = useRouter();
+
 
   useEffect(() => {
     async function fetchProfiles() {
@@ -85,8 +87,9 @@ function LoginPageInner() {
       setSuccesbesked("Velkommen til Blue Turtle!");
       playSuccessSound();
       setLoginAttempts(0);
-      // Redirect using Next.js router for client-side navigation
-      window.location.href = "/homepage";
+      setTimeout(() => {
+      router.push("/homepage");
+      }, 1200);
     } else {
       setFejlbesked("Forkert adgangskode.");
       playErrorSound();
@@ -118,7 +121,7 @@ function LoginPageInner() {
 
   return (
     <div className="flex flex-col min-h-screen bg-page text-main">
-      <header className="flex items-center gap-4 p-4 sm:p-6">
+      <header className="flex items-center gap-4 p-4 sm:p-6 xl:p-8">
         <Image src={logoImage} alt="Blue Turtle Logo" width={50} height={50} className="full w-fit" />
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
           Blue Turtle
@@ -126,7 +129,7 @@ function LoginPageInner() {
       </header>
 
       <main className="flex flex-1 flex-col items-center justify-center">
-        <div className="w-full max-w-7xl">
+        <div className="w-full">
           {!selectedProfile ? (
             <ProfileSelection 
               profiles={profiles} 
@@ -148,7 +151,6 @@ function LoginPageInner() {
           )}
         </div>
       </main>
-
       <Footer />
     </div>
   );
