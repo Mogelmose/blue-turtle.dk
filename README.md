@@ -6,101 +6,65 @@ Vibecoded Website for the Turtle Boys. This is a full-stack web application buil
 
 Before you begin, ensure you have the following installed on your system:
 
-**Node.js**: This project requires Node.js. You can check if it's installed by running:
+**Docker + docker-compose** (recommended for running the full stack).
 
-```bash
-node -v
-```
+## Run With Docker (recommended)
 
-If you don't have it, you can download it from [nodejs.org](https://nodejs.org/).
+### First-time setup
 
-**npm (Node Package Manager)**: npm is distributed with Node.js, so it should be installed as
-well. You can check the version with:
-
-```bash
-npm -v
-```
-
-**PostgrSQL**: This project uses a PostgreSQL database. You need to have a PostgreSQL server installed and runnng locally
-
-## How to Run This Web App Locally
-
-### 1. Clone the Repository
+1. Clone the repo and enter the webapp directory:
 
 ```bash
 git clone https://github.com/Mogelmose/blue-turtle.dk.git
 cd blue-turtle.dk/blue-turtle-webapp
 ```
 
-### 2. Set Up The local PostgreSQL Database
-
-Before running the application, you need to created a dedicated database and user for it.
-
-#### 2.1 Open the PostgreSQL command-line tool (psql) and run the following commands to create a user and a database. Make sure the password matches what you set in your .env file in the database URL
-
-```bash
--- Create a new user (role) for your application.
-CREATE ROLE your_db_user WITH LOGIN PASSWORD 'your_db_password';
-
--- Create the database.
-CREATE DATABASE database_name OWNER your_db_user;
-
--- Grant all privileges on the new database to the user.
-GRANT ALL PRIVILEGES ON DATABASE database_name TO your_db_user;
-
--- Grant privilege to create databases for migrations.
-ALTER USER your_db_user CREATEDB;
-
--- Grant all rights on the public schema to db_user.
-GRANT ALL ON SCHEMA public TO your_db_user;
-
--- Change owner of the public schema to db_user.
-ALTER SCHEMA public OWNER TO your_db_user;
-```
-
-### 3. Set Up Environment Variables
-
-Copy the example environment file:  
+2. Create runtime env file:
 
 ```bash
 cp .env.example .env
+```
+
+Edit `.env` and set:
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+- `NEXTAUTH_SECRET` (generate with `npx auth secret` or `openssl rand -base64 32`)
+- `NEXTAUTH_URL` (usually `http://localhost:3000`)
+- `UPLOADS_HOST_PATH` (optional, defaults to `./.data/uploads`)
+
+3. Create a seed script from the template:
+
+```bash
 cp prisma/template_seed.js prisma/seed.js
 ```
 
-Open `.env` and fill in any required values (like database URL, nextauth_secret, and user passwords).
-you can generate a nextauth secret in multiple ways but here are two:
+Edit `prisma/seed.js` with your users, albums, and `passwordEnvVar` values.
+
+4. Add seed values to `.env`:
+
+- `DATABASE_URL=postgresql://<user>:<pass>@db:5432/<db>?schema=public`
+- `PASSWORD_*` entries that match the `passwordEnvVar` values in `prisma/seed.js`
+
+5. Build and start the stack:
 
 ```bash
-npx auth secret
-openssl rand -base64 32
+docker-compose build
+docker-compose up -d
 ```
 
-In `seed.js`, you can specify your seed data for the database.
-
-### 4. Install Dependencies
+6. Seed the database once (disposable container):
 
 ```bash
-npm install
-```
-
-### 5. Generate the Database
-
-Run Prisma migrations to create the database tables:  
-
-```bash
-npx prisma migrate dev --name init
-```
-
-### 6. Seed the Database
-
-```bash
-npx prisma db seed
-```
-
-### 7. Start the Development Server
-
-```bash
-npm run dev
+docker-compose run --rm web node prisma/seed.js
 ```
 
 The app should now be running at <http://localhost:3000>
+
+### Subsequent starts
+
+On later runs, you do not need to seed again:
+
+```bash
+docker-compose up -d
+```
+
+If you ever need to re-seed, clear the database or drop the volume and run the seed step again.

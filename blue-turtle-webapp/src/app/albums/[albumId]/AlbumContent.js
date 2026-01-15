@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Footer from "../../../components/layout/Footer";
 import ReactDOM from "react-dom";
+import EditAlbumModal from "../../../components/album/EditAlbumModal";
 
 export default function AlbumContent({ initialAlbum }) {
   const [album, setAlbum] = useState(initialAlbum);
@@ -30,11 +31,27 @@ export default function AlbumContent({ initialAlbum }) {
       "image/gif",
       "image/webp",
       "image/heic",
+      "image/heif",
       "video/mp4",
       "video/webm",
       "video/quicktime",
     ];
-    if (!allowedMimeTypes.includes(file.type)) {
+    const allowedExtensions = [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "webp",
+      "heic",
+      "heif",
+      "mp4",
+      "webm",
+      "mov",
+    ];
+    const extension = file.name.split(".").pop()?.toLowerCase() || "";
+    const isMimeAllowed = file.type && allowedMimeTypes.includes(file.type);
+    const isExtensionAllowed = allowedExtensions.includes(extension);
+    if (!isMimeAllowed && !isExtensionAllowed) {
       alert(
         "Filtypen er ikke tilladt. Vælg venligst et billede eller en video i et understøttet format."
       );
@@ -42,10 +59,10 @@ export default function AlbumContent({ initialAlbum }) {
       return;
     }
 
-    // Validate file size (e.g., 20MB limit)
-    const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+    // Validate file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB in bytes
     if (file.size > maxSize) {
-      alert("Filen skal være mindre end 20MB.");
+      alert("Filen skal være mindre end 50MB.");
       event.target.value = ""; // Clear the input
       return;
     }
@@ -138,7 +155,7 @@ export default function AlbumContent({ initialAlbum }) {
                       type="file"
                       onChange={handleFileChange}
                       disabled={uploading}
-                      accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/webm,video/quicktime"
+                      accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,video/mp4,video/webm,video/quicktime"
                       style={{ display: "none" }}
                     />
                   </li>
@@ -162,14 +179,28 @@ export default function AlbumContent({ initialAlbum }) {
                 ".heif",
               ];
               const videoExtensions = [".mp4", ".webm", ".mov"];
-              const url = item.url.toLowerCase();
-              const isImage = imageExtensions.some((ext) => url.endsWith(ext));
-              const isVideo = videoExtensions.some((ext) => url.endsWith(ext));
+              const mimeType = item.mimeType ? item.mimeType.toLowerCase() : "";
+              const reference = (item.filename || item.url || "").toLowerCase();
+              const isImage = mimeType
+                ? mimeType.startsWith("image/")
+                : imageExtensions.some((ext) => reference.endsWith(ext));
+              const isVideo = mimeType
+                ? mimeType.startsWith("video/")
+                : videoExtensions.some((ext) => reference.endsWith(ext));
+              const isHeic =
+                isImage &&
+                (mimeType === "image/heic" ||
+                  mimeType === "image/heif" ||
+                  reference.endsWith(".heic") ||
+                  reference.endsWith(".heif"));
+              const displayUrl = isHeic
+                ? `${item.url}${item.url.includes("?") ? "&" : "?"}format=jpeg`
+                : item.url;
               return (
                 <div key={item.id} className="photo-grid-item">
                   {isImage ? (
                     <Image
-                      src={item.url}
+                      src={displayUrl}
                       alt={item.alt || album.name}
                       width={400}
                       height={400}

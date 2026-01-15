@@ -21,20 +21,36 @@ export default function MediaUpload({ albumId, onUploadComplete }) {
       "image/gif",
       "image/webp",
       "image/heic",
+      "image/heif",
       "video/mp4",
       "video/webm",
       "video/quicktime",
     ];
-    if (!allowedMimeTypes.includes(file.type)) {
+    const allowedExtensions = [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "webp",
+      "heic",
+      "heif",
+      "mp4",
+      "webm",
+      "mov",
+    ];
+    const extension = file.name.split(".").pop()?.toLowerCase() || "";
+    const isMimeAllowed = file.type && allowedMimeTypes.includes(file.type);
+    const isExtensionAllowed = allowedExtensions.includes(extension);
+    if (!isMimeAllowed && !isExtensionAllowed) {
       setError("Filtypen er ikke tilladt.");
       event.target.value = "";
       return;
     }
 
-    // Validate file size (e.g., 20MB limit)
-    const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+    // Validate file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB in bytes
     if (file.size > maxSize) {
-      setError("Filen skal være mindre end 20MB.");
+      setError("Filen skal være mindre end 50MB.");
       event.target.value = "";
       return;
     }
@@ -79,10 +95,10 @@ export default function MediaUpload({ albumId, onUploadComplete }) {
         type="file"
         onChange={handleFileChange}
         disabled={uploading}
-        accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/webm,video/quicktime"
+        accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,video/mp4,video/webm,video/quicktime"
         style={{ display: 'none' }}
       />
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {error && <p className="text-danger text-sm mt-2">{error}</p>}
     </div>
   );
 }

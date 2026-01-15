@@ -29,6 +29,30 @@ enum Category {
   JULEFROKOST
 }
 
+enum MetadataStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum LocationSource {
+  EXIF
+  VIDEO_META
+  NONE
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum JobType {
+  EXTRACT_METADATA
+}
+
 model Album {
   id           String   @id @default(cuid())
   name         String   @unique
@@ -46,9 +70,34 @@ model Album {
 model Media {
   id        String   @id @default(cuid())
   url       String
+  storagePath String?
+  filename  String?
+  originalName String?
+  mimeType  String?
+  sizeBytes Int?
+  metadataStatus MetadataStatus @default(PENDING)
+  capturedAt DateTime?
+  locationAutoLat Float?
+  locationAutoLng Float?
+  locationSource LocationSource?
   album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
   albumId   String
   createdAt DateTime @default(now())
 
   @@index([albumId])
+  @@index([albumId, filename])
+}
+
+model Job {
+  id        String   @id @default(cuid())
+  type      JobType
+  payload   Json
+  status    JobStatus @default(PENDING)
+  attempts  Int      @default(0)
+  lastError String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([type, status])
 }

@@ -43,6 +43,7 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
                     src={profile.img}
                     alt={`Profilbillede af ${profile.name}`}
                     fill
+                    unoptimized
                     className="object-cover transition-all duration-300 group-hover:scale-105" 
                   />
               </div>

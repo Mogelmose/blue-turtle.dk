@@ -1,7 +1,5 @@
-
 'use client';
-import { useState, useTransition } from 'react';
-import Modal from '../ui/Modal';
+import { useState, useTransition, type ReactNode } from 'react';
 import { Album, Category } from '@prisma/client';
 
 interface EditAlbumModalProps {
@@ -9,6 +7,43 @@ interface EditAlbumModalProps {
   onClose: () => void;
   album: Album;
   onAlbumUpdated: (updatedAlbum: Album) => void;
+}
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+}
+
+function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div
+        className="card w-full max-w-xl shadow-xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
+        <div className="flex items-center justify-between border-b border-default pb-3">
+          <h2 className="text-lg font-semibold text-main">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm font-medium text-muted hover:text-main"
+            aria-label="Luk"
+          >
+            Luk
+          </button>
+        </div>
+        <div className="pt-4">{children}</div>
+      </div>
+    </div>
+  );
 }
 
 export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated }: EditAlbumModalProps) {
@@ -36,7 +71,7 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
           throw new Error(data.error || 'Noget gik galt');
         }
 
-        onAlbumUpdated(data.album);
+        onAlbumUpdated(data);
         onClose();
       } catch (err: any) {
         setError(err.message);

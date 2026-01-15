@@ -33,13 +33,13 @@ const usersToCreate = [
   { username: "UserFour", role: "REGULAR", passwordEnvVar: "PASSWORD_USER4" },
 ];
 
-// Example album data. Customize this with the albums you want to create. (category REJSER does not support album covers)
+// Example album data. Customize this with the albums you want to create.
+// coverImage and user.image should store paths relative to /uploads.
 const albumsToCreate = [
   {
     name: "Birthday Party 2025",
     infoText: "so fun",
     category: "SPILLEAFTEN",
-    coverImage: "/uploads/covers/example.jpg",
   },
   {
     name: "Summer Vacation 2024",
@@ -50,7 +50,6 @@ const albumsToCreate = [
     name: "Julefrokost",
     infoText: "Julefrokost",
     category: "JULEFROKOST",
-    coverImage: "/uploads/covers/example.jpg",
   },
 ];
 
@@ -72,22 +71,16 @@ async function main() {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const imagePath = `/uploads/profile/${userData.username
-      .toLowerCase()
-      .replace(/\s+/g, "")
-      .normalize("NFD")
-      .replace(/[^\p{L}0-9]/gu, "")}.jpg`;
-
     const user = await prisma.user.upsert({
       where: { username: userData.username },
       update: {
-        image: imagePath,
+        image: null,
       },
       create: {
         username: userData.username,
         hashedPassword: hashedPassword,
         role: userData.role,
-        image: imagePath
+        image: null
       },
     });
     console.log(`  - Created/updated user: ${user.username} (ID: ${user.id})`);
@@ -102,13 +95,13 @@ async function main() {
         name: albumData.name,
         infoText: albumData.infoText,
         category: albumData.category,
-        coverImage: albumData.coverImage || null,
+        coverImage: albumData.coverImage ?? undefined,
       },
       create: {
         name: albumData.name,
         infoText: albumData.infoText,
         category: albumData.category,
-        coverImage: albumData.coverImage || null,
+        coverImage: albumData.coverImage ?? null,
       },
     });
     console.log(`  - Created/updated album: ${album.name} (ID: ${album.id})`);

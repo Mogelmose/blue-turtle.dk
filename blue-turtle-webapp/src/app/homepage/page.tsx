@@ -1,108 +1,44 @@
-import Link from "next/link";
-import Image from "next/image";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import Footer from "@/components/layout/Footer";
-import Header from "@/components/layout/Header";
-import { Album } from "@prisma/client";
-import { Plus } from "lucide-react";
-
-async function fetchAlbums() {
-  try {
-    const albums = await prisma.album.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-    return albums;
-  } catch (error) {
-    console.error("Error fetching albums:", error);
-    return [];
-  }
-}
-
-interface AlbumCardProps {
-  album: Album;
-}
-
-const AlbumCard: React.FC<AlbumCardProps> = ({ album }) => (
-  <Link 
-    href={`/albums/${album.id}`}
-    className="card p-0 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-  >
-    <div className="aspect-square relative bg-surface-elevated">
-      <Image
-        src={album.coverImage || "/static/logo.png"}
-        alt={album.name}
-        fill
-        className="object-cover"
-      />
-    </div>
-    <div className="p-3">
-      <h3 className="font-semibold text-main truncate">
-        {album.name}
-      </h3>
-    </div>
-  </Link>
-);
-
-const renderAlbumGrid = (albumList: Album[], title: string) => (
-  <section className="mb-12">
-    <h2 className="text-2xl font-semibold text-main mb-6">
-      {title}
-    </h2>
-    
-    {albumList.length > 0 ? (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {albumList.map((album) => (
-          <AlbumCard key={album.id} album={album} />
-        ))}
-      </div>
-    ) : (
-      <div className="card text-center py-12">
-        <p className="text-muted">Ingen albums i {title} endnu</p>
-      </div>
-    )}
-  </section>
-);
+import { getServerSession } from 'next-auth';
+import { sessionAuthOptions } from '../../lib/auth';
+import { getHomepageData } from '../../lib/homepage';
+import ActivityList from '../../components/home/ActivityList';
+import HomeHero from '../../components/home/HomeHero';
+import HomeStats from '../../components/home/HomeStats';
+import MapTeaserCard from '../../components/home/MapTeaserCard';
+import RecentAlbums from '../../components/home/RecentAlbums';
+import RecentMedia from '../../components/home/RecentMedia';
+import BottomNav from '../../components/layout/BottomNav';
+import Container from '../../components/layout/Container';
+import Footer from '../../components/layout/Footer';
+import Header from '../../components/layout/Header';
 
 export default async function Homepage() {
-  const session = await getServerSession();
-  const albums = await fetchAlbums();
-
-  const CATEGORY = {
-    REJSER: "REJSER",
-    SPILLEAFTEN: "SPILLEAFTEN",
-    JULEFROKOST: "JULEFROKOST",
-  };
-
-  const rejser = albums.filter((album) => album.category === CATEGORY.REJSER);
-  const spilleaftener = albums.filter((album) => album.category === CATEGORY.SPILLEAFTEN);
-  const julefrokoster = albums.filter((album) => album.category === CATEGORY.JULEFROKOST);
+  const session = await getServerSession(sessionAuthOptions);
+  const data = await getHomepageData();
+  const userName = session?.user?.name ?? null;
+  const isAdmin = session?.user?.role === 'ADMIN';
 
   return (
     <div className="min-h-screen flex flex-col bg-page">
-      <Header />
-      {/* Main Content */}
-      <main className="flex-1 max-w-full mx-auto w-full px-4 py-8">
-        {/* Header with Create Button */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-main">Mine Albums</h1>
-          <Link href="placeholder" className="btn btn-primary">
-            <Plus size={20} />
-            <span className="hidden sm:inline">Opret album</span>
-          </Link>
-        </div>
-
-        {/* Album Categories */}
-        <div className="space-y-12">
-          {renderAlbumGrid(rejser, "Rejser")}
-          {renderAlbumGrid(spilleaftener, "Spilleaftener")}
-          {renderAlbumGrid(julefrokoster, "Julefrokoster")}
-        </div>
+      <div className="hidden md:block">
+        <Header />
+      </div>
+      <main className="flex-1">
+        <Container className="w-full py-6 pb-24 md:pb-6">
+          <div className="space-y-10">
+            <HomeHero userName={userName} isAdmin={isAdmin} />
+            <RecentAlbums albums={data.recentAlbums} />
+            <RecentMedia items={data.recentMedia} />
+            <MapTeaserCard mapAlbums={data.mapAlbums} />
+            <div className="grid gap-6 lg:grid-cols-2">
+              <HomeStats stats={data.stats} />
+              <ActivityList items={data.activity} />
+            </div>
+          </div>
+        </Container>
       </main>
-
       <Footer />
+      <BottomNav />
     </div>
   );
 }

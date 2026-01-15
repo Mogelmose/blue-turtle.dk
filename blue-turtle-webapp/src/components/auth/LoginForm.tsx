@@ -51,6 +51,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             src={selectedProfile.img}
             alt={`Profilbillede af ${selectedProfile.name}`}
             fill
+            unoptimized
             className="object-cover"
           />
         </div>

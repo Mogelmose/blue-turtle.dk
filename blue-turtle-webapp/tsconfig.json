@@ -17,11 +17,10 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "baseUrl": ".",  
     "paths": {
       "@/*": ["./src/*"]
     },
-    "ignoreDeprecations": "6.0",  
+    "ignoreDeprecations": "5.0",
     "plugins": [
       {
         "name": "next"
@@ -34,7 +33,7 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.js"
-  ],
+, "next.config.mjs"  ],
   "exclude": [
     "node_modules"
   ]

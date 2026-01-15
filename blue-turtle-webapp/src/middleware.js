@@ -5,10 +5,16 @@ import { getToken } from 'next-auth/jwt';
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
 
+  if (
+    pathname.startsWith('/api/users/') &&
+    pathname.endsWith('/avatar')
+  ) {
+    return NextResponse.next();
+  }
+
   // Allow static assets (images, audio, css) to pass through without auth checks
   if (
     pathname.startsWith('/static/') ||
-    pathname.startsWith('/uploads/') ||
     pathname.startsWith('/sound/') ||
     pathname.startsWith('/_next/') ||
     /\.(?:png|jpg|jpeg|gif|svg|webp|ico|mp3|css)$/.test(pathname)
