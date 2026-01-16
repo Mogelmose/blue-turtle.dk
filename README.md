@@ -8,58 +8,6 @@ Before you begin, ensure you have the following installed on your system:
 
 **Docker + docker-compose** (recommended for running the full stack).
 
-## Local Dev (recommended for development)
-
-This setup runs Postgres in Docker and the Next.js app locally with live reload.
-
-1. Clone the repo and enter the webapp directory:
-
-```bash
-git clone https://github.com/Mogelmose/blue-turtle.dk.git
-cd blue-turtle.dk/blue-turtle-webapp
-```
-
-2. Create a local env file:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and set:
-- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
-- `DATABASE_URL` to match your active run target - for local dev use "localhost"
-- `UPLOAD_ROOT` (optional, e.g. `./.data/uploads`)
-- `NEXTAUTH_SECRET`, `NEXTAUTH_URL`
-
-3. Start Postgres only (with a host port):
-
-```bash
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
-```
-
-Tip: if you want a shorter command, set `COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml` in your shell and then use `docker-compose up -d db`.
-
-4. Install deps and apply migrations:
-
-```bash
-npm install
-npx prisma migrate deploy
-```
-
-5. (Optional) Seed the database:
-
-```bash
-node prisma/seed.js
-```
-
-6. Run the dev server:
-
-```bash
-npm run dev
-```
-
-Note: For Docker production runs, `DATABASE_URL` should point to `blue_turtle_db` instead of `localhost`.
-
 ## Run With Docker (recommended)
 
 ### First-time setup
@@ -122,3 +70,55 @@ docker-compose up -d
 ```
 
 If you ever need to re-seed, clear the database or drop the volume and run the seed step again.
+
+## Local Dev (recommended for development)
+
+This setup runs Postgres in Docker and the Next.js app locally with live reload.
+
+1. Clone the repo and enter the webapp directory:
+
+```bash
+git clone https://github.com/Mogelmose/blue-turtle.dk.git
+cd blue-turtle.dk/blue-turtle-webapp
+```
+
+2. Create a local env file:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set:
+- `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
+- `DATABASE_URL` to match your active run target - for local dev use "localhost"
+- `UPLOAD_ROOT` (optional, e.g. `./.data/uploads`)
+- `NEXTAUTH_SECRET`, `NEXTAUTH_URL`
+
+3. Start Postgres only (with a host port):
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
+```
+
+Tip: if you want a shorter command, set `COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml` in your shell and then use `docker-compose up -d db`.
+
+4. Install deps and apply migrations:
+
+```bash
+npm install
+npx prisma migrate deploy
+```
+
+5. (Optional) Seed the database:
+
+```bash
+node prisma/seed.js
+```
+
+6. Run the dev server:
+
+```bash
+npm run dev
+```
+
+Note: For Docker production runs, `DATABASE_URL` should point to `blue_turtle_db` instead of `localhost`.
