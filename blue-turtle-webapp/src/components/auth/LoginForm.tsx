@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { LockClosedIcon, XMarkIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 
 interface LoginFormProps {
-  selectedProfile: { name: string; img: string };
+  selectedProfile: { name: string; img: string; isPlaceholder?: boolean };
   kode: string;
   setKode: (kode: string) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -46,13 +46,17 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       {/* Profile info */}
       <div className="flex flex-col items-center">
-        <div className="relative size-40 md:size-44 lg:size-48 xl:size-52 2xl:size-56 rounded-full overflow-hidden border-4 border-default shadow-md">
+        <div
+          className={`relative size-40 md:size-44 lg:size-48 xl:size-52 2xl:size-56 rounded-full overflow-hidden border-4 border-default shadow-md ${
+            selectedProfile.isPlaceholder ? 'bg-surface' : ''
+          }`}
+        >
           <Image
             src={selectedProfile.img}
             alt={`Profilbillede af ${selectedProfile.name}`}
             fill
             unoptimized
-            className="object-cover"
+            className={selectedProfile.isPlaceholder ? 'object-contain' : 'object-cover'}
           />
         </div>
         <p className="mt-4 md:mt-5 lg:mt-6 text-xl md:text-2xl lg:text-3xl font-bold text-main">

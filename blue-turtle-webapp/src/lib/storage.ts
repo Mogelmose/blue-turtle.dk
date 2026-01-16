@@ -1,7 +1,8 @@
 import path from 'path';
 
 export function getUploadRoot(): string {
-  return '/uploads';
+  const configured = process.env.UPLOAD_ROOT?.trim();
+  return configured || '/uploads';
 }
 
 export function resolveUploadPath(relativePath: string): string {

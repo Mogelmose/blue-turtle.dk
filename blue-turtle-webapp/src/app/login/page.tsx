@@ -11,6 +11,7 @@ import Footer from "../../components/layout/Footer";
 interface Profile {
   name: string;
   img: string;
+  isPlaceholder?: boolean;
 }
 
 interface SelectedProfile extends Profile {}
@@ -60,8 +61,8 @@ function LoginPageInner() {
     }
   }, [searchParams]);
 
-  const handleProfileClick = (name: string, img: string) => {
-    setSelectedProfile({ name, img });
+  const handleProfileClick = (profile: Profile) => {
+    setSelectedProfile(profile);
     setFejlbesked("");
     setSuccesbesked("");
     setKode("");
