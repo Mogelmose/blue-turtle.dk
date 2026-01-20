@@ -29,7 +29,7 @@ Edit `.env` and set:
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
 - `NEXTAUTH_SECRET` (generate with `npx auth secret` or `openssl rand -base64 32`)
 - `NEXTAUTH_URL` (usually `http://localhost:3000`)
-- `UPLOADS_HOST_PATH` (optional, defaults to `./.data/uploads`)
+- `HOST_UPLOAD_ROOT` (optional, defaults to `./.data/uploads`)
 
 3. Create a seed script from the template:
 
@@ -38,11 +38,17 @@ cp prisma/template_seed.js prisma/seed.js
 ```
 
 Edit `prisma/seed.js` with your users, albums, and `passwordEnvVar` values.
+If you seed cover images or avatars, put the files in `prisma/seed-assets`
+and keep their filenames matched to the `coverAsset`/`avatarAsset` entries.
+The seed script copies them into the upload root using the same folder layout
+as runtime uploads.
 
 4. Add seed values to `.env`:
 
 - `DATABASE_URL=postgresql://<user>:<pass>@db:5432/<db>?schema=public`
 - `PASSWORD_*` entries that match the `passwordEnvVar` values in `prisma/seed.js`
+Optional:
+- `SEED_OVERWRITE_ASSETS=true` to overwrite existing seeded images
 
 5. Build and start the stack:
 
@@ -91,7 +97,7 @@ cp .env.example .env
 Edit `.env` and set:
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
 - `DATABASE_URL` to match your active run target - for local dev use "localhost"
-- `UPLOAD_ROOT` (optional, e.g. `./.data/uploads`)
+- `DEV_UPLOAD_ROOT` (recommended, e.g. `./.data/uploads`)
 - `NEXTAUTH_SECRET`, `NEXTAUTH_URL`
 
 3. Start Postgres only (with a host port):
@@ -121,4 +127,12 @@ node prisma/seed.js
 npm run dev
 ```
 
-Note: For Docker production runs, `DATABASE_URL` should point to `blue_turtle_db` instead of `localhost`.
+Note: For Docker production runs, `DATABASE_URL` should point to `db` instead of `localhost`.
+## Upload Root Variables
+
+Set only one of these depending on how you run the app:
+- `HOST_UPLOAD_ROOT` when running the webapp in Docker (maps host uploads to `/uploads`).
+- `DEV_UPLOAD_ROOT` when running the webapp locally (where the app reads/writes uploads).
+
+Note: the Docker container defaults to `/uploads`, so you can omit `DEV_UPLOAD_ROOT` there.
+For local dev, keep `DEV_UPLOAD_ROOT` set so seeded and uploaded images resolve correctly.

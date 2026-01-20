@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-UPLOAD_ROOT_PATH=${UPLOAD_ROOT:-/uploads}
-mkdir -p "$UPLOAD_ROOT_PATH" || echo "UPLOAD_ROOT is not writable: $UPLOAD_ROOT_PATH"
+UPLOAD_ROOT_PATH=${DEV_UPLOAD_ROOT:-/uploads}
+mkdir -p "$UPLOAD_ROOT_PATH" || echo "DEV_UPLOAD_ROOT is not writable: $UPLOAD_ROOT_PATH"
 
 mkdir -p /app/.next/cache/images || echo "Next cache dir is not writable: /app/.next/cache/images"
 
