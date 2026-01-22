@@ -1,19 +1,30 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Folder, Globe, Home, Plus, User } from 'lucide-react';
+import UploadMenu from '@/components/media/UploadMenu';
 
 type NavItem = {
   label: string;
-  href: string;
+  href?: string;
   icon: typeof Home;
   isPrimary?: boolean;
   isActive?: (pathname: string) => boolean;
+  onClick?: () => void;
 };
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const safePathname = isMounted ? pathname : '';
 
   const items: NavItem[] = [
     {
@@ -30,9 +41,9 @@ export default function BottomNav() {
     },
     {
       label: 'Upload',
-      href: '/albums',
       icon: Plus,
       isPrimary: true,
+      onClick: () => setIsUploadOpen(true),
     },
     {
       label: 'Kort',
@@ -40,21 +51,43 @@ export default function BottomNav() {
       icon: Globe,
       isActive: (path) => path === '/geomap',
     },
-    { label: 'Aktivitet', href: '/homepage#home-activity', icon: User },
+    { label: 'Profil', 
+      href: '/homepage#home-activity', 
+      icon: User },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-default bg-surface/95 backdrop-blur-sm md:hidden">
-      <div className="mx-auto flex max-w-3xl items-stretch px-2">
-        {items.map((item) => {
-          const isActive = item.isActive ? item.isActive(pathname) : false;
+    <>
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-default bg-surface/95 backdrop-blur-sm md:hidden">
+        <div className="mx-auto flex max-w-3xl items-stretch px-2">
+          {items.map((item) => {
+          const isActive = item.isActive ? item.isActive(safePathname) : false;
           const Icon = item.icon;
           const baseClasses =
-            'flex flex-1 flex-col items-center justify-center gap-1 px-2 py-2 text-xs font-semibold transition-colors';
+            'flex flex-1 flex-col items-center justify-center gap-1 px-2 py-2 text-xs font-semibold transition-colors transition-transform duration-150 ease-out active:scale-[0.95] active:brightness-90';
           const activeClasses = isActive ? 'text-main' : 'text-muted';
           const primaryClasses = item.isPrimary
-            ? 'my-2 rounded-full bg-primary text-white shadow'
+            ? 'my-2 rounded-full bg-surface-elevated text-main border border-default p-3 transition-transform duration-150 ease-out hover:border-default-hover active:scale-95'
             : '';
+
+            if (!item.href && item.onClick) {
+              return (
+              <button
+                key={item.label}
+                type="button"
+                onClick={item.onClick}
+                className={`${baseClasses} ${activeClasses} ${primaryClasses}`}
+                aria-pressed={isUploadOpen}
+              >
+                <Icon size={20} />
+                <span>{item.label}</span>
+                </button>
+              );
+            }
+
+            if (!item.href) {
+              return null;
+            }
 
           return (
             <Link
@@ -63,12 +96,14 @@ export default function BottomNav() {
               className={`${baseClasses} ${activeClasses} ${primaryClasses}`}
               aria-current={isActive ? 'page' : undefined}
             >
-              <Icon size={20} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+                <Icon size={20} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+      <UploadMenu isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
+    </>
   );
 }

@@ -70,16 +70,27 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '10');
+  const summary = searchParams.get('summary') === '1';
   const skip = (page - 1) * limit;
 
   try {
-    const albums = await prisma.album.findMany({
-      skip,
-      take: limit,
-      include: {
-        media: true, // Include media to show a cover image
-      },
-    });
+    const albums = summary
+      ? await prisma.album.findMany({
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            name: true,
+            category: true,
+          },
+        })
+      : await prisma.album.findMany({
+          skip,
+          take: limit,
+          include: {
+            media: true, // Include media to show a cover image
+          },
+        });
 
     const total = await prisma.album.count();
     return NextResponse.json({

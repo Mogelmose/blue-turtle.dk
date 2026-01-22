@@ -48,7 +48,7 @@ as runtime uploads.
 - `DATABASE_URL=postgresql://<user>:<pass>@db:5432/<db>?schema=public`
 - `PASSWORD_*` entries that match the `passwordEnvVar` values in `prisma/seed.js`
 Optional:
-- `SEED_OVERWRITE_ASSETS=true` to overwrite existing seeded images
+- `SEED_OVERWRITE_ASSETS=true` in seed.js to overwrite existing seeded images
 
 5. Build and start the stack:
 

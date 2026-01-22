@@ -21,8 +21,8 @@ export default function AlbumContent({ initialAlbum }) {
   };
 
   const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
 
     // Validate MIME type
     const allowedMimeTypes = [
@@ -48,51 +48,71 @@ export default function AlbumContent({ initialAlbum }) {
       "webm",
       "mov",
     ];
-    const extension = file.name.split(".").pop()?.toLowerCase() || "";
-    const isMimeAllowed = file.type && allowedMimeTypes.includes(file.type);
-    const isExtensionAllowed = allowedExtensions.includes(extension);
-    if (!isMimeAllowed && !isExtensionAllowed) {
+
+    const validFiles = [];
+    const rejectedFiles = [];
+
+    files.forEach((file) => {
+      const extension = file.name.split(".").pop()?.toLowerCase() || "";
+      const isMimeAllowed = file.type && allowedMimeTypes.includes(file.type);
+      const isExtensionAllowed = allowedExtensions.includes(extension);
+
+      if (!isMimeAllowed && !isExtensionAllowed) {
+        rejectedFiles.push(`${file.name}: Filtypen er ikke tilladt.`);
+        return;
+      }
+
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        rejectedFiles.push(`${file.name}: Filen skal vaere mindre end 50MB.`);
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    if (rejectedFiles.length > 0) {
       alert(
-        "Filtypen er ikke tilladt. Vælg venligst et billede eller en video i et understøttet format."
+        `Nogle filer blev sprunget over:\n${rejectedFiles
+          .slice(0, 4)
+          .join("\n")}${rejectedFiles.length > 4 ? "\n+ flere" : ""}`
       );
-      event.target.value = ""; // Clear the input
-      return;
     }
 
-    // Validate file size (50MB limit)
-    const maxSize = 50 * 1024 * 1024; // 50MB in bytes
-    if (file.size > maxSize) {
-      alert("Filen skal være mindre end 50MB.");
-      event.target.value = ""; // Clear the input
+    if (validFiles.length === 0) {
+      event.target.value = "";
       return;
     }
 
     setUploading(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("albumId", album.id);
+    for (const file of validFiles) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("albumId", album.id);
 
-    try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data.success && data.media) {
-        setMedia((prevMedia) => [...prevMedia, data.media]);
-      } else {
-        alert(`Upload fejlede: ${data.error}`);
-        console.error(`Upload fejlede: ${data.error}`);
+        if (data.success && data.media) {
+          setMedia((prevMedia) => [...prevMedia, data.media]);
+        } else {
+          alert(`Upload fejlede: ${data.error}`);
+          console.error(`Upload fejlede: ${data.error}`);
+        }
+      } catch (error) {
+        alert("En fejl skete under upload af fil.");
+        console.error("Upload error:", error);
       }
-    } catch (error) {
-      alert("En fejl skete under upload af fil.");
-      console.error("Upload error:", error);
     }
 
     setUploading(false);
+    event.target.value = "";
   };
 
   if (!album) {
@@ -155,6 +175,7 @@ export default function AlbumContent({ initialAlbum }) {
                       type="file"
                       onChange={handleFileChange}
                       disabled={uploading}
+                      multiple
                       accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,video/mp4,video/webm,video/quicktime"
                       style={{ display: "none" }}
                     />

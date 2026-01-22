@@ -29,8 +29,8 @@ export default function AlbumGridCard({ album }: Props) {
           className={imageClassName}
         />
       </div>
-      <div className="p-3">
-        <h3 className="truncate text-base font-semibold text-main">
+      <div className="p-2">
+        <h3 className="font-semibold text-main">
           {album.name}
         </h3>
         <p className="mt-1 text-xs text-muted">

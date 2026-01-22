@@ -30,13 +30,17 @@
   --color-danger-300: hsl(0, 100%, 67%);
   --color-danger-500: hsl(0, 100%, 50%);
   --color-danger-600: hsl(0, 97%, 40%);
+
+  /* Navigation hover tokens (light mode defaults) */
+  --nav-hover-active: var(--color-ocean-500);
+  --nav-hover-inactive: var(--color-ocean-700);
 }
 
 @layer utilities {
   /* Background utilities */
   .bg-page { background-color: var(--color-ocean-50); }
   .bg-surface { background-color: var(--color-ocean-100); }
-  .bg-surface-elevated { background-color: var(--color-ocean-200); }
+  .bg-surface-elevated { background-color: var(--color-ocean-300); }
 
   /* Text utilities */
   .text-main { color: var(--color-ocean-900); }
@@ -49,13 +53,14 @@
   /* Border utilities */
   .border-default { border-color: var(--color-ocean-300); }
   .border-default-hover { border-color: var(--color-ocean-400); }
+  .border-ocean-500 { border-color: var(--color-ocean-500); }
 
   /* Card utilities */
   .card {
     background-color: var(--color-ocean-100);
     border: 2px solid var(--color-ocean-200);
     border-radius: 0.75rem;
-    padding: 1.5rem;    
+    padding: 1.25rem;    
   }
   .card-elevated {
     background-color: var(--color-ocean-200);
@@ -226,7 +231,7 @@
   @media (prefers-color-scheme: dark) {
     :root:not(.light) .bg-page { background-color: hsl(217, 91%, 12%); }
     :root:not(.light) .bg-surface { background-color: var(--color-ocean-900); }
-    :root:not(.light) .bg-surface-elevated { background-color: var(--color-ocean-800); }
+    :root:not(.light) .bg-surface-elevated { background-color: var(--color-ocean-700); }
     :root:not(.light) .text-main { color: var(--color-ocean-50); }
     :root:not(.light) .text-muted { color: var(--color-ocean-100); }
     :root:not(.light) .bg-primary { background-color: var(--color-ocean-300); }
@@ -295,5 +300,9 @@
     :root:not(.light) .link:hover {
       color: var(--color-ocean-200);
     }
+
+    :root:not(.light) {
+      --nav-hover-active: var(--color-ocean-400);
+      --nav-hover-inactive: var(--color-ocean-900);    }
   }
 }

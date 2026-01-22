@@ -10,9 +10,8 @@
 /blue-turtle-webapp/out/
 *.tsbuildinfo
 
-# User-uploaded content
 # This folder contains private user media and should not be committed.
-/blue-turtle-webapp/album_uploads
+/blue-turtle-webapp/.data/
 
 # Environment variables
 # Never commit secrets to a repository!
@@ -29,9 +28,6 @@ yarn-error.log*
 # OS-specific
 .DS_Store
 Thumbs.db
-
-# Vercel Platform
-/blue-turtle-webapp/.vercel
 
 # Prisma
 # Ignore the local database file
