@@ -16,7 +16,7 @@ export default function Header() {
   const logoImage = "/static/logo.png";
 
   const navButtonBase =
-    'group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors';
+    'group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors curosor-pointer';
   const navButtonInactive =
     'text-muted hover:bg-[var(--color-ocean-400)]';
   const navButtonActive = 'text-main bg-surface-elevated';
@@ -89,7 +89,7 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={() => setIsUploadOpen(true)}
-                  className={`${navButtonBase} ${
+                  className={`${navButtonBase} cursor-copy ${
                     isUploadOpen ? navButtonActive : navButtonInactive
                   }`}
                 >
@@ -128,7 +128,7 @@ export default function Header() {
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/login' })}
-                  className={`${navButtonBase} text-muted hover:bg-ocean-400`}
+                  className={`${navButtonBase} text-muted cursor-pointer hover:bg-ocean-400`}
                   title="Log ud"
                 >
                   <LogOut size={18} className="transition-colors group-hover:text-danger-500" />

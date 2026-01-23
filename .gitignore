@@ -18,7 +18,6 @@
 /blue-turtle-webapp/.env*
 !/blue-turtle-webapp/.env.example
 
-
 # Logs
 npm-debug.log*
 yarn-debug.log*
