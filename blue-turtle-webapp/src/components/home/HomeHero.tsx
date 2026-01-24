@@ -6,11 +6,11 @@ type Props = {
 };
 
 export default function HomeHero({ userName, isAdmin }: Props) {
-  const greeting = userName ? `Hej, ${userName}` : 'Hej';
+  const greeting = userName ? `Hej ${userName}` : 'Hej';
 
   return (
     <section className="card">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-3xl font-bold text-main sm:text-4xl">
             {greeting}
@@ -19,13 +19,7 @@ export default function HomeHero({ userName, isAdmin }: Props) {
             Velkommen til Blue Turtle
           </h1>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Link href="/albums" className="btn btn-primary">
-            Alle albums
-          </Link>
-          <Link href="/geomap" className="btn btn-secondary">
-            Kort
-          </Link>
+        <div className="flex max-sm:pt-4">
           {isAdmin ? (
             <Link href="/admin" className="btn btn-secondary">
               Admin

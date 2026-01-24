@@ -25,7 +25,7 @@ export default async function Homepage() {
       </div>
       <main className="flex-1">
         <Container className="w-full py-6 pb-24 md:pb-6">
-          <div className="space-y-10">
+          <div className="space-y-8">
             <HomeHero userName={userName} isAdmin={isAdmin} />
             <RecentAlbums albums={data.recentAlbums} />
             <RecentMedia items={data.recentMedia} />

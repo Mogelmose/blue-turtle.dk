@@ -17,7 +17,7 @@ export default function HomeAlbumCard({ album }: Props) {
   return (
     <Link
       href={`/albums/${album.id}`}
-      className="card group w-64 shrink-0 overflow-hidden p-0 transition-shadow hover:shadow-lg sm:w-auto sm:shrink"
+      className="card group w-50 shrink-0 overflow-hidden p-0 transition-shadow hover:shadow-lg sm:w-auto sm:shrink"
     >
       <div className="relative aspect-square bg-surface-elevated md:m-3 rounded-lg overflow-hidden">
         <Image
@@ -29,8 +29,8 @@ export default function HomeAlbumCard({ album }: Props) {
           className={imageClassName}
         />
       </div>
-      <div className="p-3">
-        <h3 className="truncate text-base font-semibold text-main">
+      <div className="pt-3 md:p-3">
+        <h3 className="truncate text-base font-semibold text-main xl:text-xl">
           {album.name}
         </h3>
         <p className="mt-1 text-xs text-muted">
