@@ -71,7 +71,7 @@ export default function HomeMediaTile({ item }: Props) {
   return (
     <Link
       href={`/albums/${item.albumId}`}
-      className="group relative block overflow-hidden rounded-xl border-2 border-default bg-surface-elevated"
+      className="group relative block overflow-hidden rounded-xl border-2 border-default bg-surface-elevated transition-all duration-200 hover:translate-y-0.5 hover:border-default-hover hover:bg-surface-elevated hover:shadow-lg"
     >
       <div className="relative aspect-square">
         {kind === 'image' ? (
@@ -80,6 +80,7 @@ export default function HomeMediaTile({ item }: Props) {
             alt={item.albumName}
             fill
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
+            unoptimized
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : kind === 'video' ? (
@@ -97,10 +98,10 @@ export default function HomeMediaTile({ item }: Props) {
           </div>
         )}
       </div>
-      <span className="absolute left-2 top-2 rounded-full border-2 border-default bg-surface px-2 py-0.5 text-xs font-semibold text-main">
+      <span className="absolute left-1 top-1 rounded-full border-2 border-default bg-surface px-2 py-0.5 text-xs font-semibold text-main md:text-sm">
         {badgeLabel}
       </span>
-      <span className="absolute inset-x-2 bottom-2 truncate text-xs font-semibold text-main">
+      <span className="absolute inset-x-2 bottom-2 truncate text-xs font-semibold text-main md:text-lg">
         {item.albumName}
       </span>
     </Link>

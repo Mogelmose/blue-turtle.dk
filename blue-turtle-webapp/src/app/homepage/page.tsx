@@ -31,8 +31,8 @@ export default async function Homepage() {
             <RecentMedia items={data.recentMedia} />
             <MapTeaserCard mapAlbums={data.mapAlbums} />
             <div className="grid gap-6 lg:grid-cols-2">
-              <HomeStats stats={data.stats} />
               <ActivityList items={data.activity} />
+              <HomeStats stats={data.stats} />
             </div>
           </div>
         </Container>

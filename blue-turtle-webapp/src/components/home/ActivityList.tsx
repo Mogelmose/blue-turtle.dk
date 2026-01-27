@@ -16,7 +16,7 @@ export default function ActivityList({ items }: Props) {
             <li key={`${item.type}-${item.id}`}>
               <Link
                 href={item.href}
-                className="flex items-center justify-between gap-3 rounded-lg border-2 border-default bg-surface px-4 py-3 transition-colors hover:bg-surface-elevated"
+                className="flex items-center justify-between gap-3 rounded-lg border-2 border-default bg-surface px-4 py-3 transition-transform duration-200 hover:translate-y-0.5 hover:border-default-hover hover:shadow-inner"
               >
                 <span className="text-sm font-semibold text-main">
                   {item.label}

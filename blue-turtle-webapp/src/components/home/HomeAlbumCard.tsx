@@ -17,7 +17,7 @@ export default function HomeAlbumCard({ album }: Props) {
   return (
     <Link
       href={`/albums/${album.id}`}
-      className="card group w-50 shrink-0 overflow-hidden p-0 transition-shadow hover:shadow-lg sm:w-auto sm:shrink"
+      className="card group w-50 shrink-0 overflow-hidden p-0 transition-all duration-200 hover:translate-y-0.5 hover:border-default-hover hover:bg-surface-elevated hover:shadow-lg sm:w-auto sm:shrink"
     >
       <div className="relative aspect-square bg-surface-elevated md:m-3 rounded-lg overflow-hidden">
         <Image

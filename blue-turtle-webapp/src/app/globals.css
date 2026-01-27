@@ -53,6 +53,8 @@
   /* Border utilities */
   .border-default { border-color: var(--color-ocean-300); }
   .border-default-hover { border-color: var(--color-ocean-400); }
+  .hover\:border-default-hover:hover { border-color: var(--color-ocean-400); }
+  .group:hover .group-hover\:border-default-hover { border-color: var(--color-ocean-400); }
   .border-ocean-500 { border-color: var(--color-ocean-500); }
 
   /* Card utilities */
@@ -237,6 +239,9 @@
     :root:not(.light) .bg-primary { background-color: var(--color-ocean-300); }
     :root:not(.light) .text-primary { color: var(--color-ocean-300); }
     :root:not(.light) .border-default { border-color: var(--color-ocean-700); }
+    :root:not(.light) .border-default-hover { border-color: var(--color-ocean-600); }
+    :root:not(.light) .hover\:border-default-hover:hover { border-color: var(--color-ocean-600); }
+    :root:not(.light) .group:hover .group-hover\:border-default-hover { border-color: var(--color-ocean-600); }
     :root:not(.light) .card { background-color: var(--color-ocean-900); border-color: var(--color-ocean-800); }
     :root:not(.light) .card-elevated { background-color: var(--color-ocean-800); border-color: var(--color-ocean-700); }
 
