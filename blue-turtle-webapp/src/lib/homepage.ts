@@ -7,7 +7,6 @@ import type {
   MediaSummary,
 } from './types/homepage';
 
-const RECENT_ALBUMS_LIMIT = 6;
 const RECENT_MEDIA_LIMIT = 12;
 const ACTIVITY_LIMIT = 6;
 
@@ -23,7 +22,6 @@ export async function getHomepageData(): Promise<HomepageData> {
   ] = await prisma.$transaction([
     prisma.album.findMany({
       orderBy: { updatedAt: 'desc' },
-      take: RECENT_ALBUMS_LIMIT,
       select: {
         id: true,
         name: true,

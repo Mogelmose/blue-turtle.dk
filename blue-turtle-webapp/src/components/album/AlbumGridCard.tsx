@@ -17,9 +17,9 @@ export default function AlbumGridCard({ album }: Props) {
   return (
     <Link
       href={`/albums/${album.id}`}
-      className="card group overflow-hidden p-0 transition-shadow hover:shadow-lg"
+      className="card group w-full overflow-hidden p-0 transition-all duration-200 hover:translate-y-0.5 hover:border-default-hover hover:bg-surface-elevated hover:shadow-lg"
     >
-      <div className="relative aspect-square bg-surface-elevated">
+      <div className="relative aspect-square bg-surface-elevated md:m-1 rounded-lg overflow-hidden">
         <Image
           src={coverUrl}
           alt={album.name}
@@ -29,7 +29,7 @@ export default function AlbumGridCard({ album }: Props) {
           className={imageClassName}
         />
       </div>
-      <div className="p-2">
+      <div className="px-1 pb-0 pt-2 sm:p-2">
         <h3 className="font-semibold text-main">
           {album.name}
         </h3>
