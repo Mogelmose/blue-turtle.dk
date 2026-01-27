@@ -106,6 +106,14 @@
     padding: 1rem;
     border-radius: 0.5rem;    
   }
+
+  /* Status message animations */
+  .animate-status-in {
+    animation: status-in 150ms ease-out both;
+  }
+  .animate-status-toast {
+    animation: status-toast 10s ease-in-out forwards;
+  }
  .input {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -310,4 +318,16 @@
       --nav-hover-active: var(--color-ocean-400);
       --nav-hover-inactive: var(--color-ocean-900);    }
   }
+}
+
+@keyframes status-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes status-toast {
+  0% { opacity: 0; transform: translateY(6px); }
+  12% { opacity: 1; transform: translateY(0); }
+  82% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-4px); }
 }

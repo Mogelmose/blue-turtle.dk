@@ -51,9 +51,12 @@ export default function BottomNav() {
       icon: Globe,
       isActive: (path) => path === '/geomap',
     },
-    { label: 'Profil', 
-      href: '/homepage#home-activity', 
-      icon: User },
+    {
+      label: 'Profil',
+      href: '/profile',
+      icon: User,
+      isActive: (path) => path.startsWith('/profile'),
+    },
   ];
 
   return (

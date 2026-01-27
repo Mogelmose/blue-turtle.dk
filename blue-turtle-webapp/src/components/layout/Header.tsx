@@ -28,6 +28,7 @@ export default function Header() {
   const isHomeActive = pathname === '/homepage';
   const isAlbumsActive = !!pathname?.startsWith('/albums');
   const isGeomapActive = pathname === '/geomap';
+  const isProfileActive = pathname === '/profile';
 
 
   return (
@@ -120,11 +121,24 @@ export default function Header() {
                   </span>
                 </Link>
                 <Link
-                  href="/homepage#home-activity"
-                  className={`${navButtonBase} ${navButtonInactive}`}
+                  href="/profile"
+                  className={`${navButtonBase} ${
+                    isProfileActive ? navButtonActive : navButtonInactive
+                  }`}
                 >
-                  <User size={18} className={navIconHoverInactive} />
-                  <span className={navTextHoverInactive}>Profil</span>
+                  <User
+                    size={18}
+                    className={
+                      isProfileActive ? navIconHoverActive : navIconHoverInactive
+                    }
+                  />
+                  <span
+                    className={
+                      isProfileActive ? navTextHoverActive : navTextHoverInactive
+                    }
+                  >
+                    Profil
+                  </span>
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/login' })}

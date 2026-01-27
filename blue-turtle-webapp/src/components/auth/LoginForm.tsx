@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { LockClosedIcon, XMarkIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 
@@ -84,23 +84,23 @@ const LoginForm: React.FC<LoginFormProps> = ({
           />
         </div>
 
-        {/* Alerts – fully using .alert-* classes */}
+        {/* Alerts â€“ fully using .alert-* classes */}
         {fejlbesked && (
-          <div className="alert-danger p-3 md:p-4 rounded-lg shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
+          <div className="alert-danger animate-status-in p-3 md:p-4 rounded-lg w-60 shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
             <ExclamationTriangleIcon className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
             <span>{fejlbesked}</span>
           </div>
         )}
 
         {succesbesked && (
-          <div className="alert-success p-3 md:p-4 rounded-lg shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
+          <div className="alert-success animate-status-in p-3 md:p-4 rounded-lg w-60 md:w-70 shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
             <CheckCircleIcon className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
             <span>{succesbesked}</span>
           </div>
         )}
 
         {isBlocked && (
-          <div className="alert-warning p-3 md:p-4 rounded-lg shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
+          <div className="alert-warning animate-status-in p-3 md:p-4 rounded-lg w-full shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
             <ExclamationTriangleIcon className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
             <span>For mange forkerte forsøg. Prøv igen om 30 sekunder.</span>
           </div>
@@ -139,3 +139,5 @@ const LoginForm: React.FC<LoginFormProps> = ({
 };
 
 export default LoginForm;
+
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
@@ -50,16 +50,27 @@ function LoginPageInner() {
         setProfiles(data);
       } catch (error) {
         console.error("Error fetching profiles:", error);
-        setFejlbesked("Kunne ikke hente profiler. Prøv at genindlæse siden.");
+        setFejlbesked("Kunne ikke hente profiler. PrÃ¸v at genindlÃ¦se siden.");
       }
     }
     fetchProfiles();
 
     const error = searchParams.get("error");
     if (error === "AccessDenied") {
-      setFejlbesked("Adgang nægtet. Du har ikke tilladelse til at se denne side.");
+      setFejlbesked("Adgang nÃ¦gtet. Du har ikke tilladelse til at se denne side.");
     }
   }, [searchParams]);
+  useEffect(() => {
+    if (!fejlbesked) {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      setFejlbesked("");
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, [fejlbesked]);
 
   const handleProfileClick = (profile: Profile) => {
     setSelectedProfile(profile);
@@ -173,3 +184,4 @@ function LoadingSpinner() {
     </div>
   );
 }
+

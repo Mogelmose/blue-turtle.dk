@@ -21,7 +21,7 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
       <p className="text-lg md:text-xl xl:text-xl text-muted mb-8 md:mb-10 xl:mb-12">Vælg din profil for at fortsætte.</p>
 
       {fejlbesked && (
-        <div className="mb-6 p-4 rounded-lg alert-danger" role="alert">
+        <div className="mb-6 p-4 rounded-lg alert-danger animate-status-in" role="alert">
           <span className="text-sm font-medium block">{fejlbesked}</span>
         </div>
       )}

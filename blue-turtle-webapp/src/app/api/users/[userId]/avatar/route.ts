@@ -1,13 +1,59 @@
-import { NextResponse } from 'next/server';
-import { createReadStream } from 'fs';
-import { stat } from 'fs/promises';
+import { NextResponse, type NextRequest } from 'next/server';
+import { createReadStream, createWriteStream } from 'fs';
+import { mkdir, stat, unlink } from 'fs/promises';
 import mime from 'mime-types';
 import path from 'path';
 import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
+import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
-import { resolveUploadPath } from '@/lib/storage';
+import { sessionAuthOptions as authOptions } from '@/lib/auth';
+import {
+  buildUserAvatarRelativePath,
+  resolveUploadPath,
+  sanitizeExtension,
+} from '@/lib/storage';
 
 export const runtime = 'nodejs';
+
+const ALLOWED_FILE_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+]);
+
+const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+
+const EXTENSION_TO_MIME: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  heic: 'image/heic',
+  heif: 'image/heif',
+};
+
+function resolveMimeType(file: File): string | null {
+  if (file.type) {
+    return file.type.toLowerCase();
+  }
+
+  const lookup = mime.lookup(file.name);
+  if (typeof lookup === 'string') {
+    return lookup.toLowerCase();
+  }
+
+  const extension = path.extname(file.name).slice(1).toLowerCase();
+  return EXTENSION_TO_MIME[extension] ?? null;
+}
+
+function isSafeUserId(value: unknown): value is string {
+  return typeof value === 'string' && /^[a-zA-Z0-9_-]+$/.test(value);
+}
 
 type AvatarContext =
   | {
@@ -134,6 +180,122 @@ export async function GET(_request: Request, { params }: RouteContext) {
     console.error('Avatar stream error:', error);
     return NextResponse.json(
       { error: 'Internal server error.' },
+      { status: 500 },
+    );
+  }
+}
+
+export async function POST(request: NextRequest, { params }: RouteContext) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+  }
+
+  const { userId } = await params;
+
+  if (!isSafeUserId(userId)) {
+    return NextResponse.json({ error: 'Invalid user ID.' }, { status: 400 });
+  }
+
+  if (session.user.id !== userId && session.user.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, image: true },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: 'User not found.' }, { status: 404 });
+  }
+
+  try {
+    const data = await request.formData();
+    const fileRaw = data.get('file');
+
+    if (!(fileRaw instanceof File)) {
+      return NextResponse.json({ error: 'Mangler fil.' }, { status: 400 });
+    }
+
+    const file = fileRaw;
+    let resolvedMimeType = resolveMimeType(file);
+    const extensionFromName = path.extname(file.name).slice(1).toLowerCase();
+    const extensionMimeType = EXTENSION_TO_MIME[extensionFromName];
+    const isAllowedMime = resolvedMimeType && ALLOWED_FILE_TYPES.has(resolvedMimeType);
+    const isAllowedExtension =
+      extensionMimeType && ALLOWED_FILE_TYPES.has(extensionMimeType);
+
+    if (!isAllowedMime && isAllowedExtension) {
+      resolvedMimeType = extensionMimeType;
+    }
+
+    if (!resolvedMimeType || (!isAllowedMime && !isAllowedExtension)) {
+      return NextResponse.json(
+        { error: 'Ikke tilladt filtype.' },
+        { status: 400 },
+      );
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: 'Filen er for stor.' },
+        { status: 400 },
+      );
+    }
+
+    const extensionFromMime = mime.extension(resolvedMimeType);
+    const extension = sanitizeExtension(
+      path.extname(file.name) ||
+        (typeof extensionFromMime === 'string'
+          ? `.${extensionFromMime}`
+          : ''),
+    );
+
+    if (!extension) {
+      return NextResponse.json(
+        { error: 'Kunne ikke bestemme filtypen.' },
+        { status: 400 },
+      );
+    }
+
+    const relativePath = buildUserAvatarRelativePath(userId, extension);
+    const absolutePath = resolveUploadPath(relativePath);
+
+    await mkdir(path.dirname(absolutePath), { recursive: true });
+
+    const nodeStream = Readable.fromWeb(
+      file.stream() as unknown as import('stream/web').ReadableStream,
+    );
+    await pipeline(nodeStream, createWriteStream(absolutePath));
+
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { image: relativePath },
+      });
+    } catch (error) {
+      await unlink(absolutePath).catch(() => undefined);
+      throw error;
+    }
+
+    if (user.image && !user.image.startsWith('/') && user.image !== relativePath) {
+      try {
+        await unlink(resolveUploadPath(user.image));
+      } catch (error) {
+        console.error('Failed to delete old avatar:', error);
+      }
+    }
+
+    return NextResponse.json(
+      { success: true, avatarUrl: `/api/users/${userId}/avatar` },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    return NextResponse.json(
+      { error: 'Upload fejlede.' },
       { status: 500 },
     );
   }
