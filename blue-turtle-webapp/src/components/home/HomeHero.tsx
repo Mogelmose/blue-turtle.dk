@@ -9,7 +9,7 @@ export default function HomeHero({ userName, isAdmin }: Props) {
   const greeting = userName ? `Hej ${userName}` : 'Hej';
 
   return (
-    <section className="card">
+    <section className="card mb-2 md:mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-3xl font-bold text-main sm:text-4xl">
@@ -19,7 +19,7 @@ export default function HomeHero({ userName, isAdmin }: Props) {
             Velkommen til Blue Turtle
           </h1>
         </div>
-        <div className="flex max-sm:pt-4">
+        <div className="flex max-sm:pt-2 gap-2">
           {isAdmin ? (
             <Link href="/admin" className="btn btn-secondary">
               Admin

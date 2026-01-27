@@ -20,14 +20,14 @@ export default function RecentAlbums({ albums }: Props) {
   }, [albums, hasOverflow, isExpanded]);
 
   return (
-    <section id="home-albums" className="space-y-4">
+    <section id="home-albums" className="space-y-4 mb-2 md:mb-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-main">Seneste albums</h2>
         <span className="text-sm text-muted">{albums.length} viste</span>
       </div>
       {albums.length > 0 ? (
         <>
-          <div className="flex gap-4 overflow-x-auto pb-2 sm:hidden">
+          <div className="flex gap-4 overflow-x-auto pb-0 sm:hidden">
             {albums.map((album) => (
               <HomeAlbumCard key={album.id} album={album} />
             ))}
@@ -38,7 +38,7 @@ export default function RecentAlbums({ albums }: Props) {
             ))}
           </div>
           {hasOverflow && (
-            <div className="hidden sm:flex justify-end">
+            <div className="hidden sm:flex justify-center">
               <button
                 type="button"
                 onClick={() => setIsExpanded((prev) => !prev)}

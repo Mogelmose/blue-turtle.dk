@@ -12,7 +12,7 @@ export default function MapTeaserCard({ mapAlbums }: Props) {
   }));
 
   return (
-    <section id="home-map" className="space-y-4">
+    <section id="home-map" className="space-y-4 mb-2 md:mb-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-main">Lokationer</h2>
         <Link href="/geomap" className="link text-sm">

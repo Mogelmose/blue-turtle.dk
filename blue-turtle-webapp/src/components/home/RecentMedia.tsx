@@ -7,7 +7,7 @@ type Props = {
 
 export default function RecentMedia({ items }: Props) {
   return (
-    <section id="home-media" className="space-y-4">
+    <section id="home-media" className="space-y-4 mb-2 md:mb-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-main">Seneste medier</h2>
         <span className="text-sm text-muted">{items.length} viste</span>
