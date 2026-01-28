@@ -39,6 +39,7 @@
     "@types/node": "24.10.1",
     "@types/react": "19.2.7",
     "autoprefixer": "^10.4.22",
+    "baseline-browser-mapping": "^2.9.19",
     "eslint": "^9.3.5",
     "eslint-config-next": "^15.5.9",
     "postcss": "^8.5.6",
