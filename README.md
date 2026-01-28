@@ -95,6 +95,7 @@ cp .env.example .env
 ```
 
 Edit `.env` and set:
+
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
 - `DATABASE_URL` to match your active run target - for local dev use "localhost"
 - `DEV_UPLOAD_ROOT` (recommended, e.g. `./.data/uploads`)
