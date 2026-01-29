@@ -4,6 +4,7 @@ import { sessionAuthOptions } from '@/lib/auth';
 import { formatDateTime } from '@/lib/date';
 import prisma from '@/lib/prisma';
 import ProfileAvatarEditor from '@/components/profile/ProfileAvatarEditor';
+import ProfileSecurityPanel from '@/components/profile/ProfileSecurityPanel';
 import BottomNav from '@/components/layout/BottomNav';
 import Container from '@/components/layout/Container';
 import Footer from '@/components/layout/Footer';
@@ -73,6 +74,7 @@ export default async function ProfilePage() {
                   </dd>
                 </div>
               </dl>
+              <ProfileSecurityPanel />
             </div>
           </section>
         </Container>

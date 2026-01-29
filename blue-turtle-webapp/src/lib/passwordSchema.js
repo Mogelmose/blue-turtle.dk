@@ -8,11 +8,15 @@ export const passwordSchema = z
   .regex(/[0-9]/, 'Adgangskoden skal indeholde mindst ét tal')
   .regex(/[^A-Za-z0-9]/, 'Adgangskoden skal indeholde mindst ét specialtegn');
 
-export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Nuværende adgangskode er påkrævet'),
-  newPassword: passwordSchema,
-  confirmNewPassword: z.string().min(1, 'Bekræftelse af adgangskode er påkrævet'),
-}).refine((data) => data.newPassword === data.confirmNewPassword, {
-  message: 'Adgangskoderne er ikke ens',
-  path: ['confirmNewPassword'],
-});
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Nuværende adgangskode er påkrævet'),
+    newPassword: passwordSchema,
+    confirmNewPassword: z
+      .string()
+      .min(1, 'Bekræftelse af adgangskode er påkrævet'),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: 'Adgangskoderne er ikke ens',
+    path: ['confirmNewPassword'],
+  });

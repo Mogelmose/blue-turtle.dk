@@ -33,14 +33,14 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
               <div
                 key={profile.name}
                 onClick={() => handleProfileClick(profile)}
-                className="flex flex-col items-center gap-1 rounded-2xl card shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+                className="flex flex-col items-center gap-1 rounded-lg card shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
                 style={{ minWidth: '170px', maxWidth: '280px' }}
                 tabIndex={0}
                 role="button"
                 aria-label={`Vælg ${profile.name}`}
               >
                 <div
-                  className={`relative w-32 h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 xl:w-44 xl:h-44 2xl:w-48 2xl:h-48 rounded-full overflow-hidden border-4 border-default group-hover:border-default-hover transition-colors duration-300 ${
+                  className={`relative w-36 h-36 md:w-36 md:h-36 lg:w-40 lg:h-40 xl:w-44 xl:h-44 2xl:w-48 2xl:h-48 rounded-full overflow-hidden border-4 border-default group-hover:border-default-hover transition-colors duration-300 ${
                     profile.isPlaceholder ? 'bg-surface' : ''
                   }`}
                 >
@@ -56,7 +56,7 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
                     }
                   />
               </div>
-              <span className="font-bold text-base md:text-xl text-main text-center w-full"> {}
+              <span className="font-bold text-base md:text-xl text-main text-center w-full -mb-2"> {}
                 {profile.name}
               </span>
             </div>
