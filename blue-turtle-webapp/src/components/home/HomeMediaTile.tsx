@@ -1,3 +1,5 @@
+﻿'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import type { MediaSummary } from '../../lib/types/homepage';
@@ -10,6 +12,18 @@ const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif'];
 const VIDEO_EXTENSIONS = ['mp4', 'webm', 'mov', 'm4v'];
 const HEIC_EXTENSIONS = ['heic', 'heif'];
 const HEIC_MIME_TYPES = new Set(['image/heic', 'image/heif']);
+const FALLBACK_VIDEO_POSTER =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">' +
+      '<defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1">' +
+      '<stop offset="0" stop-color="#e0f2fe"/><stop offset="1" stop-color="#bae6fd"/>' +
+      '</linearGradient></defs>' +
+      '<rect width="800" height="800" fill="url(#g)"/>' +
+      '<circle cx="400" cy="400" r="170" fill="rgba(15,23,42,0.15)"/>' +
+      '<path d="M360 320 L520 400 L360 480 Z" fill="rgba(15,23,42,0.6)"/>' +
+      '</svg>',
+  );
 
 function getExtension(url: string): string | null {
   const cleanUrl = url.split('?')[0];
@@ -89,6 +103,14 @@ export default function HomeMediaTile({ item }: Props) {
             preload="metadata"
             muted
             playsInline
+            poster={FALLBACK_VIDEO_POSTER}
+            onLoadedMetadata={(event) => {
+              try {
+                event.currentTarget.currentTime = 0.1;
+              } catch {
+                // Best-effort thumbnail seek.
+              }
+            }}
           >
             <source src={item.url} />
           </video>

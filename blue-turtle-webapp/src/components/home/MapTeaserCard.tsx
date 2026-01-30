@@ -21,7 +21,7 @@ export default function MapTeaserCard({ mapAlbums }: Props) {
       </div>
       <div className="card space-y-4">
         <div
-          className="relative h-32 overflow-hidden rounded-lg border-2 border-default"
+          className="relative h-64 overflow-hidden rounded-lg border-2 border-default"
           style={{
             backgroundImage:
               'linear-gradient(135deg, var(--color-ocean-100), var(--color-ocean-200))',

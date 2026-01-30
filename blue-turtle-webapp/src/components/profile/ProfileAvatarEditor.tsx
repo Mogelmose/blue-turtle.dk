@@ -112,7 +112,7 @@ export default function ProfileAvatarEditor({
         type="button"
         onClick={handlePick}
         disabled={isUploading}
-        className="group relative h-40 w-40 md:h-52 md:w-52 overflow-hidden rounded-full border-2 border-default bg-surface-elevated transition hover:border-default-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-ocean-500 disabled:cursor-not-allowed"
+        className="group relative h-40 w-40 md:h-60 md:w-60 xl:w-70 xl:h-70 overflow-hidden rounded-full border-2 border-default bg-surface-elevated transition hover:border-default-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-ocean-500 disabled:cursor-not-allowed"
         aria-label="Skift avatar"
       >
         <Image

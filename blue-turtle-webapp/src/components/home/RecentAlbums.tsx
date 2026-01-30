@@ -12,12 +12,8 @@ type Props = {
 export default function RecentAlbums({ albums }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasOverflow = albums.length > 6;
-  const visibleAlbums = useMemo(() => {
-    if (!hasOverflow || isExpanded) {
-      return albums;
-    }
-    return albums.slice(0, 6);
-  }, [albums, hasOverflow, isExpanded]);
+  const baseAlbums = useMemo(() => albums.slice(0, 6), [albums]);
+  const extraAlbums = useMemo(() => albums.slice(6), [albums]);
 
   return (
     <section id="home-albums" className="space-y-4 mb-2 md:mb-4">
@@ -33,10 +29,25 @@ export default function RecentAlbums({ albums }: Props) {
             ))}
           </div>
           <div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-3">
-            {visibleAlbums.map((album) => (
+            {baseAlbums.map((album) => (
               <HomeAlbumCard key={album.id} album={album} />
             ))}
           </div>
+          {extraAlbums.length > 0 ? (
+            <div
+              className={`hidden overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out sm:block ${
+                isExpanded
+                  ? 'max-h-2499.75 opacity-100 translate-y-0 delay-100'
+                  : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none'
+              }`}
+            >
+              <div className="mt-0 grid gap-4 pb-3 sm:grid-cols-2 lg:grid-cols-3">
+                {extraAlbums.map((album) => (
+                  <HomeAlbumCard key={album.id} album={album} />
+                ))}
+              </div>
+            </div>
+          ) : null}
           {hasOverflow && (
             <div className="hidden sm:flex justify-center">
               <button

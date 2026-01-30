@@ -9,7 +9,7 @@ export default function HomeHero({ userName, isAdmin }: Props) {
   const greeting = userName ? `Hej ${userName}` : 'Hej';
 
   return (
-    <section className="card mb-2 md:mb-6">
+    <section className="card card-gradient mb-2 md:mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-3xl font-bold text-main sm:text-4xl">

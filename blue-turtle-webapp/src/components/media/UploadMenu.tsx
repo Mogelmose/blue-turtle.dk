@@ -272,6 +272,14 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
     setUploading(false);
     setUploadErrors(errors);
     setUploadSummary({ successCount, failureCount, totalCount: files.length });
+
+    if (successCount > 0) {
+      window.dispatchEvent(
+        new CustomEvent('album-media-updated', {
+          detail: { albumId: selectedAlbumId },
+        }),
+      );
+    }
   };
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
