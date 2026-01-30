@@ -81,6 +81,20 @@ function createJpegResponse({ absolutePath, filename }) {
   });
 }
 
+function createStaticJpegResponse({ absolutePath, filename, size }) {
+  const stream = createReadStream(absolutePath);
+  const body = Readable.toWeb(stream);
+
+  return new Response(body, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/jpeg",
+      "Content-Length": size.toString(),
+      "Content-Disposition": `inline; filename="${getJpegFilename(filename)}"`,
+    },
+  });
+}
+
 async function getMediaContext(slug) {
   if (!slug || slug.length < 1 || slug.length > 2) {
     return {
@@ -98,6 +112,7 @@ async function getMediaContext(slug) {
         storagePath: true,
         mimeType: true,
         filename: true,
+        convertedPath: true,
       },
     });
   } else {
@@ -108,6 +123,7 @@ async function getMediaContext(slug) {
         storagePath: true,
         mimeType: true,
         filename: true,
+        convertedPath: true,
       },
     });
   }
@@ -133,6 +149,7 @@ async function getMediaContext(slug) {
     filename: mediaRecord.filename ?? "media",
     storagePath: mediaRecord.storagePath,
     mimeType: mediaRecord.mimeType ?? null,
+    convertedPath: mediaRecord.convertedPath ?? null,
   };
 }
 
@@ -151,6 +168,23 @@ export async function HEAD(request, { params }) {
     }
 
     if (wantsJpeg(request) && isHeicAsset(context)) {
+      if (context.convertedPath) {
+        try {
+          const convertedAbsolutePath = resolveUploadPath(context.convertedPath);
+          const convertedStat = await stat(convertedAbsolutePath);
+          return new NextResponse(null, {
+            status: 200,
+            headers: {
+              "Content-Type": "image/jpeg",
+              "Content-Length": convertedStat.size.toString(),
+              "Content-Disposition": `inline; filename="${getJpegFilename(context.filename)}"`,
+            },
+          });
+        } catch {
+          // Fall back to on-the-fly conversion.
+        }
+      }
+
       return new NextResponse(null, {
         status: 200,
         headers: {
@@ -198,6 +232,20 @@ export async function GET(request, { params }) {
     }
 
     if (wantsJpeg(request) && isHeicAsset(context)) {
+      if (context.convertedPath) {
+        try {
+          const convertedAbsolutePath = resolveUploadPath(context.convertedPath);
+          const convertedStat = await stat(convertedAbsolutePath);
+          return createStaticJpegResponse({
+            absolutePath: convertedAbsolutePath,
+            filename: context.filename,
+            size: convertedStat.size,
+          });
+        } catch {
+          // Fall back to on-the-fly conversion.
+        }
+      }
+
       return createJpegResponse(context);
     }
 

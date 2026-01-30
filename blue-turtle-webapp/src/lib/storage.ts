@@ -30,6 +30,15 @@ export function buildMediaRelativePath(
   return path.posix.join('albums', albumId, 'original', monthFolder, filename);
 }
 
+export function buildConvertedRelativePath(
+  albumId: string,
+  mediaId: string,
+  extension = '.jpg',
+): string {
+  const safeExtension = sanitizeExtension(extension) || '.jpg';
+  return path.posix.join('albums', albumId, 'converted', `${mediaId}${safeExtension}`);
+}
+
 export function sanitizeFilename(name: string): string {
   const base = path.basename(name);
   const extension = path.extname(base);

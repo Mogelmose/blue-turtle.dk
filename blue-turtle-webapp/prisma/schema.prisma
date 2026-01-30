@@ -51,6 +51,7 @@ enum JobStatus {
 
 enum JobType {
   EXTRACT_METADATA
+  CONVERT_HEIC
 }
 
 model Album {
@@ -71,6 +72,7 @@ model Media {
   id        String   @id @default(cuid())
   url       String
   storagePath String?
+  convertedPath String?
   filename  String?
   originalName String?
   mimeType  String?

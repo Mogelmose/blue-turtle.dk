@@ -7,7 +7,7 @@ import type {
   MediaSummary,
 } from './types/homepage';
 
-const RECENT_MEDIA_LIMIT = 12;
+const RECENT_MEDIA_LIMIT = 8;
 const ACTIVITY_LIMIT = 6;
 
 export async function getHomepageData(): Promise<HomepageData> {

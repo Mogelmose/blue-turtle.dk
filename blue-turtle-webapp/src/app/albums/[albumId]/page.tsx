@@ -9,7 +9,11 @@ async function getAlbumData(albumId: string): Promise<AlbumWithMedia | null> {
   try {
     const album = await prisma.album.findUnique({
       where: { id: albumId },
-      include: { media: true },
+      include: {
+        media: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
     });
     return album;
   } catch (error) {

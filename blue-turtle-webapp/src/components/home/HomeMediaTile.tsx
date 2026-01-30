@@ -85,7 +85,7 @@ export default function HomeMediaTile({ item }: Props) {
   return (
     <Link
       href={`/albums/${item.albumId}`}
-      className="group relative block overflow-hidden rounded-xl border-2 border-default bg-surface-elevated transition-all duration-200 hover:translate-y-0.5 hover:border-default-hover hover:bg-surface-elevated hover:shadow-lg"
+      className="group relative block w-50 shrink-0 overflow-hidden rounded-xl border-2 border-default bg-surface-elevated transition-all duration-200 hover:translate-y-0.5 hover:border-default-hover hover:bg-surface-elevated hover:shadow-lg sm:w-auto sm:shrink"
     >
       <div className="relative aspect-square">
         {kind === 'image' ? (
@@ -100,11 +100,11 @@ export default function HomeMediaTile({ item }: Props) {
         ) : kind === 'video' ? (
           <video
             className="h-full w-full object-cover"
-            preload="metadata"
+            preload="auto"
             muted
             playsInline
             poster={FALLBACK_VIDEO_POSTER}
-            onLoadedMetadata={(event) => {
+            onLoadedData={(event) => {
               try {
                 event.currentTarget.currentTime = 0.1;
               } catch {

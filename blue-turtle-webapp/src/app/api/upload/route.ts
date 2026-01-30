@@ -11,6 +11,7 @@ import { sessionAuthOptions as authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import {
   buildMediaRelativePath,
+  buildConvertedRelativePath,
   getMonthFolder,
   resolveUploadPath,
   sanitizeFilename,
@@ -44,6 +45,9 @@ const EXTENSION_TO_MIME: Record<string, string> = {
   webm: 'video/webm',
   mov: 'video/quicktime',
 };
+
+const HEIC_MIME_TYPES = new Set(['image/heic', 'image/heif']);
+const HEIC_EXTENSIONS = new Set(['heic', 'heif']);
 
 function resolveMimeType(file: File): string | null {
   if (file.type) {
@@ -114,6 +118,11 @@ export async function POST(request: NextRequest) {
     const filename = `${mediaId}-${sanitized}`;
     const relativePath = buildMediaRelativePath(albumId, monthFolder, filename);
     const absolutePath = resolveUploadPath(relativePath);
+    const isHeic =
+      HEIC_MIME_TYPES.has(resolvedMimeType) || HEIC_EXTENSIONS.has(extension);
+    const convertedPath = isHeic
+      ? buildConvertedRelativePath(albumId, mediaId, '.jpg')
+      : null;
 
     await mkdir(path.dirname(absolutePath), { recursive: true });
 
@@ -136,6 +145,7 @@ export async function POST(request: NextRequest) {
             sizeBytes: file.size,
             filename,
             storagePath: relativePath,
+            convertedPath,
             metadataStatus: 'PENDING',
           },
         });
@@ -147,6 +157,16 @@ export async function POST(request: NextRequest) {
             status: 'PENDING',
           },
         });
+
+        if (isHeic) {
+          await tx.job.create({
+            data: {
+              type: 'CONVERT_HEIC',
+              payload: { mediaId: created.id },
+              status: 'PENDING',
+            },
+          });
+        }
 
         return created;
       });
