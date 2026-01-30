@@ -7,6 +7,7 @@ Vibecoded Website for the Turtle Boys. This is a full-stack web application buil
 Before you begin, ensure you have the following installed on your system:
 
 **Docker + docker-compose** (recommended for running the full stack).
+**Bun** (required for local dev outside Docker).
 
 ## Run With Docker (recommended)
 
@@ -26,8 +27,9 @@ cp .env.example .env
 ```
 
 Edit `.env` and set:
+
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
-- `NEXTAUTH_SECRET` (generate with `npx auth secret` or `openssl rand -base64 32`)
+- `NEXTAUTH_SECRET` (generate with `bunx auth secret` or `openssl rand -base64 32`)
 - `NEXTAUTH_URL` (usually `http://localhost:3000`)
 - `HOST_UPLOAD_ROOT` (optional, defaults to `./.data/uploads`)
 
@@ -59,10 +61,10 @@ docker-compose up -d
 
 On first startup, the web container runs `prisma migrate deploy` automatically and creates the schema. On later startups it will only apply new migrations if any exist.
 
-6. Seed the database once (disposable container):
+6. Seed the database once
 
 ```bash
-docker-compose run --rm web node prisma/seed.js
+docker-compose exec web bun prisma/seed.js
 ```
 
 The app should now be running at <http://localhost:3000>
@@ -74,8 +76,6 @@ On later runs, you do not need to seed again:
 ```bash
 docker-compose up -d
 ```
-
-If you ever need to re-seed, clear the database or drop the volume and run the seed step again.
 
 ## Local Dev (recommended for development)
 
@@ -112,20 +112,20 @@ Tip: if you want a shorter command, set `COMPOSE_FILE=docker-compose.yml:docker-
 4. Install deps and apply migrations:
 
 ```bash
-npm install
-npx prisma migrate deploy
+bun install
+bunx prisma migrate deploy
 ```
 
 5. (Optional) Seed the database:
 
 ```bash
-node prisma/seed.js
+bun prisma/seed.js
 ```
 
 6. Run the dev server:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 Note: For Docker production runs, `DATABASE_URL` should point to `db` instead of `localhost`.

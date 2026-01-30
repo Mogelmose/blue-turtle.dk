@@ -27,7 +27,7 @@
     "zod": "^4.1.5"
   },
   "prisma": {
-    "seed": "node prisma/seed.js"
+    "seed": "bun prisma/seed.js"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
