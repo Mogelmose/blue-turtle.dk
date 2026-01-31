@@ -52,6 +52,7 @@ enum JobStatus {
 enum JobType {
   EXTRACT_METADATA
   CONVERT_HEIC
+  GENERATE_VIDEO_PREVIEW
 }
 
 model Album {
@@ -73,6 +74,7 @@ model Media {
   url       String
   storagePath String?
   convertedPath String?
+  previewPath String?
   filename  String?
   originalName String?
   mimeType  String?

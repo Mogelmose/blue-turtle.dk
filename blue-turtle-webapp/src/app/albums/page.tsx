@@ -61,7 +61,7 @@ export default async function AlbumsPage() {
       <main className="flex-1">
         <Container className="w-full py-6 pb-24 md:pb-6">
           <div className="space-y-10">
-            <section className="card mb-4">
+            <section className="card card-gradient mb-4">
               <h1 className="text-3xl font-bold text-main sm:text-4xl">
                 Alle albums
               </h1>

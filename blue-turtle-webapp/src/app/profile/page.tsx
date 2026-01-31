@@ -43,7 +43,7 @@ export default async function ProfilePage() {
       </div>
       <main className="flex-1">
         <Container className="w-full py-6 pb-24 md:pb-6">
-          <section className="card space-y-6 max-w-3xl mx-auto">
+          <section className="card card-gradient space-y-6 max-w-3xl mx-auto">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold text-main sm:text-4xl sm:pl-4">
                 Profil

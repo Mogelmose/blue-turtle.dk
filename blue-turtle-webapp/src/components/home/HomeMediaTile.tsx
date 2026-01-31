@@ -1,5 +1,6 @@
 ﻿'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { MediaSummary } from '../../lib/types/homepage';
@@ -81,6 +82,30 @@ export default function HomeMediaTile({ item }: Props) {
   const badgeLabel =
     kind === 'video' ? 'Video' : kind === 'image' ? 'Billede' : 'Fil';
   const displayUrl = getDisplayUrl(item.url, item.mimeType);
+  const [posterSrc, setPosterSrc] = useState(FALLBACK_VIDEO_POSTER);
+  const previewUrl = `/api/media/${item.id}/preview`;
+
+  useEffect(() => {
+    if (kind !== 'video') {
+      return;
+    }
+    let isActive = true;
+    const probe = new window.Image();
+    probe.onload = () => {
+      if (isActive) {
+        setPosterSrc(previewUrl);
+      }
+    };
+    probe.onerror = () => {
+      if (isActive) {
+        setPosterSrc(FALLBACK_VIDEO_POSTER);
+      }
+    };
+    probe.src = previewUrl;
+    return () => {
+      isActive = false;
+    };
+  }, [kind, previewUrl]);
 
   return (
     <Link
@@ -103,7 +128,7 @@ export default function HomeMediaTile({ item }: Props) {
             preload="auto"
             muted
             playsInline
-            poster={FALLBACK_VIDEO_POSTER}
+            poster={posterSrc}
             onLoadedData={(event) => {
               try {
                 event.currentTarget.currentTime = 0.1;

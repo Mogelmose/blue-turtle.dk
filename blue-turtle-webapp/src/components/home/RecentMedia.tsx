@@ -26,6 +26,33 @@ export default function RecentMedia({ items }: Props) {
     hasRequestedRef.current = false;
   }, [items]);
 
+  const refreshRecent = useCallback(async () => {
+    try {
+      const response = await fetch('/api/media/recent?skip=0&take=8');
+      const data = await response.json();
+      if (!response.ok || !Array.isArray(data?.items)) {
+        throw new Error(data?.error || 'Kunne ikke hente seneste medier');
+      }
+      const incoming = data.items as MediaSummary[];
+      setMediaItems(incoming);
+      setPrefetchedItems([]);
+      setHasMore(incoming.length >= 8);
+      setIsExpanded(false);
+      hasRequestedRef.current = false;
+    } catch (error) {
+      console.error('Recent media refresh failed:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleUpload = () => {
+      void refreshRecent();
+    };
+
+    window.addEventListener('album-media-updated', handleUpload);
+    return () => window.removeEventListener('album-media-updated', handleUpload);
+  }, [refreshRecent]);
+
   const cappedItems = useMemo(() => mediaItems.slice(0, 24), [mediaItems]);
   const baseItems = useMemo(() => cappedItems.slice(0, 8), [cappedItems]);
   const extraItems = useMemo(() => cappedItems.slice(8), [cappedItems]);

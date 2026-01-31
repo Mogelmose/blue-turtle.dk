@@ -1,4 +1,4 @@
-FROM oven/bun:latest AS base
+FROM oven/bun:slim AS bun-base
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -6,41 +6,56 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends ca-certificates libssl3 adduser \
   && rm -rf /var/lib/apt/lists/*
 
-FROM base AS deps
+FROM bun-base AS deps
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-FROM base AS builder
+FROM bun-base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN bunx prisma generate
 RUN bunx next build
 
-FROM base AS prisma-cli
+FROM bun-base AS prisma-cli
 WORKDIR /prisma-cli
 COPY package.json ./
 RUN bun -e "import { readFileSync, writeFileSync } from 'fs'; const pkg = JSON.parse(readFileSync('./package.json', 'utf8')); const ver = pkg.devDependencies?.prisma ?? pkg.dependencies?.prisma ?? '6.19.0'; writeFileSync('./package.json', JSON.stringify({ private: true, dependencies: { prisma: ver } }, null, 2));"
 RUN bun install --production
 
-FROM base AS runner
+FROM node:20-slim AS runtime-deps
+WORKDIR /app
 ENV NODE_ENV=production
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ffmpeg libheif-examples libde265-0 \
+  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder --chown=bun:bun /app/public ./public
-COPY --from=builder --chown=bun:bun /app/prisma ./prisma
-COPY --from=builder --chown=bun:bun /app/.next/standalone ./
-COPY --from=builder --chown=bun:bun /app/.next/static ./.next/static
-COPY --from=builder --chown=bun:bun /app/node_modules/bcryptjs ./node_modules/bcryptjs
-COPY --from=builder --chown=bun:bun /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder --chown=bun:bun /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=prisma-cli --chown=bun:bun /prisma-cli/node_modules /prisma-cli/node_modules
-COPY --chown=bun:bun docker-entrypoint.sh ./docker-entrypoint.sh
+FROM bun-base AS migrate
+WORKDIR /app
+COPY --from=prisma-cli /prisma-cli/node_modules /prisma-cli/node_modules
+COPY prisma ./prisma
+ENTRYPOINT ["bun", "/prisma-cli/node_modules/prisma/build/index.js", "migrate", "deploy"]
+
+FROM runtime-deps AS runner
+
+COPY --from=builder --chown=node:node /app/public ./public
+COPY --from=builder --chown=node:node /app/prisma ./prisma
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+COPY --from=builder --chown=node:node /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder --chown=node:node /app/node_modules/@prisma/client ./node_modules/@prisma/client
+COPY --from=builder --chown=node:node /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=node:node /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=node:node /app/package.json ./package.json
+COPY --from=builder --chown=node:node /app/src/worker ./src/worker
+COPY --from=builder --chown=node:node /app/src/lib/prisma.js ./src/lib/prisma.js
+COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh \
   && mkdir -p /app/.next/cache/images \
   && mkdir -p /uploads \
-  && chown -R bun:bun /uploads \
-  && chown -R bun:bun /app/.next
+  && chown -R node:node /uploads \
+  && chown -R node:node /app/.next
 
-USER bun
+USER node
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0

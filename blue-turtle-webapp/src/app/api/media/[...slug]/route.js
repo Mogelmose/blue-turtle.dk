@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { createReadStream } from "fs";
-import { stat } from "fs/promises";
+import { mkdtemp, open, rm, stat } from "fs/promises";
 import mime from "mime-types";
 import { Readable } from "stream";
-import sharp from "sharp";
+import { spawn } from "child_process";
+import os from "os";
+import path from "path";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { sessionAuthOptions as authOptions } from "@/lib/auth";
@@ -66,16 +68,91 @@ function getJpegFilename(filename) {
   return `${base}.jpg`;
 }
 
-function createJpegResponse({ absolutePath, filename }) {
-  const readStream = createReadStream(absolutePath);
-  const transformer = sharp().rotate().jpeg({ quality: 82 });
-  const convertedStream = readStream.pipe(transformer);
-  const body = Readable.toWeb(convertedStream);
+function runHeifConvert(inputPath, outputPath) {
+  return new Promise((resolve, reject) => {
+    const args = ["-q", "90", inputPath, outputPath];
+    const proc = spawn("heif-convert", args, { stdio: ["ignore", "ignore", "pipe"] });
+    let stderr = "";
+
+    proc.stderr.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    proc.on("error", (error) => {
+      const details = stderr.trim();
+      reject(
+        new Error(
+          `heif-convert failed to start: ${error.message}${details ? ` (${details})` : ""}`,
+        ),
+      );
+    });
+
+    proc.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        const details = stderr.trim();
+        reject(
+          new Error(
+            `heif-convert exited with code ${code}${details ? ` (${details})` : ""}`,
+          ),
+        );
+      }
+    });
+  });
+}
+
+async function isJpegFile(absolutePath) {
+  const file = await open(absolutePath, "r");
+  try {
+    const buffer = Buffer.alloc(3);
+    await file.read(buffer, 0, 3, 0);
+    return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  } finally {
+    await file.close();
+  }
+}
+
+async function createTempJpegResponse({ absolutePath, filename }) {
+  if (await isJpegFile(absolutePath)) {
+    const fileStat = await stat(absolutePath);
+    return createStaticJpegResponse({
+      absolutePath,
+      filename,
+      size: fileStat.size,
+    });
+  }
+
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "heic-"));
+  const tempOutput = path.join(tempDir, "converted.jpg");
+
+  await runHeifConvert(absolutePath, tempOutput);
+  const tempStat = await stat(tempOutput);
+
+  const stream = createReadStream(tempOutput);
+  const body = Readable.toWeb(stream);
+
+  let cleaned = false;
+  const cleanup = async () => {
+    if (cleaned) {
+      return;
+    }
+    cleaned = true;
+    await rm(tempDir, { recursive: true, force: true });
+  };
+
+  stream.on("close", () => {
+    void cleanup();
+  });
+  stream.on("error", () => {
+    void cleanup();
+  });
 
   return new Response(body, {
     status: 200,
     headers: {
       "Content-Type": "image/jpeg",
+      "Content-Length": tempStat.size.toString(),
       "Content-Disposition": `inline; filename="${getJpegFilename(filename)}"`,
     },
   });
@@ -246,7 +323,7 @@ export async function GET(request, { params }) {
         }
       }
 
-      return createJpegResponse(context);
+      return await createTempJpegResponse(context);
     }
 
     const { absolutePath, size, contentType, filename } = context;

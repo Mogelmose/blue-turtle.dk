@@ -56,15 +56,16 @@ Optional:
 
 ```bash
 docker-compose build
+docker-compose --profile migrate run --rm migrate
 docker-compose up -d
 ```
 
-On first startup, the web container runs `prisma migrate deploy` automatically and creates the schema. On later startups it will only apply new migrations if any exist.
+Run the migrate step whenever you add new migrations. It no longer runs automatically on container startup.
 
 6. Seed the database once
 
 ```bash
-docker-compose exec web bun prisma/seed.js
+docker-compose exec web node prisma/seed.js
 ```
 
 The app should now be running at <http://localhost:3000>
@@ -74,7 +75,7 @@ The app should now be running at <http://localhost:3000>
 On later runs, you do not need to seed again:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Local Dev (recommended for development)
@@ -104,10 +105,10 @@ Edit `.env` and set:
 3. Start Postgres only (with a host port):
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
 ```
 
-Tip: if you want a shorter command, set `COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml` in your shell and then use `docker-compose up -d db`.
+Tip: if you want a shorter command, set `COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml` in your shell and then use `docker compose up -d db`.
 
 4. Install deps and apply migrations:
 
@@ -129,6 +130,15 @@ bun run dev
 ```
 
 Note: For Docker production runs, `DATABASE_URL` should point to `db` instead of `localhost`.
+
+## Background Jobs (Docker)
+
+The web container starts a lightweight job runner (in the same container) for:
+
+- HEIC/HEIF conversion caching
+- Video poster generation (for previews)
+
+It starts automatically with the web server. To disable it, set `RUN_WORKER=false` in your environment. If disabled, conversions will only happen on-demand.
 ## Upload Root Variables
 
 Set only one of these depending on how you run the app:

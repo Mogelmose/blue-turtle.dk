@@ -12,6 +12,7 @@ import { getServerSession } from 'next-auth';
 import {
   buildMediaRelativePath,
   buildConvertedRelativePath,
+  buildPreviewRelativePath,
   getMonthFolder,
   resolveUploadPath,
   sanitizeFilename,
@@ -48,6 +49,8 @@ const EXTENSION_TO_MIME: Record<string, string> = {
 
 const HEIC_MIME_TYPES = new Set(['image/heic', 'image/heif']);
 const HEIC_EXTENSIONS = new Set(['heic', 'heif']);
+const VIDEO_MIME_PREFIX = 'video/';
+const VIDEO_EXTENSIONS = new Set(['mp4', 'webm', 'mov']);
 
 function resolveMimeType(file: File): string | null {
   if (file.type) {
@@ -120,8 +123,14 @@ export async function POST(request: NextRequest) {
     const absolutePath = resolveUploadPath(relativePath);
     const isHeic =
       HEIC_MIME_TYPES.has(resolvedMimeType) || HEIC_EXTENSIONS.has(extension);
+    const isVideo =
+      resolvedMimeType.startsWith(VIDEO_MIME_PREFIX) ||
+      VIDEO_EXTENSIONS.has(extension);
     const convertedPath = isHeic
       ? buildConvertedRelativePath(albumId, mediaId, '.jpg')
+      : null;
+    const previewPath = isVideo
+      ? buildPreviewRelativePath(albumId, mediaId, '.jpg')
       : null;
 
     await mkdir(path.dirname(absolutePath), { recursive: true });
@@ -146,6 +155,7 @@ export async function POST(request: NextRequest) {
             filename,
             storagePath: relativePath,
             convertedPath,
+            previewPath,
             metadataStatus: 'PENDING',
           },
         });
@@ -162,6 +172,16 @@ export async function POST(request: NextRequest) {
           await tx.job.create({
             data: {
               type: 'CONVERT_HEIC',
+              payload: { mediaId: created.id },
+              status: 'PENDING',
+            },
+          });
+        }
+
+        if (isVideo) {
+          await tx.job.create({
+            data: {
+              type: 'GENERATE_VIDEO_PREVIEW',
               payload: { mediaId: created.id },
               status: 'PENDING',
             },

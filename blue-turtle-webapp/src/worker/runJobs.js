@@ -1,8 +1,6 @@
-import { createReadStream, createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
+import { copyFile, mkdir, open } from 'fs/promises';
 import path from 'path';
-import { pipeline } from 'stream/promises';
-import sharp from 'sharp';
+import { spawn } from 'child_process';
 import prisma from '../lib/prisma.js';
 
 function getUploadRoot() {
@@ -40,14 +38,26 @@ function buildConvertedRelativePath(albumId, mediaId, extension = '.jpg') {
   return path.posix.join('albums', albumId, 'converted', `${mediaId}${safeExtension}`);
 }
 
+function buildPreviewRelativePath(albumId, mediaId, extension = '.jpg') {
+  const safeExtension = sanitizeExtension(extension) || '.jpg';
+  return path.posix.join(
+    'albums',
+    albumId,
+    'derived',
+    'previews',
+    `${mediaId}-poster${safeExtension}`,
+  );
+}
+
 const POLL_INTERVAL_MS = 4000;
 const MAX_ATTEMPTS = 3;
 const CONCURRENCY = 2;
+const JOB_TYPES = ['CONVERT_HEIC', 'GENERATE_VIDEO_PREVIEW'];
 
 let activeCount = 0;
 let isShuttingDown = false;
 
-async function claimJob() {
+async function claimJob(type) {
   const result = await prisma.$queryRaw`
     UPDATE "Job"
     SET status = 'PROCESSING',
@@ -57,13 +67,13 @@ async function claimJob() {
       SELECT id
       FROM "Job"
       WHERE status = 'PENDING'
-        AND type = 'CONVERT_HEIC'
+        AND type = ${type}
         AND attempts < ${MAX_ATTEMPTS}
       ORDER BY "createdAt" ASC
       FOR UPDATE SKIP LOCKED
       LIMIT 1
     )
-    RETURNING id, payload, attempts;
+    RETURNING id, type, payload, attempts;
   `;
 
   if (!Array.isArray(result) || result.length === 0) {
@@ -121,11 +131,11 @@ async function handleConvertHeic(job) {
 
   await mkdir(path.dirname(convertedAbsolute), { recursive: true });
 
-  await pipeline(
-    createReadStream(originalAbsolute),
-    sharp().rotate().jpeg({ quality: 82 }),
-    createWriteStream(convertedAbsolute),
-  );
+  if (await isJpegFile(originalAbsolute)) {
+    await copyFile(originalAbsolute, convertedAbsolute);
+  } else {
+    await runHeifConvert(originalAbsolute, convertedAbsolute);
+  }
 
   if (!media.convertedPath) {
     await prisma.media.update({
@@ -135,9 +145,134 @@ async function handleConvertHeic(job) {
   }
 }
 
+function runHeifConvert(inputPath, outputPath) {
+  return new Promise((resolve, reject) => {
+    const args = ['-q', '90', inputPath, outputPath];
+    const proc = spawn('heif-convert', args, { stdio: ['ignore', 'ignore', 'pipe'] });
+    let stderr = '';
+
+    proc.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    proc.on('error', (error) => {
+      const details = stderr.trim();
+      reject(
+        new Error(
+          `heif-convert failed to start: ${error.message}${details ? ` (${details})` : ''}`,
+        ),
+      );
+    });
+
+    proc.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        const details = stderr.trim();
+        reject(
+          new Error(
+            `heif-convert exited with code ${code}${details ? ` (${details})` : ''}`,
+          ),
+        );
+      }
+    });
+  });
+}
+
+async function isJpegFile(absolutePath) {
+  const file = await open(absolutePath, 'r');
+  try {
+    const buffer = Buffer.alloc(3);
+    await file.read(buffer, 0, 3, 0);
+    return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  } finally {
+    await file.close();
+  }
+}
+
+function runFfmpeg(inputPath, outputPath, extraArgs = []) {
+  return new Promise((resolve, reject) => {
+    const args = [
+      '-y',
+      '-loglevel',
+      'error',
+      '-i',
+      inputPath,
+      ...extraArgs,
+      outputPath,
+    ];
+    const proc = spawn('ffmpeg', args, { stdio: 'ignore' });
+
+    proc.on('error', (error) => {
+      reject(new Error(`ffmpeg failed to start: ${error.message}`));
+    });
+
+    proc.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`ffmpeg exited with code ${code}`));
+      }
+    });
+  });
+}
+
+async function handleGenerateVideoPreview(job) {
+  const payload = job.payload ?? {};
+  const mediaId = payload.mediaId;
+
+  if (!mediaId || typeof mediaId !== 'string') {
+    throw new Error('Missing mediaId in job payload.');
+  }
+
+  const media = await prisma.media.findUnique({
+    where: { id: mediaId },
+    select: {
+      id: true,
+      albumId: true,
+      storagePath: true,
+      previewPath: true,
+    },
+  });
+
+  if (!media?.storagePath || !media.albumId) {
+    throw new Error('Media record missing storagePath or albumId.');
+  }
+
+  const originalAbsolute = resolveUploadPath(media.storagePath);
+  const relativePreviewPath =
+    media.previewPath ?? buildPreviewRelativePath(media.albumId, media.id, '.jpg');
+  const previewAbsolute = resolveUploadPath(relativePreviewPath);
+
+  await mkdir(path.dirname(previewAbsolute), { recursive: true });
+  await runFfmpeg(originalAbsolute, previewAbsolute, [
+    '-ss',
+    '0.5',
+    '-frames:v',
+    '1',
+    '-q:v',
+    '2',
+    '-vf',
+    'scale=960:-2',
+  ]);
+
+  if (!media.previewPath) {
+    await prisma.media.update({
+      where: { id: media.id },
+      data: { previewPath: relativePreviewPath },
+    });
+  }
+}
+
 async function processJob(job) {
   try {
-    await handleConvertHeic(job);
+    if (job.type === 'CONVERT_HEIC') {
+      await handleConvertHeic(job);
+    } else if (job.type === 'GENERATE_VIDEO_PREVIEW') {
+      await handleGenerateVideoPreview(job);
+    } else {
+      throw new Error(`Unsupported job type: ${job.type}`);
+    }
     await markJobDone(job.id);
   } catch (error) {
     const message =
@@ -149,7 +284,13 @@ async function processJob(job) {
 
 async function runOnce() {
   while (!isShuttingDown && activeCount < CONCURRENCY) {
-    const job = await claimJob();
+    let job = null;
+    for (const type of JOB_TYPES) {
+      job = await claimJob(type);
+      if (job) {
+        break;
+      }
+    }
     if (!job) {
       break;
     }
@@ -162,7 +303,7 @@ async function runOnce() {
 }
 
 async function start() {
-  console.log('Worker started: CONVERT_HEIC');
+  console.log('Worker started: CONVERT_HEIC, GENERATE_VIDEO_PREVIEW');
   await runOnce();
   const interval = setInterval(() => {
     if (isShuttingDown) {

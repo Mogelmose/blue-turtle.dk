@@ -39,6 +39,21 @@ export function buildConvertedRelativePath(
   return path.posix.join('albums', albumId, 'converted', `${mediaId}${safeExtension}`);
 }
 
+export function buildPreviewRelativePath(
+  albumId: string,
+  mediaId: string,
+  extension = '.jpg',
+): string {
+  const safeExtension = sanitizeExtension(extension) || '.jpg';
+  return path.posix.join(
+    'albums',
+    albumId,
+    'derived',
+    'previews',
+    `${mediaId}-poster${safeExtension}`,
+  );
+}
+
 export function sanitizeFilename(name: string): string {
   const base = path.basename(name);
   const extension = path.extname(base);
