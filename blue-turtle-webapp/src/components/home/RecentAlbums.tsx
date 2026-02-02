@@ -37,7 +37,7 @@ export default function RecentAlbums({ albums }: Props) {
             <div
               className={`hidden overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out sm:block ${
                 isExpanded
-                  ? 'max-h-2499.75 opacity-100 translate-y-0 delay-100'
+                  ? 'max-h-[2499.75px] opacity-100 translate-y-0 delay-100'
                   : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none'
               }`}
             >

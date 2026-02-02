@@ -57,6 +57,7 @@ export default function RecentMedia({ items }: Props) {
   const baseItems = useMemo(() => cappedItems.slice(0, 8), [cappedItems]);
   const extraItems = useMemo(() => cappedItems.slice(8), [cappedItems]);
   const hasOverflow = hasMore || prefetchedItems.length > 0 || extraItems.length > 0;
+  const desktopDisplayedCount = isExpanded ? cappedItems.length : baseItems.length;
 
   const fetchMore = useCallback(async (append: boolean) => {
     if (hasRequestedRef.current) {
@@ -152,7 +153,8 @@ export default function RecentMedia({ items }: Props) {
     <section id="home-media" className="space-y-4 mb-2 md:mb-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-main">Seneste medier</h2>
-        <span className="text-sm text-muted">{cappedItems.length} viste</span>
+        <span className="text-sm text-muted sm:hidden">{cappedItems.length} viste</span>
+        <span className="text-sm text-muted hidden sm:inline">{desktopDisplayedCount} viste</span>
       </div>
       {cappedItems.length > 0 ? (
         <>
@@ -173,7 +175,7 @@ export default function RecentMedia({ items }: Props) {
             <div
               className={`hidden overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out sm:block ${
                 isExpanded
-                  ? 'max-h-2499.75 opacity-100 translate-y-0 delay-100'
+                  ? 'max-h-[2499.75px] opacity-100 translate-y-0 delay-100'
                   : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none'
               }`}
             >
