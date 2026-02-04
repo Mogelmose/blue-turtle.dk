@@ -72,7 +72,12 @@ export default async function AlbumsPage() {
                     Se alle album, grupperet efter kategori.
                   </p>
                 </div>
-                <CreateAlbumButton />
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="rounded-full border border-default bg-surface-elevated px-3 py-1 text-xs font-semibold text-main">
+                    {albums.length} {albums.length === 1 ? 'album' : 'albums'}
+                  </span>
+                  <CreateAlbumButton />
+                </div>
               </div>
             </section>
             {grouped.map((group) => (

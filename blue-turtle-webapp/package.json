@@ -8,7 +8,8 @@
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
-    "worker": "node src/worker/runJobs.js"
+    "worker": "node src/worker/runJobs.js",
+    "backfill:video-previews": "node src/worker/backfillVideoPreviews.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createReadStream } from "fs";
 import { mkdtemp, open, rm, stat } from "fs/promises";
 import mime from "mime-types";
-import { Readable } from "stream";
 import { spawn } from "child_process";
 import os from "os";
 import path from "path";
@@ -14,6 +13,94 @@ import { resolveUploadPath } from "@/lib/storage";
 export const runtime = "nodejs";
 const HEIC_MIME_TYPES = new Set(["image/heic", "image/heif"]);
 const HEIC_EXTENSIONS = [".heic", ".heif"];
+
+function createWebReadableStream(nodeStream, abortSignal) {
+  let closed = false;
+  let cleanup = () => {};
+  let onAbort = null;
+
+  const safeClose = (controller) => {
+    if (closed) {
+      return;
+    }
+    closed = true;
+    cleanup();
+    controller.close();
+  };
+
+  const safeError = (controller, error) => {
+    if (closed) {
+      return;
+    }
+    closed = true;
+    cleanup();
+    controller.error(error);
+  };
+
+  return new ReadableStream({
+    start(controller) {
+      const onData = (chunk) => {
+        if (closed) {
+          return;
+        }
+        try {
+          controller.enqueue(chunk);
+        } catch (error) {
+          if (error?.code === "ERR_INVALID_STATE") {
+            safeClose(controller);
+            return;
+          }
+          safeError(controller, error);
+        }
+      };
+
+      const onEnd = () => safeClose(controller);
+
+      const onError = (error) => {
+        if (abortSignal?.aborted || error?.code === "ERR_STREAM_PREMATURE_CLOSE") {
+          safeClose(controller);
+          return;
+        }
+        safeError(controller, error);
+      };
+
+      onAbort = () => {
+        nodeStream.destroy();
+        safeClose(controller);
+      };
+
+      cleanup = () => {
+        nodeStream.off("data", onData);
+        nodeStream.off("end", onEnd);
+        nodeStream.off("close", onEnd);
+        nodeStream.off("error", onError);
+        if (abortSignal && onAbort) {
+          abortSignal.removeEventListener("abort", onAbort);
+        }
+      };
+
+      nodeStream.on("data", onData);
+      nodeStream.on("end", onEnd);
+      nodeStream.on("close", onEnd);
+      nodeStream.on("error", onError);
+
+      if (abortSignal) {
+        abortSignal.addEventListener("abort", onAbort, { once: true });
+      }
+    },
+    cancel() {
+      if (closed) {
+        return;
+      }
+      closed = true;
+      if (abortSignal && onAbort) {
+        abortSignal.removeEventListener("abort", onAbort);
+      }
+      nodeStream.destroy();
+      cleanup();
+    },
+  });
+}
 
 function parseRangeHeader(rangeHeader, size) {
   if (!rangeHeader) {
@@ -113,13 +200,14 @@ async function isJpegFile(absolutePath) {
   }
 }
 
-async function createTempJpegResponse({ absolutePath, filename }) {
+async function createTempJpegResponse({ absolutePath, filename, signal }) {
   if (await isJpegFile(absolutePath)) {
     const fileStat = await stat(absolutePath);
     return createStaticJpegResponse({
       absolutePath,
       filename,
       size: fileStat.size,
+      signal,
     });
   }
 
@@ -130,7 +218,7 @@ async function createTempJpegResponse({ absolutePath, filename }) {
   const tempStat = await stat(tempOutput);
 
   const stream = createReadStream(tempOutput);
-  const body = Readable.toWeb(stream);
+  const body = createWebReadableStream(stream, signal);
 
   let cleaned = false;
   const cleanup = async () => {
@@ -158,9 +246,9 @@ async function createTempJpegResponse({ absolutePath, filename }) {
   });
 }
 
-function createStaticJpegResponse({ absolutePath, filename, size }) {
+function createStaticJpegResponse({ absolutePath, filename, size, signal }) {
   const stream = createReadStream(absolutePath);
-  const body = Readable.toWeb(stream);
+  const body = createWebReadableStream(stream, signal);
 
   return new Response(body, {
     status: 200,
@@ -317,13 +405,14 @@ export async function GET(request, { params }) {
             absolutePath: convertedAbsolutePath,
             filename: context.filename,
             size: convertedStat.size,
+            signal: request.signal,
           });
         } catch {
           // Fall back to on-the-fly conversion.
         }
       }
 
-      return await createTempJpegResponse(context);
+      return await createTempJpegResponse({ ...context, signal: request.signal });
     }
 
     const { absolutePath, size, contentType, filename } = context;
@@ -344,7 +433,7 @@ export async function GET(request, { params }) {
       const { start, end } = range;
       const chunkSize = end - start + 1;
       const stream = createReadStream(absolutePath, { start, end });
-      const body = Readable.toWeb(stream);
+      const body = createWebReadableStream(stream, request.signal);
 
       return new Response(body, {
         status: 206,
@@ -359,7 +448,7 @@ export async function GET(request, { params }) {
     }
 
     const stream = createReadStream(absolutePath);
-    const body = Readable.toWeb(stream);
+    const body = createWebReadableStream(stream, request.signal);
     return new Response(body, {
       status: 200,
       headers: {

@@ -83,6 +83,7 @@ export default function HomeMediaTile({ item }: Props) {
     kind === 'video' ? 'Video' : kind === 'image' ? 'Billede' : 'Fil';
   const displayUrl = getDisplayUrl(item.url, item.mimeType);
   const [posterSrc, setPosterSrc] = useState(FALLBACK_VIDEO_POSTER);
+  const [isMobilePreview, setIsMobilePreview] = useState(false);
   const previewUrl = `/api/media/${item.id}/preview`;
 
   useEffect(() => {
@@ -107,6 +108,16 @@ export default function HomeMediaTile({ item }: Props) {
     };
   }, [kind, previewUrl]);
 
+  useEffect(() => {
+    if (kind !== 'video') {
+      return;
+    }
+    const isCoarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+    const ua = navigator.userAgent?.toLowerCase() ?? '';
+    const isIOS = ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod');
+    setIsMobilePreview(isCoarse || isIOS);
+  }, [kind]);
+
   return (
     <Link
       href={`/albums/${item.albumId}`}
@@ -123,22 +134,32 @@ export default function HomeMediaTile({ item }: Props) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : kind === 'video' ? (
-          <video
-            className="h-full w-full object-cover"
-            preload="auto"
-            muted
-            playsInline
-            poster={posterSrc}
-            onLoadedData={(event) => {
-              try {
-                event.currentTarget.currentTime = 0.1;
-              } catch {
-                // Best-effort thumbnail seek.
-              }
-            }}
-          >
-            <source src={item.url} />
-          </video>
+          isMobilePreview ? (
+            <img
+              src={posterSrc}
+              alt={item.albumName}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              onError={() => setPosterSrc(FALLBACK_VIDEO_POSTER)}
+            />
+          ) : (
+            <video
+              className="h-full w-full object-cover"
+              preload="auto"
+              muted
+              playsInline
+              poster={posterSrc}
+              onLoadedData={(event) => {
+                try {
+                  event.currentTarget.currentTime = 0.1;
+                } catch {
+                  // Best-effort thumbnail seek.
+                }
+              }}
+            >
+              <source src={item.url} />
+            </video>
+          )
         ) : (
           <div className="flex h-full w-full items-center justify-center text-sm text-muted">
             Fil

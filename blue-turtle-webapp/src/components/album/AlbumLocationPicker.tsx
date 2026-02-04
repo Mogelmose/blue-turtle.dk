@@ -99,7 +99,7 @@ export default function AlbumLocationPicker({ value, onChange }: Props) {
   return (
     <div
       ref={containerRef}
-      className="h-56 w-full overflow-hidden rounded-xl border-2 border-default shadow-sm"
+      className="h-66 sm:h-80 md:h-80 lg:h-96 w-full overflow-hidden rounded-xl border-2 border-default shadow-sm"
     >
       <MapContainer
         center={center}
