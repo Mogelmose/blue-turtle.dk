@@ -110,7 +110,7 @@ export async function GET(request) {
 export async function POST(request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (!session) {
     return NextResponse.json({ message: 'Not authorized' }, { status: 401 });
   }
 

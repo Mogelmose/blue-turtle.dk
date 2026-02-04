@@ -92,7 +92,7 @@ function MapResizeHandler({ containerRef }: { containerRef: RefObject<HTMLDivEle
 }
 
 export default function AlbumLocationPicker({ value, onChange }: Props) {
-  const center = value ? [value.lat, value.lng] : DEFAULT_CENTER;
+  const center: [number, number] = value ? [value.lat, value.lng] : DEFAULT_CENTER;
   const zoom = value ? SELECTED_ZOOM : DEFAULT_ZOOM;
   const containerRef = useRef<HTMLDivElement | null>(null);
 

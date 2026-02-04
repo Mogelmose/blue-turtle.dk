@@ -1,18 +1,18 @@
 'use client';
+
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Album, Category } from '@prisma/client';
+import type { Album, Category } from '@prisma/client';
 
 const AlbumLocationPicker = dynamic(() => import('./AlbumLocationPicker'), {
   ssr: false,
 });
 
-interface EditAlbumModalProps {
+interface CreateAlbumModalProps {
   isOpen: boolean;
   onClose: () => void;
-  album: Album;
-  onAlbumUpdated: (updatedAlbum: Album) => void;
+  onAlbumCreated: (createdAlbum: Album) => void;
 }
 
 const CATEGORY_LABELS: Record<Category, string> = {
@@ -27,18 +27,18 @@ const CATEGORY_ORDER: Category[] = [
   'JULEFROKOST',
 ];
 
-export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated }: EditAlbumModalProps) {
-  const [name, setName] = useState(album.name);
-  const [infoText, setInfoText] = useState(album.infoText || '');
-  const [category, setCategory] = useState(album.category);
+export default function CreateAlbumModal({
+  isOpen,
+  onClose,
+  onAlbumCreated,
+}: CreateAlbumModalProps) {
+  const [name, setName] = useState('');
+  const [infoText, setInfoText] = useState('');
+  const [category, setCategory] = useState<Category>('REJSER');
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    album.latitude !== null && album.longitude !== null
-      ? { lat: album.latitude, lng: album.longitude }
-      : null,
-  );
-  const [locationName, setLocationName] = useState(album.locationName || '');
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationName, setLocationName] = useState('');
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -50,27 +50,15 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
       return;
     }
 
-    setName(album.name);
-    setInfoText(album.infoText || '');
-    setCategory(album.category);
+    setName('');
+    setInfoText('');
+    setCategory('REJSER');
     setCoverFile(null);
     setCoverPreviewUrl(null);
-    setLocation(
-      album.latitude !== null && album.longitude !== null
-        ? { lat: album.latitude, lng: album.longitude }
-        : null,
-    );
-    setLocationName(album.locationName || '');
+    setLocation(null);
+    setLocationName('');
     setError(null);
-  }, [
-    album.category,
-    album.infoText,
-    album.latitude,
-    album.locationName,
-    album.longitude,
-    album.name,
-    isOpen,
-  ]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!infoTextRef.current) {
@@ -149,51 +137,33 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
 
     startTransition(async () => {
       try {
-        const useFormData = Boolean(coverFile);
-        let response: Response;
-
-        if (useFormData) {
-          const formData = new FormData();
-          formData.append('name', name);
-          formData.append('infoText', infoText);
-          formData.append('category', category);
-          if (coverFile) {
-            formData.append('coverImage', coverFile);
-          }
-          if (location) {
-            formData.append('latitude', location.lat.toString());
-            formData.append('longitude', location.lng.toString());
-          }
-          if (locationName) {
-            formData.append('locationName', locationName);
-          }
-
-          response = await fetch(`/api/albums/${album.id}`, {
-            method: 'PATCH',
-            body: formData,
-          });
-        } else {
-          response = await fetch(`/api/albums/${album.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name,
-              infoText,
-              category,
-              latitude: location?.lat ?? null,
-              longitude: location?.lng ?? null,
-              locationName: locationName || null,
-            }),
-          });
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('infoText', infoText);
+        formData.append('category', category);
+        if (coverFile) {
+          formData.append('coverImage', coverFile);
         }
+        if (location) {
+          formData.append('latitude', location.lat.toString());
+          formData.append('longitude', location.lng.toString());
+        }
+        if (locationName) {
+          formData.append('locationName', locationName);
+        }
+
+        const response = await fetch('/api/albums', {
+          method: 'POST',
+          body: formData,
+        });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || 'Noget gik galt');
+          throw new Error(data.error || data.message || 'Noget gik galt');
         }
 
-        onAlbumUpdated(data);
+        onAlbumCreated(data);
         onClose();
       } catch (err: any) {
         setError(err.message);
@@ -201,8 +171,7 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
     });
   };
 
-  const coverUrl = album.coverImage ? `/api/albums/${album.id}/cover` : null;
-  const displayCoverUrl = coverPreviewUrl || coverUrl;
+  const displayCoverUrl = coverPreviewUrl;
 
   if (!isOpen) {
     return null;
@@ -217,13 +186,13 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
         className="card w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-xl overscroll-contain scrollbar-subtle scrollbar-gutter-stable"
         role="dialog"
         aria-modal="true"
-        aria-label="Rediger album"
+        aria-label="Opret album"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-default pb-3">
           <div>
-            <h2 className="text-lg font-semibold text-main">Rediger album</h2>
-            <p className="text-sm text-muted">Opdater navn, lokation m.m.</p>
+            <h2 className="text-lg font-semibold text-main">Opret album</h2>
+            <p className="text-sm text-muted">Udfyld navn, lokation m.m.</p>
           </div>
           <button
             type="button"
@@ -269,6 +238,7 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
               rows={3}
               ref={infoTextRef}
               className="input min-h-22 resize-none overflow-hidden"
+              required
             />
           </div>
           <div>
@@ -278,7 +248,7 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
                 type="button"
                 onClick={() => coverInputRef.current?.click()}
                 className="group relative h-40 w-40 xl:h-70 xl:w-70 overflow-hidden rounded-lg border-2 border-default bg-surface-elevated transition hover:border-default-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-ocean-500"
-                aria-label="Skift albumcover"
+                aria-label="Vælg albumcover"
               >
                 {displayCoverUrl ? (
                   <img
@@ -414,7 +384,7 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
               Annuller
             </button>
             <button type="submit" disabled={isPending} className="btn btn-primary btn-sm">
-              {isPending ? 'Gemmer...' : 'Gem'}
+              {isPending ? 'Opretter...' : 'Opret album'}
             </button>
           </div>
         </form>

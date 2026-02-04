@@ -2,6 +2,7 @@ import { Category } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import type { AlbumSummary } from '@/lib/types/homepage';
 import AlbumGroupSection from '@/components/album/AlbumGroupSection';
+import CreateAlbumButton from '@/components/album/CreateAlbumButton';
 import BottomNav from '@/components/layout/BottomNav';
 import Container from '@/components/layout/Container';
 import Footer from '@/components/layout/Footer';
@@ -62,12 +63,17 @@ export default async function AlbumsPage() {
         <Container className="w-full py-6 pb-24 md:pb-6">
           <div className="space-y-10">
             <section className="card card-gradient mb-4">
-              <h1 className="text-3xl font-bold text-main sm:text-4xl">
-                Alle albums
-              </h1>
-              <p className="mt-2 text-sm text-muted">
-                Se alle album, grupperet efter kategori.
-              </p>
+              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-main sm:text-4xl">
+                    Alle albums
+                  </h1>
+                  <p className="mt-2 text-sm text-muted">
+                    Se alle album, grupperet efter kategori.
+                  </p>
+                </div>
+                <CreateAlbumButton />
+              </div>
             </section>
             {grouped.map((group) => (
               <AlbumGroupSection
