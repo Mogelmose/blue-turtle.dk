@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Folder, Globe, Home, Plus, User } from 'lucide-react';
 import UploadMenu from '@/components/media/UploadMenu';
 
@@ -17,6 +17,7 @@ type NavItem = {
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -53,9 +54,9 @@ export default function BottomNav() {
     },
     {
       label: 'Profil',
-      href: '/profile',
       icon: User,
       isActive: (path) => path.startsWith('/profile'),
+      onClick: () => router.push('/profile'),
     },
   ];
 
@@ -75,15 +76,16 @@ export default function BottomNav() {
 
             if (!item.href && item.onClick) {
               return (
-              <button
-                key={item.label}
-                type="button"
-                onClick={item.onClick}
-                className={`${baseClasses} ${activeClasses} ${primaryClasses}`}
-                aria-pressed={isUploadOpen}
-              >
-                <Icon size={20} />
-                <span>{item.label}</span>
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={item.onClick}
+                  className={`${baseClasses} ${activeClasses} ${primaryClasses}`}
+                  aria-pressed={item.isPrimary ? isUploadOpen : undefined}
+                  aria-current={!item.isPrimary && isActive ? 'page' : undefined}
+                >
+                  <Icon size={20} />
+                  <span>{item.label}</span>
                 </button>
               );
             }

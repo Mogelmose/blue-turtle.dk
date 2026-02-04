@@ -93,7 +93,7 @@ export async function GET(_request, { params }) {
 export async function PATCH(request, { params }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== 'ADMIN') {
+  if (!session) {
     return NextResponse.json(
       { success: false, error: 'Not authorized' },
       { status: 401 },

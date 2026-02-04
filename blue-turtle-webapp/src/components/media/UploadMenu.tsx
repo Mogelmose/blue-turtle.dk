@@ -303,7 +303,7 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
       onClick={onClose}
     >
       <div
-        className="card w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-xl overscroll-contain"
+        className="card w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-xl overscroll-contain scrollbar-subtle scrollbar-gutter-stable"
         role="dialog"
         aria-modal="true"
         aria-label="Upload medier"

@@ -94,7 +94,7 @@ export default function AlbumContent({ initialAlbum }: Props) {
   const { data: session } = useSession();
   const router = useRouter();
   const touchStart = useRef<{ x: number; y: number } | null>(null);
-  const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'ADMIN';
+  const canEdit = Boolean(session?.user);
 
   const preparedMedia = useMemo(
     () => (album?.media ?? []).map((item) => normalizeMedia(item)),
@@ -238,11 +238,11 @@ export default function AlbumContent({ initialAlbum }: Props) {
                 <span className="rounded-full border border-default bg-surface-elevated px-3 py-1 text-xs font-semibold text-main">
                   {preparedMedia.length} medier
                 </span>
-                {isAdmin ? (
+                {canEdit ? (
                   <button
                     type="button"
                     onClick={() => setIsEditModalOpen(true)}
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-primary btn-sm"
                   >
                     Rediger album
                   </button>
