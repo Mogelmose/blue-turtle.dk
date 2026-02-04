@@ -9,6 +9,13 @@ const pages = {
 /** @type {import('next-auth').AuthOptions['session']} */
 const session = {
   strategy: "jwt",
+  maxAge: 14 * 24 * 60 * 60, // 14 days
+  updateAge: 60 * 60, // 1 hour
+};
+
+/** @type {import('next-auth').AuthOptions['jwt']} */
+const jwt = {
+  maxAge: 14 * 24 * 60 * 60, // 14 days
 };
 
 const callbacks = {
@@ -20,7 +27,7 @@ const callbacks = {
     return token;
   },
   async session({ session, token }) {
-    if (token) {
+    if (token && session?.user) {
       session.user.id = token.id;
       session.user.role = token.role;
     }
@@ -66,6 +73,7 @@ export function getAuthOptions() {
     ],
     pages,
     session,
+    jwt,
     callbacks,
   };
 }
@@ -74,5 +82,6 @@ export function getAuthOptions() {
 export const sessionAuthOptions = {
   pages,
   session,
+  jwt,
   callbacks,
 };

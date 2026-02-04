@@ -86,14 +86,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
         {/* Alerts â€“ fully using .alert-* classes */}
         {fejlbesked && (
-          <div className="alert-danger animate-status-in p-3 md:p-4 rounded-lg w-60 shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
+          <div className="alert-danger animate-status-in p-3 md:p-4 rounded-lg w-60 md:w-70 mx-auto shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
             <ExclamationTriangleIcon className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
             <span>{fejlbesked}</span>
           </div>
         )}
 
         {succesbesked && (
-          <div className="alert-success animate-status-in p-3 md:p-4 rounded-lg w-60 md:w-70 shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
+          <div className="alert-success animate-status-in p-3 md:p-4 rounded-lg w-60 md:w-70 mx-auto shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
             <CheckCircleIcon className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
             <span>{succesbesked}</span>
           </div>

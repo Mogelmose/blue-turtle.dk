@@ -20,9 +20,41 @@ export default function BottomNav() {
   const router = useRouter();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [bottomOffset, setBottomOffset] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) {
+      return undefined;
+    }
+
+    const updateOffset = () => {
+      const viewport = window.visualViewport;
+      if (!viewport) {
+        setBottomOffset(0);
+        return;
+      }
+
+      const offset = Math.max(
+        0,
+        window.innerHeight - viewport.height - viewport.offsetTop,
+      );
+      setBottomOffset(offset);
+    };
+
+    updateOffset();
+    window.visualViewport.addEventListener('resize', updateOffset);
+    window.visualViewport.addEventListener('scroll', updateOffset);
+    window.addEventListener('orientationchange', updateOffset);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateOffset);
+      window.visualViewport?.removeEventListener('scroll', updateOffset);
+      window.removeEventListener('orientationchange', updateOffset);
+    };
   }, []);
 
   const safePathname = isMounted ? pathname : '';
@@ -78,7 +110,10 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-default bg-surface/95 backdrop-blur-sm md:hidden">
+      <nav
+        className="fixed left-0 right-0 z-50 border-t-2 border-default bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm md:hidden"
+        style={{ bottom: `${bottomOffset}px` }}
+      >
         <div className="mx-auto flex max-w-3xl items-stretch px-2">
           {items.map((item) => {
             const isActive = item.isActive ? item.isActive(safePathname) : false;
