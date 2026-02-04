@@ -189,6 +189,40 @@ function runHeifConvert(inputPath, outputPath) {
   });
 }
 
+function runFfmpeg(inputPath, outputPath, extraArgs = []) {
+  return new Promise((resolve, reject) => {
+    const args = ["-y", "-loglevel", "error", "-i", inputPath, ...extraArgs, outputPath];
+    const proc = spawn("ffmpeg", args, { stdio: "ignore" });
+
+    proc.on("error", (error) => {
+      reject(new Error(`ffmpeg failed to start: ${error.message}`));
+    });
+
+    proc.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`ffmpeg exited with code ${code}`));
+      }
+    });
+  });
+}
+
+async function convertHeicToJpeg(inputPath, outputPath) {
+  try {
+    await runHeifConvert(inputPath, outputPath);
+  } catch (error) {
+    const heifMessage = error instanceof Error ? error.message : "heif-convert failed";
+    try {
+      await runFfmpeg(inputPath, outputPath, ["-frames:v", "1", "-q:v", "2"]);
+    } catch (ffmpegError) {
+      const ffmpegMessage =
+        ffmpegError instanceof Error ? ffmpegError.message : "ffmpeg failed";
+      throw new Error(`${heifMessage}; ${ffmpegMessage}`);
+    }
+  }
+}
+
 async function isJpegFile(absolutePath) {
   const file = await open(absolutePath, "r");
   try {
@@ -214,7 +248,7 @@ async function createTempJpegResponse({ absolutePath, filename, signal }) {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "heic-"));
   const tempOutput = path.join(tempDir, "converted.jpg");
 
-  await runHeifConvert(absolutePath, tempOutput);
+  await convertHeicToJpeg(absolutePath, tempOutput);
   const tempStat = await stat(tempOutput);
 
   const stream = createReadStream(tempOutput);

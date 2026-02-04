@@ -67,7 +67,7 @@ async function claimJob(type) {
       SELECT id
       FROM "Job"
       WHERE status = 'PENDING'
-        AND type = ${type}
+        AND type = ${type}::"JobType"
         AND attempts < ${MAX_ATTEMPTS}
       ORDER BY "createdAt" ASC
       FOR UPDATE SKIP LOCKED
@@ -134,7 +134,7 @@ async function handleConvertHeic(job) {
   if (await isJpegFile(originalAbsolute)) {
     await copyFile(originalAbsolute, convertedAbsolute);
   } else {
-    await runHeifConvert(originalAbsolute, convertedAbsolute);
+    await convertHeicToJpeg(originalAbsolute, convertedAbsolute);
   }
 
   if (!media.convertedPath) {
@@ -177,6 +177,23 @@ function runHeifConvert(inputPath, outputPath) {
       }
     });
   });
+}
+
+async function convertHeicToJpeg(inputPath, outputPath) {
+  try {
+    await runHeifConvert(inputPath, outputPath);
+    return;
+  } catch (error) {
+    const heifMessage = error instanceof Error ? error.message : 'heif-convert failed';
+    try {
+      await runFfmpeg(inputPath, outputPath, ['-frames:v', '1', '-q:v', '2']);
+      return;
+    } catch (ffmpegError) {
+      const ffmpegMessage =
+        ffmpegError instanceof Error ? ffmpegError.message : 'ffmpeg failed';
+      throw new Error(`${heifMessage}; ${ffmpegMessage}`);
+    }
+  }
 }
 
 async function isJpegFile(absolutePath) {
