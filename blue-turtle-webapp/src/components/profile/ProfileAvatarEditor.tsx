@@ -12,6 +12,15 @@ const ALLOWED_FILE_TYPES = new Set([
   'image/heic',
   'image/heif',
 ]);
+const ALLOWED_FILE_EXTENSIONS = new Set([
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'webp',
+  'heic',
+  'heif',
+]);
 
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 
@@ -48,6 +57,14 @@ export default function ProfileAvatarEditor({
     inputRef.current?.click();
   };
 
+  const isAllowedFile = (file: File) => {
+    if (ALLOWED_FILE_TYPES.has(file.type)) {
+      return true;
+    }
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    return extension ? ALLOWED_FILE_EXTENSIONS.has(extension) : false;
+  };
+
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -57,7 +74,7 @@ export default function ProfileAvatarEditor({
     setError(null);
     setStatus(null);
 
-    if (!ALLOWED_FILE_TYPES.has(file.type)) {
+    if (!isAllowedFile(file)) {
       setError('Ikke tilladt filtype.');
       event.target.value = '';
       return;

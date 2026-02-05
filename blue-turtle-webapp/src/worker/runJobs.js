@@ -2,6 +2,7 @@ import { copyFile, mkdir, open } from 'fs/promises';
 import path from 'path';
 import { spawn } from 'child_process';
 import prisma from '../lib/prisma.js';
+import { convertHeicToJpeg } from '../lib/heic.js';
 
 function getUploadRoot() {
   const configured = process.env.DEV_UPLOAD_ROOT?.trim();
@@ -142,57 +143,6 @@ async function handleConvertHeic(job) {
       where: { id: media.id },
       data: { convertedPath: relativeConvertedPath },
     });
-  }
-}
-
-function runHeifConvert(inputPath, outputPath) {
-  return new Promise((resolve, reject) => {
-    const args = ['-q', '90', inputPath, outputPath];
-    const proc = spawn('heif-convert', args, { stdio: ['ignore', 'ignore', 'pipe'] });
-    let stderr = '';
-
-    proc.stderr.on('data', (chunk) => {
-      stderr += chunk.toString();
-    });
-
-    proc.on('error', (error) => {
-      const details = stderr.trim();
-      reject(
-        new Error(
-          `heif-convert failed to start: ${error.message}${details ? ` (${details})` : ''}`,
-        ),
-      );
-    });
-
-    proc.on('close', (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        const details = stderr.trim();
-        reject(
-          new Error(
-            `heif-convert exited with code ${code}${details ? ` (${details})` : ''}`,
-          ),
-        );
-      }
-    });
-  });
-}
-
-async function convertHeicToJpeg(inputPath, outputPath) {
-  try {
-    await runHeifConvert(inputPath, outputPath);
-    return;
-  } catch (error) {
-    const heifMessage = error instanceof Error ? error.message : 'heif-convert failed';
-    try {
-      await runFfmpeg(inputPath, outputPath, ['-frames:v', '1', '-q:v', '2']);
-      return;
-    } catch (ffmpegError) {
-      const ffmpegMessage =
-        ffmpegError instanceof Error ? ffmpegError.message : 'ffmpeg failed';
-      throw new Error(`${heifMessage}; ${ffmpegMessage}`);
-    }
   }
 }
 

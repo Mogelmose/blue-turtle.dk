@@ -3,8 +3,9 @@ import prisma from '../../../../lib/prisma';
 import { getServerSession } from 'next-auth';
 import { sessionAuthOptions as authOptions } from '../../../../lib/auth';
 import { createWriteStream } from 'fs';
-import { mkdir, unlink } from 'fs/promises';
+import { mkdir, mkdtemp, rm, unlink } from 'fs/promises';
 import path from 'path';
+import os from 'os';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import mime from 'mime-types';
@@ -13,6 +14,7 @@ import {
   resolveUploadPath,
   sanitizeExtension,
 } from '../../../../lib/storage';
+import { convertHeicToJpeg } from '../../../../lib/heic';
 
 export const runtime = 'nodejs';
 
@@ -24,6 +26,7 @@ const ALLOWED_IMAGE_MIME_TYPES = new Set([
   'image/heic',
   'image/heif',
 ]);
+const HEIC_MIME_TYPES = new Set(['image/heic', 'image/heif']);
 
 const EXTENSION_TO_MIME = {
   jpg: 'image/jpeg',
@@ -67,7 +70,7 @@ function resolveFileExtension(fileName, mimeType) {
 
 export async function GET(_request, { params }) {
   try {
-    const { albumId } = params;
+    const { albumId } = await params;
     const album = await prisma.album.findUnique({
       where: { id: albumId },
       include: { media: true },
@@ -101,7 +104,7 @@ export async function PATCH(request, { params }) {
   }
 
   try {
-    const { albumId } = params;
+    const { albumId } = await params;
     const existingAlbum = await prisma.album.findUnique({
       where: { id: albumId },
       select: { coverImage: true },
@@ -199,8 +202,9 @@ export async function PATCH(request, { params }) {
         );
       }
 
+      const isHeic = Boolean(finalMimeType && HEIC_MIME_TYPES.has(finalMimeType));
       const safeExtension = sanitizeExtension(
-        resolveFileExtension(coverImageFile.name, finalMimeType),
+        isHeic ? '.jpg' : resolveFileExtension(coverImageFile.name, finalMimeType),
       );
 
       if (!safeExtension) {
@@ -215,8 +219,27 @@ export async function PATCH(request, { params }) {
 
       await mkdir(path.dirname(coverAbsolutePath), { recursive: true });
 
-      const nodeStream = Readable.fromWeb(coverImageFile.stream());
-      await pipeline(nodeStream, createWriteStream(coverAbsolutePath));
+      if (isHeic) {
+        const tempDir = await mkdtemp(path.join(os.tmpdir(), 'cover-'));
+        const inputExtension = sanitizeExtension(
+          resolveFileExtension(coverImageFile.name, finalMimeType),
+        );
+        const tempInput = path.join(tempDir, `input${inputExtension || '.heic'}`);
+
+        try {
+          const nodeStream = Readable.fromWeb(coverImageFile.stream());
+          await pipeline(nodeStream, createWriteStream(tempInput));
+          await convertHeicToJpeg(tempInput, coverAbsolutePath);
+        } catch (error) {
+          await unlink(coverAbsolutePath).catch(() => undefined);
+          throw error;
+        } finally {
+          await rm(tempDir, { recursive: true, force: true });
+        }
+      } else {
+        const nodeStream = Readable.fromWeb(coverImageFile.stream());
+        await pipeline(nodeStream, createWriteStream(coverAbsolutePath));
+      }
     }
 
     const infoTextValue = typeof infoText === 'string' ? infoText : null;

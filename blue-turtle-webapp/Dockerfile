@@ -26,7 +26,10 @@ FROM node:20-slim AS runtime-deps
 WORKDIR /app
 ENV NODE_ENV=production
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ffmpeg libheif-examples libde265-0 \
+  && apt-get install -y --no-install-recommends ca-certificates ffmpeg libde265-0 \
+  && echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/bookworm-backports.list \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends -t bookworm-backports libheif1 libheif-examples \
   && rm -rf /var/lib/apt/lists/*
 
 FROM bun-base AS migrate

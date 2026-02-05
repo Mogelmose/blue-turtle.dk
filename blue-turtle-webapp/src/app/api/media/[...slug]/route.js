@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { createReadStream } from "fs";
 import { mkdtemp, open, rm, stat } from "fs/promises";
 import mime from "mime-types";
-import { spawn } from "child_process";
 import os from "os";
 import path from "path";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import { sessionAuthOptions as authOptions } from "@/lib/auth";
 import { resolveUploadPath } from "@/lib/storage";
+import { convertHeicToJpeg } from "@/lib/heic";
 
 export const runtime = "nodejs";
 const HEIC_MIME_TYPES = new Set(["image/heic", "image/heif"]);
@@ -153,74 +153,6 @@ function wantsJpeg(request) {
 function getJpegFilename(filename) {
   const base = filename?.replace(/\.[^/.]+$/, "") || "media";
   return `${base}.jpg`;
-}
-
-function runHeifConvert(inputPath, outputPath) {
-  return new Promise((resolve, reject) => {
-    const args = ["-q", "90", inputPath, outputPath];
-    const proc = spawn("heif-convert", args, { stdio: ["ignore", "ignore", "pipe"] });
-    let stderr = "";
-
-    proc.stderr.on("data", (chunk) => {
-      stderr += chunk.toString();
-    });
-
-    proc.on("error", (error) => {
-      const details = stderr.trim();
-      reject(
-        new Error(
-          `heif-convert failed to start: ${error.message}${details ? ` (${details})` : ""}`,
-        ),
-      );
-    });
-
-    proc.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        const details = stderr.trim();
-        reject(
-          new Error(
-            `heif-convert exited with code ${code}${details ? ` (${details})` : ""}`,
-          ),
-        );
-      }
-    });
-  });
-}
-
-function runFfmpeg(inputPath, outputPath, extraArgs = []) {
-  return new Promise((resolve, reject) => {
-    const args = ["-y", "-loglevel", "error", "-i", inputPath, ...extraArgs, outputPath];
-    const proc = spawn("ffmpeg", args, { stdio: "ignore" });
-
-    proc.on("error", (error) => {
-      reject(new Error(`ffmpeg failed to start: ${error.message}`));
-    });
-
-    proc.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`ffmpeg exited with code ${code}`));
-      }
-    });
-  });
-}
-
-async function convertHeicToJpeg(inputPath, outputPath) {
-  try {
-    await runHeifConvert(inputPath, outputPath);
-  } catch (error) {
-    const heifMessage = error instanceof Error ? error.message : "heif-convert failed";
-    try {
-      await runFfmpeg(inputPath, outputPath, ["-frames:v", "1", "-q:v", "2"]);
-    } catch (ffmpegError) {
-      const ffmpegMessage =
-        ffmpegError instanceof Error ? ffmpegError.message : "ffmpeg failed";
-      throw new Error(`${heifMessage}; ${ffmpegMessage}`);
-    }
-  }
 }
 
 async function isJpegFile(absolutePath) {
