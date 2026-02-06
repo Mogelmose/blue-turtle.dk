@@ -114,6 +114,9 @@ export default function ProfileSecurityPanel() {
 
       setForm(INITIAL_STATE);
       setSuccess(payload?.message || 'Adgangskode opdateret.');
+      setTimeout(() => {
+        signOut({ callbackUrl: '/login' });
+      }, 1200);
     } catch (submitError) {
       console.error('Password change failed:', submitError);
       setError('Kunne ikke ændre adgangskode. Prøv igen.');
@@ -358,7 +361,11 @@ export default function ProfileSecurityPanel() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2 text-xs text-muted">
+                  <ExclamationTriangleIcon className="h-4 w-4" />
+                  <span>Ved succesfuldt adgangskodeskift bliver du logget ud.</span>
+                </div>
                 <button
                   type="submit"
                   className="btn btn-primary btn-sm w-full sm:w-auto"

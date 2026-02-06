@@ -307,19 +307,19 @@ export default function AlbumContent({ initialAlbum }: Props) {
       <main className="flex-1">
         <Container className="w-full py-6 pb-24 md:pb-6">
           <section className="card card-gradient mb-2 md:mb-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted">
+                <p className="text-xl font-semibold uppercase tracking-[0.3em] text-muted sm:text-2xl">
                   {CATEGORY_LABELS[album.category]}
                 </p>
                 <h1 className="mt-2 text-3xl font-bold text-main sm:text-4xl">
                   {album.name}
                 </h1>
                 {album.infoText ? (
-                  <p className="mt-2 text-sm text-muted">{album.infoText}</p>
+                  <p className="mt-2 text-sm text-muted break-all">{album.infoText}</p>
                 ) : null}
               </div>
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 md:w-full md:flex-col md:items-end">
                 <span className="rounded-full border border-default bg-surface-elevated px-3 py-1 text-xs font-semibold text-main">
                   {preparedMedia.length} medier
                 </span>

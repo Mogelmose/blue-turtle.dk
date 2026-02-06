@@ -265,11 +265,13 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
             <textarea
               id="infoText"
               value={infoText}
-              onChange={(e) => setInfoText(e.target.value)}
+              onChange={(e) => setInfoText(e.target.value.slice(0, 300))}
+              maxLength={300}
               rows={3}
               ref={infoTextRef}
               className="input min-h-22 resize-none overflow-hidden"
             />
+            <p className="mt-2 text-xs text-muted">{infoText.length}/300</p>
           </div>
           <div>
             <label htmlFor="coverImage" className="label">Albumcover</label>

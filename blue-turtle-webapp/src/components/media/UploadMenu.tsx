@@ -303,7 +303,7 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
       onClick={onClose}
     >
       <div
-        className="card w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-xl overscroll-contain scrollbar-subtle scrollbar-gutter-stable"
+        className="card w-full max-w-lg overflow-y-auto shadow-xl overscroll-contain scrollbar-subtle scrollbar-gutter-stable"
         role="dialog"
         aria-modal="true"
         aria-label="Upload medier"
@@ -436,24 +436,22 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm text-muted">Du er i gang med at uploade til</p>
-                  <p className="text-base font-semibold text-main">
-                    {selectedAlbum?.name || 'Ukendt album'}
-                  </p>
-                </div>
+              <div>
+                <p className="text-sm text-muted pb-2">Du er i gang med at uploade til</p>
+                <p className="text-base font-semibold text-main pb-2">
+                  {selectedAlbum?.name || 'Ukendt album'}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
                 <button
                   type="button"
-                  className="text-sm text-muted hover:underline"
+                  className="btn btn-secondary btn-md"
                   onClick={() => setStep('album')}
                   disabled={uploading}
                 >
                   Skift album
                 </button>
-              </div>
-
-              <div className="flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={handleChooseFiles}
