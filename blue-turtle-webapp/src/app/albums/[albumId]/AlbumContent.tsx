@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import ReactDOM from 'react-dom';
-import { ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
+import Lightbox from 'react-spring-lightbox';
+import { ArrowDownToLine, Check, ChevronLeft, ChevronRight, Play, Trash2, X } from 'lucide-react';
 import type { Album, Category } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/layout/BottomNav';
@@ -45,7 +46,6 @@ const IMAGE_EXTENSIONS = [
   '.heif',
 ];
 const VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mov'];
-const SWIPE_THRESHOLD = 50;
 const CATEGORY_LABELS: Record<Category, string> = {
   REJSER: 'Rejser',
   SPILLEAFTEN: 'Spilleaftener',
@@ -91,16 +91,33 @@ export default function AlbumContent({ initialAlbum }: Props) {
   const [album, setAlbum] = useState<AlbumData>(initialAlbum);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: session } = useSession();
   const router = useRouter();
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
   const canEdit = Boolean(session?.user);
 
   const preparedMedia = useMemo(
     () => (album?.media ?? []).map((item) => normalizeMedia(item)),
     [album],
   );
-  const activeItem = activeIndex !== null ? preparedMedia[activeIndex] : null;
+  const selectedCount = selectedIds.size;
+  const selectedItems = useMemo(
+    () => preparedMedia.filter((item) => selectedIds.has(item.id)),
+    [preparedMedia, selectedIds],
+  );
+  const lightboxImages = useMemo(
+    () =>
+      preparedMedia.map((item) => ({
+        src: item.kind === 'video' ? FALLBACK_VIDEO_POSTER : item.displayUrl,
+        alt: item.alt || album.name,
+        loading: 'eager' as const,
+        className:
+          'max-h-[70vh] max-w-[92vw] object-contain sm:max-h-[78vh] md:max-h-[82vh]',
+      })),
+    [preparedMedia, album.name],
+  );
+  const lightboxIndex = activeIndex ?? 0;
 
   const handleAlbumUpdated = (updatedAlbum: Album) => {
     setAlbum((prev) => ({ ...prev, ...updatedAlbum }));
@@ -128,6 +145,121 @@ export default function AlbumContent({ initialAlbum }: Props) {
     setActiveIndex(null);
   }, []);
 
+  const toggleSelectionMode = useCallback(() => {
+    setIsSelecting((current) => {
+      const next = !current;
+      if (!next) {
+        setSelectedIds(new Set());
+      } else {
+        setActiveIndex(null);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleMediaSelection = useCallback((mediaId: string) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(mediaId)) {
+        next.delete(mediaId);
+      } else {
+        next.add(mediaId);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleDeleteSelected = useCallback(async () => {
+    if (selectedCount === 0) {
+      return;
+    }
+    const confirmed = window.confirm(
+      `Vil du slette ${selectedCount} medie${selectedCount === 1 ? '' : 'r'}?`,
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/media/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mediaIds: Array.from(selectedIds) }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Delete failed');
+      }
+
+      setSelectedIds(new Set());
+      setIsSelecting(false);
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to delete media:', error);
+      alert('Noget gik galt ved sletning.');
+    }
+  }, [selectedCount, selectedIds, router]);
+
+  const handleDownloadSelected = useCallback(() => {
+    if (selectedCount === 0) {
+      return;
+    }
+
+    if (selectedCount === 1) {
+      const item = selectedItems[0];
+      if (!item) {
+        return;
+      }
+      const link = document.createElement('a');
+      link.href = item.url;
+      link.download = item.filename || item.originalName || 'media';
+      link.rel = 'noopener';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      return;
+    }
+
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const rawName = `${album.name}-${yyyy}-${mm}-${dd}`;
+    const normalized = rawName
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const zipName = `${normalized || 'album'}-${yyyy}-${mm}-${dd}.zip`;
+
+    fetch('/api/media/bulk-download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mediaIds: Array.from(selectedIds), albumId: album.id }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Download failed');
+        }
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = zipName;
+        link.rel = 'noopener';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      })
+      .catch((error) => {
+        console.error('Failed to download zip:', error);
+        alert('Noget gik galt ved download.');
+      });
+  }, [selectedCount, selectedItems, album.id, album.name, selectedIds]);
+
   const goNext = useCallback(() => {
     setActiveIndex((current) => {
       if (current === null || preparedMedia.length === 0) {
@@ -150,31 +282,6 @@ export default function AlbumContent({ initialAlbum }: Props) {
     if (activeIndex === null) {
       return;
     }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closeViewer();
-        return;
-      }
-      if (event.key === 'ArrowRight') {
-        event.preventDefault();
-        goNext();
-      }
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault();
-        goPrev();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeIndex, closeViewer, goNext, goPrev]);
-
-  useEffect(() => {
-    if (activeIndex === null) {
-      return;
-    }
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -187,28 +294,6 @@ export default function AlbumContent({ initialAlbum }: Props) {
       setActiveIndex(null);
     }
   }, [activeIndex, preparedMedia.length]);
-
-  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
-    const touch = event.changedTouches[0];
-    touchStart.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
-    if (!touchStart.current) {
-      return;
-    }
-    const touch = event.changedTouches[0];
-    const deltaX = touch.clientX - touchStart.current.x;
-    const deltaY = touch.clientY - touchStart.current.y;
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
-      if (deltaX < 0) {
-        goNext();
-      } else {
-        goPrev();
-      }
-    }
-    touchStart.current = null;
-  };
 
   if (!album) {
     return <div>Album not found or failed to load.</div>;
@@ -239,13 +324,49 @@ export default function AlbumContent({ initialAlbum }: Props) {
                   {preparedMedia.length} medier
                 </span>
                 {canEdit ? (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="btn btn-primary btn-sm"
-                  >
-                    Rediger album
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      onClick={toggleSelectionMode}
+                      className="btn btn-primary btn-sm"
+                    >
+                      {isSelecting ? 'Annuller' : 'Vælg'}
+                    </button>
+                    {isSelecting ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+                          {selectedCount} valgt
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleDownloadSelected}
+                          disabled={selectedCount === 0}
+                          className="btn btn-primary btn-sm"
+                          aria-label="Download valgte"
+                        >
+                          <ArrowDownToLine size={22} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleDeleteSelected}
+                          disabled={selectedCount === 0}
+                          className="btn btn-danger btn-sm"
+                          aria-label="Slet valgte"
+                        >
+                          <Trash2 size={22} />
+                        </button>
+                      </div>
+                    ) : null}
+                    {!isSelecting ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditModalOpen(true)}
+                        className="btn btn-primary btn-sm"
+                      >
+                        Rediger album
+                      </button>
+                    ) : null}
+                  </>
                 ) : null}
               </div>
             </div>
@@ -262,8 +383,12 @@ export default function AlbumContent({ initialAlbum }: Props) {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setActiveIndex(index)}
-                    className="group relative aspect-square overflow-hidden rounded-md border border-default bg-surface shadow-sm"
+                    onClick={() =>
+                      isSelecting ? toggleMediaSelection(item.id) : setActiveIndex(index)
+                    }
+                    className={`group relative aspect-square overflow-hidden rounded-md border border-default bg-surface shadow-sm ${
+                      selectedIds.has(item.id) ? 'ring-2 ring-sky-400' : ''
+                    }`}
                     aria-label={
                       item.kind === 'video'
                         ? 'Åbn video'
@@ -310,6 +435,17 @@ export default function AlbumContent({ initialAlbum }: Props) {
                         </span>
                       </>
                     ) : null}
+                    {isSelecting ? (
+                      <span
+                        className={`absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full border sm:right-2 sm:top-2 ${
+                          selectedIds.has(item.id)
+                            ? 'border-sky-300 text-white bg-sky-400'
+                            : 'border-white/70 bg-black/40 text-transparent'
+                        }`}
+                      >
+                        <Check size={14} />
+                      </span>
+                    ) : null}
                   </button>
                 ))}
               </div>
@@ -319,88 +455,72 @@ export default function AlbumContent({ initialAlbum }: Props) {
       </main>
       <Footer />
       <BottomNav />
-
-      {activeItem ? (
-        <div
-          className="fixed inset-0 z-60 flex items-center justify-center bg-black/90 text-white"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Media viewer"
-          onClick={closeViewer}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div
-            className="absolute inset-x-0 top-4 z-10 flex items-center justify-between px-4"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
-              {activeIndex !== null ? `${activeIndex + 1} / ${preparedMedia.length}` : null}
-            </div>
+      <Lightbox
+        isOpen={activeIndex !== null}
+        onClose={closeViewer}
+        images={lightboxImages}
+        currentIndex={lightboxIndex}
+        onPrev={goPrev}
+        onNext={goNext}
+        style={{ zIndex: 60, background: 'rgba(8, 15, 23, 0.86)' }}
+        renderHeader={() => (
+          <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+1rem)] z-10 flex items-center justify-between px-4 text-white md:top-[calc(env(safe-area-inset-top)+5.25rem)]">
             <button
               type="button"
               onClick={closeViewer}
-              className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide transition hover:bg-white/20"
+              className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide transition hover:bg-white/20"
               aria-label="Luk"
             >
               <X size={16} /> Luk
             </button>
+            <div className="pointer-events-auto text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
+              {activeIndex !== null ? `${activeIndex + 1} / ${preparedMedia.length}` : null}
+            </div>
           </div>
-
+        )}
+        renderPrevButton={() => (
           <button
             type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              goPrev();
-            }}
-            className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/20 bg-white/10 p-3 transition hover:bg-white/20 md:flex"
+            onClick={goPrev}
+            className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/20 bg-white/10 p-3 text-white transition hover:bg-white/20 md:flex"
             aria-label="Forrige"
           >
             <ChevronLeft size={20} />
           </button>
+        )}
+        renderNextButton={() => (
           <button
             type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              goNext();
-            }}
-            className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/20 bg-white/10 p-3 transition hover:bg-white/20 md:flex"
+            onClick={goNext}
+            className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/20 bg-white/10 p-3 text-white transition hover:bg-white/20 md:flex"
             aria-label="Næste"
           >
             <ChevronRight size={20} />
           </button>
-
-          <div
-            className="relative mx-auto flex max-h-[82vh] w-full max-w-6xl items-center justify-center px-4"
-            onClick={(event) => event.stopPropagation()}
-          >
-            {activeItem.kind === 'video' ? (
+        )}
+        renderImageOverlay={() => {
+          const current = preparedMedia[lightboxIndex];
+          if (!current || current.kind !== 'video') {
+            return null;
+          }
+          const previewUrl = `${current.url}/preview`;
+          return (
+            <div
+              className="absolute inset-0 z-10 flex items-center justify-center px-4"
+              onClick={(event) => event.stopPropagation()}
+            >
               <video
-                src={activeItem.displayUrl}
+                src={current.displayUrl}
                 controls
-                autoPlay
-                muted
+                preload="metadata"
                 playsInline
-                className="max-h-[82vh] w-auto max-w-[92vw] rounded-xl shadow-2xl"
+                poster={previewUrl}
+                className="max-h-[70vh] w-auto max-w-[92vw] rounded-xl shadow-2xl sm:max-h-[78vh] md:max-h-[82vh]"
               />
-            ) : activeItem.kind === 'image' ? (
-              <div className="relative h-[82vh] w-full max-w-[92vw]">
-                <Image
-                  src={activeItem.displayUrl}
-                  alt={activeItem.alt || album.name}
-                  fill
-                  unoptimized
-                  className="object-contain"
-                />
-              </div>
-            ) : (
-              <div className="rounded-xl border border-white/20 bg-white/10 px-6 py-4 text-sm">
-                Ukendt filtype.
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
+            </div>
+          );
+        }}
+      />
 
       {typeof window !== 'undefined' &&
         isEditModalOpen &&
