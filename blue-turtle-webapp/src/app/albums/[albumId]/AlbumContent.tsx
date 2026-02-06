@@ -468,12 +468,12 @@ export default function AlbumContent({ initialAlbum }: Props) {
             <button
               type="button"
               onClick={closeViewer}
-              className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide transition hover:bg-white/20"
+              className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-wide transition hover:bg-white/20"
               aria-label="Luk"
             >
               <X size={16} /> Luk
             </button>
-            <div className="pointer-events-auto text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
+            <div className="pointer-events-auto text-xs font-semibold uppercase tracking-[0.3em] text-white/85">
               {activeIndex !== null ? `${activeIndex + 1} / ${preparedMedia.length}` : null}
             </div>
           </div>
@@ -482,7 +482,7 @@ export default function AlbumContent({ initialAlbum }: Props) {
           <button
             type="button"
             onClick={goPrev}
-            className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/20 bg-white/10 p-3 text-white transition hover:bg-white/20 md:flex"
+            className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/30 bg-white/15 p-3 text-white transition hover:bg-white/20 md:flex"
             aria-label="Forrige"
           >
             <ChevronLeft size={20} />
@@ -492,7 +492,7 @@ export default function AlbumContent({ initialAlbum }: Props) {
           <button
             type="button"
             onClick={goNext}
-            className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/20 bg-white/10 p-3 text-white transition hover:bg-white/20 md:flex"
+            className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-white/30 bg-white/15 p-3 text-white transition hover:bg-white/20 md:flex"
             aria-label="Næste"
           >
             <ChevronRight size={20} />
