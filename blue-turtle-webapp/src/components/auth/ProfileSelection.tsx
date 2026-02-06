@@ -28,7 +28,7 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
 
       {profiles.length > 0 ? (
         <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 p-2 md:gap-2 lg:gap-3 xl:gap-4 justify-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 p-3 lg:gap-3 justify-center">
             {profiles.map((profile) => (
               <div
                 key={profile.name}

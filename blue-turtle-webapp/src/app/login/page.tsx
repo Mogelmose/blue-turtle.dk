@@ -134,7 +134,7 @@ function LoginPageInner() {
   return (
     <div className="flex flex-col min-h-screen bg-page text-main">
       <header className="flex items-center gap-4 p-3 sm:p-4 xl:p-5">
-        <Image src={logoImage} alt="Blue Turtle Logo" width={40} height={40} className="full w-fit" />
+        <Image src={logoImage} alt="Blue Turtle Logo" width={50} height={50} className="full" />
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
           Blue Turtle
         </h1>
