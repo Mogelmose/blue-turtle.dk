@@ -30,6 +30,9 @@ RUN apt-get update \
   && echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/bookworm-backports.list \
   && apt-get update \
   && apt-get install -y --no-install-recommends -t bookworm-backports libheif1 libheif-examples \
+  && rm -rf /usr/local/lib/node_modules/npm \
+  /usr/local/bin/npm \
+  /usr/local/bin/npx \
   && rm -rf /var/lib/apt/lists/*
 
 FROM bun-base AS migrate
