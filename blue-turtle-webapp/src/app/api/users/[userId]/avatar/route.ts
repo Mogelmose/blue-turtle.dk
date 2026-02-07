@@ -17,6 +17,23 @@ import {
 import { convertHeicToJpeg } from '@/lib/heic';
 
 export const runtime = 'nodejs';
+const CACHE_CONTROL = 'private, max-age=300, stale-while-revalidate=86400';
+
+function isNotModified(request: Request, etag: string, lastModified: string) {
+  const ifNoneMatch = request.headers.get('if-none-match');
+  if (ifNoneMatch && ifNoneMatch === etag) {
+    return true;
+  }
+  const ifModifiedSince = request.headers.get('if-modified-since');
+  if (ifModifiedSince) {
+    const since = new Date(ifModifiedSince).getTime();
+    const modified = new Date(lastModified).getTime();
+    if (!Number.isNaN(since) && since >= modified) {
+      return true;
+    }
+  }
+  return false;
+}
 
 const ALLOWED_FILE_TYPES = new Set([
   'image/jpeg',
@@ -64,6 +81,8 @@ type AvatarContext =
       contentType: string;
       filename: string;
       size: number;
+      etag: string;
+      lastModified: string;
     }
   | { error: NextResponse };
 
@@ -112,24 +131,36 @@ async function getAvatarContext(userId: string): Promise<AvatarContext> {
   const lookup = mime.lookup(user.image);
   const contentType =
     typeof lookup === 'string' ? lookup : 'application/octet-stream';
+  const etag = `W/\"${fileStat.size}-${fileStat.mtimeMs}\"`;
+  const lastModified = fileStat.mtime.toUTCString();
 
   return {
     absolutePath,
     contentType,
     filename: path.basename(user.image),
     size: fileStat.size,
+    etag,
+    lastModified,
   };
 }
 
 type RouteContext = { params: Promise<{ userId: string }> };
 
-export async function HEAD(_request: Request, { params }: RouteContext) {
+export async function HEAD(request: Request, { params }: RouteContext) {
   try {
     const { userId } = await params;
     const context = await getAvatarContext(userId);
 
     if ('error' in context) {
       return context.error;
+    }
+    const cacheHeaders = {
+      'Cache-Control': CACHE_CONTROL,
+      ETag: context.etag,
+      'Last-Modified': context.lastModified,
+    };
+    if (isNotModified(request, context.etag, context.lastModified)) {
+      return new NextResponse(null, { status: 304, headers: cacheHeaders });
     }
 
     return new NextResponse(null, {
@@ -139,6 +170,7 @@ export async function HEAD(_request: Request, { params }: RouteContext) {
         'Content-Length': context.size.toString(),
         'Accept-Ranges': 'bytes',
         'Content-Disposition': `inline; filename="${context.filename}"`,
+        ...cacheHeaders,
       },
     });
   } catch (error: any) {
@@ -154,13 +186,21 @@ export async function HEAD(_request: Request, { params }: RouteContext) {
   }
 }
 
-export async function GET(_request: Request, { params }: RouteContext) {
+export async function GET(request: Request, { params }: RouteContext) {
   try {
     const { userId } = await params;
     const context = await getAvatarContext(userId);
 
     if ('error' in context) {
       return context.error;
+    }
+    const cacheHeaders = {
+      'Cache-Control': CACHE_CONTROL,
+      ETag: context.etag,
+      'Last-Modified': context.lastModified,
+    };
+    if (isNotModified(request, context.etag, context.lastModified)) {
+      return new NextResponse(null, { status: 304, headers: cacheHeaders });
     }
 
     const stream = createReadStream(context.absolutePath);
@@ -173,6 +213,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
         'Content-Length': context.size.toString(),
         'Accept-Ranges': 'bytes',
         'Content-Disposition': `inline; filename="${context.filename}"`,
+        ...cacheHeaders,
       },
     });
   } catch (error: any) {

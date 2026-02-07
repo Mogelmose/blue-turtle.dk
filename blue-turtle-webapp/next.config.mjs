@@ -4,6 +4,12 @@ const nextConfig = {
   experimental: {
     proxyClientMaxBodySize: '60mb',
   },
+  images: {
+    localPatterns: [
+      { pathname: '/api/**' },
+      { pathname: '/static/**' },
+    ],
+  },
 };
 
 export default nextConfig;

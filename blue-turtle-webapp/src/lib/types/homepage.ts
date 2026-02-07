@@ -2,6 +2,7 @@ export type AlbumSummary = {
   id: string;
   name: string;
   coverImage: string | null;
+  coverUrl?: string | null;
   createdAt: Date;
   mediaCount: number;
 };

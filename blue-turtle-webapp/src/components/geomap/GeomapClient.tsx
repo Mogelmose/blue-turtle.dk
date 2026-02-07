@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
-import { divIcon, latLngBounds } from 'leaflet';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import { icon, latLngBounds } from 'leaflet';
 import type { GeomapAlbum, GeomapMedia } from '@/lib/types/geomap';
 
 type Props = {
@@ -15,23 +15,28 @@ const DEFAULT_CENTER: [number, number] = [56.2639, 9.5018];
 const DEFAULT_ZOOM = 5;
 const MAX_FIT_ZOOM = 12;
 
-const MEDIA_MARKER_STYLE = {
-  color: '#f97316',
-  fillColor: '#fdba74',
-  fillOpacity: 0.9,
-  weight: 2,
-};
 
-function buildAlbumIcon() {
-  return divIcon({
-    className: 'geomap-album-icon',
-    html:
-      '<div class="geomap-album-pin"><span class="geomap-album-dot"></span></div>',
-    iconSize: [28, 36],
-    iconAnchor: [14, 34],
-    popupAnchor: [0, -30],
-  });
-}
+const albumIcon = icon({
+  iconUrl: '/geomap/album-pin.svg',
+  iconSize: [36, 48],
+  iconAnchor: [18, 46],
+  popupAnchor: [0, -40],
+});
+
+const pictureIcon = icon({
+  iconUrl: '/geomap/picture-pin.svg',
+  iconSize: [20, 38],
+  iconAnchor: [10, 28],
+  popupAnchor: [0, -20],
+});
+
+const videoIcon = icon({
+  iconUrl: '/geomap/video-pin.svg',
+  iconSize: [20, 38],
+  iconAnchor: [10, 28],
+  popupAnchor: [0, -20],
+});
+
 
 function FitBounds({ points }: { points: [number, number][] }) {
   const map = useMap();
@@ -68,7 +73,9 @@ function getSourceLabel(source: GeomapMedia['locationSource']) {
 }
 
 export default function GeomapClient({ albums, media }: Props) {
-  const albumIcon = useMemo(() => buildAlbumIcon(), []);
+  const albumIconMemo = useMemo(() => albumIcon, []);
+  const pictureIconMemo = useMemo(() => pictureIcon, []);
+  const videoIconMemo = useMemo(() => videoIcon, []);
   const points = useMemo<[number, number][]>(() => {
     const albumPoints = albums.map((album) => [album.latitude, album.longitude] as [number, number]);
     const mediaPoints = media.map((item) => [item.locationAutoLat, item.locationAutoLng] as [number, number]);
@@ -77,6 +84,8 @@ export default function GeomapClient({ albums, media }: Props) {
 
   const albumCount = albums.length;
   const mediaCount = media.length;
+  const videoCount = media.filter((item) => item.mimeType?.startsWith('video/')).length;
+  const pictureCount = mediaCount - videoCount;
   const hasPoints = points.length > 0;
 
   return (
@@ -97,19 +106,19 @@ export default function GeomapClient({ albums, media }: Props) {
             {albums.map((album) => (
               <Marker
                 key={`album-${album.id}`}
-                icon={albumIcon}
+                icon={albumIconMemo}
                 position={[album.latitude, album.longitude]}
               >
                 <Popup>
                   <div className="space-y-2">
                     <div>
-                      <p className="text-sm font-semibold text-main">{album.name}</p>
-                      <p className="text-xs text-muted">
+                      <p className="text-base font-semibold text-primary">{album.name}</p>
+                      <p className="text-sm text-main">
                         {album.locationName || 'Album-lokation'}
                       </p>
                     </div>
                     <p className="text-xs text-muted">{album.mediaCount} medier</p>
-                    <Link className="link text-xs" href={`/albums/${album.id}`}>
+                    <Link className="link text-sm" href={`/albums/${album.id}`}>
                       Åbn album
                     </Link>
                   </div>
@@ -118,30 +127,31 @@ export default function GeomapClient({ albums, media }: Props) {
             ))}
             {media.map((item) => {
               const sourceLabel = getSourceLabel(item.locationSource);
+              const isVideo = Boolean(item.mimeType?.startsWith('video/'));
+              const mediaIcon = isVideo ? videoIconMemo : pictureIconMemo;
               return (
-                <CircleMarker
+                <Marker
                   key={`media-${item.id}`}
-                  center={[item.locationAutoLat, item.locationAutoLng]}
-                  radius={6}
-                  pathOptions={MEDIA_MARKER_STYLE}
+                  icon={mediaIcon}
+                  position={[item.locationAutoLat, item.locationAutoLng]}
                 >
                   <Popup>
                     <div className="space-y-2">
                       <div>
-                        <p className="text-sm font-semibold text-main">
+                        <p className="text-base font-semibold text-primary">
                           {getMediaLabel(item.mimeType)}
                         </p>
-                        <p className="text-xs text-muted">{item.albumName}</p>
+                        <p className="text-sm text-main">{item.albumName}</p>
                       </div>
                       {sourceLabel ? (
                         <p className="text-xs text-muted">Kilde: {sourceLabel}</p>
                       ) : null}
-                      <Link className="link text-xs" href={`/albums/${item.albumId}`}>
-                        Gå til album
+                      <Link className="link text-sm" href={`/albums/${item.albumId}?media=${item.id}`}>
+                        {isVideo ? 'Gå til video' : 'Gå til billede'}
                       </Link>
                     </div>
                   </Popup>
-                </CircleMarker>
+                </Marker>
               );
             })}
             <FitBounds points={points} />
@@ -166,16 +176,20 @@ export default function GeomapClient({ albums, media }: Props) {
           </div>
           <div className="space-y-2 text-sm text-muted">
             <div className="flex items-center gap-2">
-              <span className="geomap-legend geomap-legend-album" />
+              <img src="/geomap/album-pin.svg" alt="Album ikon" className="h-6 w-6" />
               {albumCount} Album lokationer
             </div>
             <div className="flex items-center gap-2">
-              <span className="geomap-legend geomap-legend-media" />
-              {mediaCount} Medie lokationer
+              <img src="/geomap/picture-pin.svg" alt="Billede ikon" className="h-6 w-6" />
+              {pictureCount} Billede lokationer
+            </div>
+            <div className="flex items-center gap-2">
+              <img src="/geomap/video-pin.svg" alt="Video ikon" className="h-6 w-6" />
+              {videoCount} Video lokationer
             </div>
           </div>
           <p className="text-xs text-muted">
-            Albums lokationer er sat manuelt af brugeren, mens medie lokationer er automatisk udledt fra metadata fra billeder og videoer. Klik på et punkt på kortet for at se detaljer og navigere til det relevante album/medie.
+            Lokationer for albummer er valgt at brugeren, mens lokationer for medier er automatisk udledt fra metadata. Klik på et punkt på kortet for at se detaljer og navigere til det relevante album/medie.
           </p>
         </div>
 

@@ -8,8 +8,11 @@ import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
 import { resolveUploadPath } from '@/lib/storage';
+import { isSignedRequest } from '@/lib/signedUrl';
 
 export const runtime = 'nodejs';
+
+const CACHE_CONTROL = 'private, max-age=300, stale-while-revalidate=86400';
 
 type CoverContext =
   | {
@@ -17,8 +20,34 @@ type CoverContext =
       contentType: string;
       filename: string;
       size: number;
+      etag: string;
+      lastModified: string;
     }
   | { error: NextResponse };
+
+function buildCacheHeaders({ etag, lastModified }: { etag: string; lastModified: string }) {
+  return {
+    'Cache-Control': CACHE_CONTROL,
+    ETag: etag,
+    'Last-Modified': lastModified,
+  };
+}
+
+function isNotModified(request: Request, etag: string, lastModified: string) {
+  const ifNoneMatch = request.headers.get('if-none-match');
+  if (ifNoneMatch && ifNoneMatch === etag) {
+    return true;
+  }
+  const ifModifiedSince = request.headers.get('if-modified-since');
+  if (ifModifiedSince) {
+    const since = new Date(ifModifiedSince).getTime();
+    const modified = new Date(lastModified).getTime();
+    if (!Number.isNaN(since) && since >= modified) {
+      return true;
+    }
+  }
+  return false;
+}
 
 async function getCoverContext(albumId: string): Promise<CoverContext> {
   if (!albumId) {
@@ -65,20 +94,25 @@ async function getCoverContext(albumId: string): Promise<CoverContext> {
   const lookup = mime.lookup(album.coverImage);
   const contentType =
     typeof lookup === 'string' ? lookup : 'application/octet-stream';
+  const etag = `W/\"${fileStat.size}-${fileStat.mtimeMs}\"`;
+  const lastModified = fileStat.mtime.toUTCString();
 
   return {
     absolutePath,
     contentType,
     filename: path.basename(album.coverImage),
     size: fileStat.size,
+    etag,
+    lastModified,
   };
 }
 
 type RouteContext = { params: Promise<{ albumId: string }> };
 
-export async function HEAD(_request: Request, { params }: RouteContext) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
+export async function HEAD(request: Request, { params }: RouteContext) {
+  const signed = isSignedRequest(request);
+  const session = signed ? null : await getServerSession(authOptions);
+  if (!signed && !session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -90,6 +124,11 @@ export async function HEAD(_request: Request, { params }: RouteContext) {
       return context.error;
     }
 
+    const cacheHeaders = buildCacheHeaders(context);
+    if (!signed && isNotModified(request, context.etag, context.lastModified)) {
+      return new NextResponse(null, { status: 304, headers: cacheHeaders });
+    }
+
     return new NextResponse(null, {
       status: 200,
       headers: {
@@ -97,6 +136,7 @@ export async function HEAD(_request: Request, { params }: RouteContext) {
         'Content-Length': context.size.toString(),
         'Accept-Ranges': 'bytes',
         'Content-Disposition': `inline; filename="${context.filename}"`,
+        ...cacheHeaders,
       },
     });
   } catch (error: any) {
@@ -112,9 +152,10 @@ export async function HEAD(_request: Request, { params }: RouteContext) {
   }
 }
 
-export async function GET(_request: Request, { params }: RouteContext) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
+export async function GET(request: Request, { params }: RouteContext) {
+  const signed = isSignedRequest(request);
+  const session = signed ? null : await getServerSession(authOptions);
+  if (!signed && !session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -124,6 +165,11 @@ export async function GET(_request: Request, { params }: RouteContext) {
 
     if ('error' in context) {
       return context.error;
+    }
+
+    const cacheHeaders = buildCacheHeaders(context);
+    if (!signed && isNotModified(request, context.etag, context.lastModified)) {
+      return new NextResponse(null, { status: 304, headers: cacheHeaders });
     }
 
     const stream = createReadStream(context.absolutePath);
@@ -136,6 +182,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
         'Content-Length': context.size.toString(),
         'Accept-Ranges': 'bytes',
         'Content-Disposition': `inline; filename="${context.filename}"`,
+        ...cacheHeaders,
       },
     });
   } catch (error: any) {

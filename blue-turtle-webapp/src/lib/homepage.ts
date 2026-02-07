@@ -6,6 +6,7 @@ import type {
   MapAlbumSummary,
   MediaSummary,
 } from './types/homepage';
+import { buildSignedMediaUrl, buildSignedUrl } from './signedUrl';
 
 const RECENT_MEDIA_LIMIT = 8;
 const ACTIVITY_LIMIT = 6;
@@ -82,13 +83,16 @@ export async function getHomepageData(): Promise<HomepageData> {
     id: album.id,
     name: album.name,
     coverImage: album.coverImage,
+    coverUrl: album.coverImage
+      ? buildSignedUrl(`/api/albums/${album.id}/cover`)
+      : null,
     createdAt: album.createdAt,
     mediaCount: album._count.media,
   }));
 
   const recentMedia: MediaSummary[] = recentMediaRaw.map((media) => ({
     id: media.id,
-    url: media.url,
+    url: buildSignedMediaUrl(media.url, media.mimeType ?? null),
     mimeType: media.mimeType ?? null,
     createdAt: media.createdAt,
     albumId: media.album.id,

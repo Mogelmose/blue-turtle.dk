@@ -11,6 +11,8 @@ import { signOut } from 'next-auth/react';
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  EyeIcon,
+  EyeSlashIcon,
   XCircleIcon,
 } from '@heroicons/react/24/solid';
 
@@ -32,6 +34,9 @@ export default function ProfileSecurityPanel() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const errorSoundRef = useRef<HTMLAudioElement | null>(null);
 
   const playErrorSound = () => {
@@ -71,6 +76,9 @@ export default function ProfileSecurityPanel() {
     setError(null);
     setSuccess(null);
     setForm(INITIAL_STATE);
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -275,52 +283,82 @@ export default function ProfileSecurityPanel() {
                   <label htmlFor="currentPassword" className="label">
                     Nuværende adgangskode
                   </label>
-                  <input
-                    id="currentPassword"
-                    name="currentPassword"
-                    type="password"
-                    autoComplete="current-password"
-                    value={form.currentPassword}
-                    onChange={handleChange}
-                    className="input"
-                    disabled={isSubmitting}
-                    required
-                    suppressHydrationWarning
-                  />
+                  <div className="relative">
+                    <input
+                      id="currentPassword"
+                      name="currentPassword"
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      value={form.currentPassword}
+                      onChange={handleChange}
+                      className="input pr-10"
+                      disabled={isSubmitting}
+                      required
+                      suppressHydrationWarning
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted hover:text-main transition-colors bg-transparent focus:outline-none focus-visible:outline-none tap-highlight-none"
+                      aria-label={showCurrentPassword ? 'Skjul adgangskode' : 'Vis adgangskode'}
+                    >
+                      {showCurrentPassword ? (<EyeIcon className="h-5 w-5" />) : (<EyeSlashIcon className="h-5 w-5" />)}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="newPassword" className="label">
                     Ny adgangskode
                   </label>
-                  <input
-                    id="newPassword"
-                    name="newPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    value={form.newPassword}
-                    onChange={handleChange}
-                    className="input"
-                    disabled={isSubmitting}
-                    required
-                    suppressHydrationWarning
-                  />
+                  <div className="relative">
+                    <input
+                      id="newPassword"
+                      name="newPassword"
+                      type={showNewPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      value={form.newPassword}
+                      onChange={handleChange}
+                      className="input pr-10"
+                      disabled={isSubmitting}
+                      required
+                      suppressHydrationWarning
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted hover:text-main transition-colors bg-transparent focus:outline-none focus-visible:outline-none tap-highlight-none"
+                      aria-label={showNewPassword ? 'Skjul adgangskode' : 'Vis adgangskode'}
+                    >
+                      {showNewPassword ? (<EyeIcon className="h-5 w-5" />) : (<EyeSlashIcon className="h-5 w-5" />)}
+                    </button>
+                  </div>
                 </div>
                 <div className="col-span-1">
                   <label htmlFor="confirmNewPassword" className="label">
                     Bekræft ny adgangskode
                   </label>
-                  <input
-                    id="confirmNewPassword"
-                    name="confirmNewPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    value={form.confirmNewPassword}
-                    onChange={handleChange}
-                    className="input"
-                    disabled={isSubmitting}
-                    required
-                    suppressHydrationWarning
-                  />
+                  <div className="relative">
+                    <input
+                      id="confirmNewPassword"
+                      name="confirmNewPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      value={form.confirmNewPassword}
+                      onChange={handleChange}
+                      className="input pr-10"
+                      disabled={isSubmitting}
+                      required
+                      suppressHydrationWarning
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted hover:text-main transition-colors bg-transparent focus:outline-none focus-visible:outline-none tap-highlight-none"
+                      aria-label={showConfirmPassword ? 'Skjul adgangskode' : 'Vis adgangskode'}
+                    >
+                      {showConfirmPassword ? (<EyeIcon className="h-5 w-5" />) : (<EyeSlashIcon className="h-5 w-5" />)}
+                    </button>
+                  </div>
                 </div>
               </div>
 

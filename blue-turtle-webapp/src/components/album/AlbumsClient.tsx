@@ -187,7 +187,7 @@ export default function AlbumsClient({ albums, isAuthenticated }: Props) {
               {group.albums.map((album) => {
                 const hasCover = Boolean(album.coverImage);
                 const coverUrl = hasCover
-                  ? `/api/albums/${album.id}/cover`
+                  ? album.coverUrl || `/api/albums/${album.id}/cover`
                   : '/static/logo.png';
                 const imageClassName = hasCover
                   ? 'object-cover transition-transform duration-300 group-hover:scale-105'
@@ -206,7 +206,6 @@ export default function AlbumsClient({ albums, isAuthenticated }: Props) {
                         alt={album.name}
                         fill
                         sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
-                        unoptimized
                         className={imageClassName}
                       />
                     </div>
@@ -232,22 +231,21 @@ export default function AlbumsClient({ albums, isAuthenticated }: Props) {
                   </>
                 );
 
-                if (isSelecting && isAuthenticated) {
-                  return (
-                    <button
-                      key={album.id}
-                      type="button"
-                      onClick={() => toggleSelection(album.id)}
-                      className={`${wrapperClass} relative text-left`}
-                      aria-pressed={isSelected}
-                    >
-                      {body}
-                    </button>
-                  );
-                }
-
                 return (
-                  <Link key={album.id} href={`/albums/${album.id}`} className={wrapperClass}>
+                  <Link
+                    key={album.id}
+                    href={`/albums/${album.id}`}
+                    className={`${wrapperClass} relative text-left`}
+                    onClick={(event) => {
+                      if (!isSelecting || !isAuthenticated) {
+                        return;
+                      }
+                      event.preventDefault();
+                      toggleSelection(album.id);
+                    }}
+                    role={isSelecting ? 'button' : undefined}
+                    aria-pressed={isSelecting ? isSelected : undefined}
+                  >
                     {body}
                   </Link>
                 );

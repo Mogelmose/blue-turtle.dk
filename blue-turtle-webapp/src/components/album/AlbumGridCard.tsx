@@ -9,7 +9,9 @@ type Props = {
 
 export default function AlbumGridCard({ album }: Props) {
   const hasCover = Boolean(album.coverImage);
-  const coverUrl = hasCover ? `/api/albums/${album.id}/cover` : '/static/logo.png';
+  const coverUrl = hasCover
+    ? album.coverUrl || `/api/albums/${album.id}/cover`
+    : '/static/logo.png';
   const imageClassName = hasCover
     ? 'object-cover transition-transform duration-300 group-hover:scale-105'
     : 'object-contain transition-transform duration-300';
@@ -25,7 +27,6 @@ export default function AlbumGridCard({ album }: Props) {
           alt={album.name}
           fill
           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
-          unoptimized
           className={imageClassName}
         />
       </div>

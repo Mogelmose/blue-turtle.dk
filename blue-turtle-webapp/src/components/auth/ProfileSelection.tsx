@@ -48,7 +48,6 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
                     src={profile.img}
                     alt={`Profilbillede af ${profile.name}`}
                     fill
-                    unoptimized
                     className={
                       profile.isPlaceholder
                         ? 'object-contain transition-all duration-300'

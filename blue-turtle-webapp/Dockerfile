@@ -48,6 +48,7 @@ COPY --from=builder --chown=node:node /app/prisma ./prisma
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 COPY --from=builder --chown=node:node /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder --chown=node:node /app/node_modules/exifr ./node_modules/exifr
 COPY --from=builder --chown=node:node /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=builder --chown=node:node /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder --chown=node:node /app/node_modules/.prisma ./node_modules/.prisma

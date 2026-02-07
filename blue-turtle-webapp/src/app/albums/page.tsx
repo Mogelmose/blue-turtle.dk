@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import type { AlbumSummary } from '@/lib/types/homepage';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
+import { buildSignedUrl } from '@/lib/signedUrl';
 import AlbumsClient from '@/components/album/AlbumsClient';
 import BottomNav from '@/components/layout/BottomNav';
 import Container from '@/components/layout/Container';
@@ -32,6 +33,9 @@ async function getAlbums(): Promise<AlbumWithCategory[]> {
     id: album.id,
     name: album.name,
     coverImage: album.coverImage,
+    coverUrl: album.coverImage
+      ? buildSignedUrl(`/api/albums/${album.id}/cover`)
+      : null,
     createdAt: album.createdAt,
     mediaCount: album._count.media,
     category: album.category,

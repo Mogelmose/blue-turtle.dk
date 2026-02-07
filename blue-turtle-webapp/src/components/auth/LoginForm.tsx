@@ -44,7 +44,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <XMarkIcon className="h-7 w-7 md:h-8 md:w-8" />
       </button>
 
-      {/* Profile info */}
       <div className="flex flex-col items-center">
         <div
           className={`relative size-40 md:size-44 lg:size-48 xl:size-52 2xl:size-56 rounded-full overflow-hidden border-4 border-default shadow-md ${
@@ -55,7 +54,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
             src={selectedProfile.img}
             alt={`Profilbillede af ${selectedProfile.name}`}
             fill
-            unoptimized
             className={selectedProfile.isPlaceholder ? 'object-contain' : 'object-cover'}
           />
         </div>
@@ -65,7 +63,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <p className="mt-1 text-sm md:text-base text-muted">Indtast din adgangskode</p>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="mt-6 md:mt-8 lg:mt-10 space-y-5">
         <div className="relative">
           <label htmlFor="kode" className="sr-only">Adgangskode</label>
@@ -80,11 +77,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
             disabled={loading || isBlocked}
             placeholder="Adgangskode"
             required
-            className="w-full h-11 md:h-12 lg:h-14 pl-10 md:pl-12 pr-4 text-sm md:text-base text-main bg-surface border-2 border-default rounded-lg shadow-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 md:h-14 pl-10 md:pl-12 pr-4 text-base text-main bg-surface border-2 border-default rounded-lg shadow-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           />
         </div>
 
-        {/* Alerts â€“ fully using .alert-* classes */}
         {fejlbesked && (
           <div className="alert-danger animate-status-in p-3 md:p-4 rounded-lg w-60 md:w-70 mx-auto shadow-sm flex items-center gap-3 text-sm md:text-base font-medium" role="alert">
             <ExclamationTriangleIcon className="h-5 w-5 md:h-6 md:w-6 shrink-0" />
@@ -106,7 +102,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
           </div>
         )}
 
-        {/* Submit button – now using the new reusable system */}
         <button
           type="submit"
           disabled={loading || isBlocked || !kode}

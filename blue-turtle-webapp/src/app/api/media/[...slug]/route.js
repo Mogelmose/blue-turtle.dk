@@ -9,10 +9,12 @@ import prisma from "@/lib/prisma";
 import { sessionAuthOptions as authOptions } from "@/lib/auth";
 import { resolveUploadPath } from "@/lib/storage";
 import { convertHeicToJpeg } from "@/lib/heic";
+import { isSignedRequest } from "@/lib/signedUrl";
 
 export const runtime = "nodejs";
 const HEIC_MIME_TYPES = new Set(["image/heic", "image/heif"]);
 const HEIC_EXTENSIONS = [".heic", ".heif"];
+const CACHE_CONTROL = "private, max-age=300, stale-while-revalidate=86400";
 
 function createWebReadableStream(nodeStream, abortSignal) {
   let closed = false;
@@ -155,6 +157,31 @@ function getJpegFilename(filename) {
   return `${base}.jpg`;
 }
 
+function buildCacheHeaders(fileStat) {
+  const etag = `W/\"${fileStat.size}-${fileStat.mtimeMs}\"`;
+  return {
+    "Cache-Control": CACHE_CONTROL,
+    ETag: etag,
+    "Last-Modified": fileStat.mtime.toUTCString(),
+  };
+}
+
+function isNotModified(request, etag, lastModified) {
+  const ifNoneMatch = request.headers.get("if-none-match");
+  if (ifNoneMatch && ifNoneMatch === etag) {
+    return true;
+  }
+  const ifModifiedSince = request.headers.get("if-modified-since");
+  if (ifModifiedSince) {
+    const since = new Date(ifModifiedSince).getTime();
+    const modified = new Date(lastModified).getTime();
+    if (!Number.isNaN(since) && since >= modified) {
+      return true;
+    }
+  }
+  return false;
+}
+
 async function isJpegFile(absolutePath) {
   const file = await open(absolutePath, "r");
   try {
@@ -174,6 +201,7 @@ async function createTempJpegResponse({ absolutePath, filename, signal }) {
       filename,
       size: fileStat.size,
       signal,
+      cacheHeaders: buildCacheHeaders(fileStat),
     });
   }
 
@@ -202,17 +230,19 @@ async function createTempJpegResponse({ absolutePath, filename, signal }) {
     void cleanup();
   });
 
+  const sourceStat = await stat(absolutePath);
   return new Response(body, {
     status: 200,
     headers: {
       "Content-Type": "image/jpeg",
       "Content-Length": tempStat.size.toString(),
       "Content-Disposition": `inline; filename="${getJpegFilename(filename)}"`,
+      ...buildCacheHeaders(sourceStat),
     },
   });
 }
 
-function createStaticJpegResponse({ absolutePath, filename, size, signal }) {
+function createStaticJpegResponse({ absolutePath, filename, size, signal, cacheHeaders }) {
   const stream = createReadStream(absolutePath);
   const body = createWebReadableStream(stream, signal);
 
@@ -222,6 +252,7 @@ function createStaticJpegResponse({ absolutePath, filename, size, signal }) {
       "Content-Type": "image/jpeg",
       "Content-Length": size.toString(),
       "Content-Disposition": `inline; filename="${getJpegFilename(filename)}"`,
+      ...(cacheHeaders || {}),
     },
   });
 }
@@ -272,6 +303,8 @@ async function getMediaContext(slug) {
     mediaRecord.mimeType ||
     (typeof lookup === "string" ? lookup : null) ||
     "application/octet-stream";
+  const etag = `W/\"${fileStat.size}-${fileStat.mtimeMs}\"`;
+  const lastModified = fileStat.mtime.toUTCString();
 
   return {
     absolutePath,
@@ -281,12 +314,16 @@ async function getMediaContext(slug) {
     storagePath: mediaRecord.storagePath,
     mimeType: mediaRecord.mimeType ?? null,
     convertedPath: mediaRecord.convertedPath ?? null,
+    etag,
+    lastModified,
+    fileStat,
   };
 }
 
 export async function HEAD(request, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
+  const signed = isSignedRequest(request);
+  const session = signed ? null : await getServerSession(authOptions);
+  if (!signed && !session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -296,6 +333,11 @@ export async function HEAD(request, { params }) {
 
     if (context.error) {
       return context.error;
+    }
+
+    const cacheHeaders = buildCacheHeaders(context.fileStat);
+    if (!signed && isNotModified(request, context.etag, context.lastModified)) {
+      return new NextResponse(null, { status: 304, headers: cacheHeaders });
     }
 
     if (wantsJpeg(request) && isHeicAsset(context)) {
@@ -309,6 +351,7 @@ export async function HEAD(request, { params }) {
               "Content-Type": "image/jpeg",
               "Content-Length": convertedStat.size.toString(),
               "Content-Disposition": `inline; filename="${getJpegFilename(context.filename)}"`,
+              ...cacheHeaders,
             },
           });
         } catch {
@@ -321,6 +364,7 @@ export async function HEAD(request, { params }) {
         headers: {
           "Content-Type": "image/jpeg",
           "Content-Disposition": `inline; filename="${getJpegFilename(context.filename)}"`,
+          ...cacheHeaders,
         },
       });
     }
@@ -332,6 +376,7 @@ export async function HEAD(request, { params }) {
         "Content-Length": context.size.toString(),
         "Accept-Ranges": "bytes",
         "Content-Disposition": `inline; filename="${context.filename}"`,
+        ...cacheHeaders,
       },
     });
   } catch (error) {
@@ -348,9 +393,9 @@ export async function HEAD(request, { params }) {
 }
 
 export async function GET(request, { params }) {
-  // Add authentication check
-  const session = await getServerSession(authOptions);
-  if (!session) {
+  const signed = isSignedRequest(request);
+  const session = signed ? null : await getServerSession(authOptions);
+  if (!signed && !session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -360,6 +405,11 @@ export async function GET(request, { params }) {
 
     if (context.error) {
       return context.error;
+    }
+
+    const cacheHeaders = buildCacheHeaders(context.fileStat);
+    if (!signed && isNotModified(request, context.etag, context.lastModified)) {
+      return new NextResponse(null, { status: 304, headers: cacheHeaders });
     }
 
     if (wantsJpeg(request) && isHeicAsset(context)) {
@@ -372,6 +422,7 @@ export async function GET(request, { params }) {
             filename: context.filename,
             size: convertedStat.size,
             signal: request.signal,
+            cacheHeaders,
           });
         } catch {
           // Fall back to on-the-fly conversion.
@@ -409,6 +460,7 @@ export async function GET(request, { params }) {
           "Content-Range": `bytes ${start}-${end}/${size}`,
           "Accept-Ranges": "bytes",
           "Content-Disposition": `inline; filename="${filename}"`,
+          ...cacheHeaders,
         },
       });
     }
@@ -422,6 +474,7 @@ export async function GET(request, { params }) {
         "Content-Length": size.toString(),
         "Accept-Ranges": "bytes",
         "Content-Disposition": `inline; filename="${filename}"`,
+        ...cacheHeaders,
       },
     });
 

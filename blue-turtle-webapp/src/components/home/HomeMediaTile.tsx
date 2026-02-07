@@ -73,6 +73,9 @@ function getDisplayUrl(url: string, mimeType?: string | null): string {
   if (!isHeic(url, mimeType)) {
     return url;
   }
+  if (url.includes('format=') || url.includes('sig=') || url.includes('exp=')) {
+    return url;
+  }
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}format=jpeg`;
 }
@@ -130,7 +133,6 @@ export default function HomeMediaTile({ item }: Props) {
             alt={item.albumName}
             fill
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
-            unoptimized
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : kind === 'video' ? (

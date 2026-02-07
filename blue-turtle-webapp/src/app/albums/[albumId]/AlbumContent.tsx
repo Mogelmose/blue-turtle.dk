@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 import Lightbox from 'react-spring-lightbox';
 import { ArrowDownToLine, Check, ChevronLeft, ChevronRight, Play, Trash2, X } from 'lucide-react';
 import type { Album, Category } from '@prisma/client';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import BottomNav from '@/components/layout/BottomNav';
 import Container from '@/components/layout/Container';
 import Footer from '@/components/layout/Footer';
@@ -80,9 +80,10 @@ function normalizeMedia(item: AlbumMedia): PreparedMedia {
       mimeType === 'image/heif' ||
       reference.endsWith('.heic') ||
       reference.endsWith('.heif'));
-  const displayUrl = isHeic
-    ? `${item.url}${item.url.includes('?') ? '&' : '?'}format=jpeg`
-    : item.url;
+  const displayUrl =
+    isHeic && !item.url.includes('format=') && !item.url.includes('sig=') && !item.url.includes('exp=')
+      ? `${item.url}${item.url.includes('?') ? '&' : '?'}format=jpeg`
+      : item.url;
 
   return { ...item, kind, displayUrl };
 }
@@ -95,6 +96,8 @@ export default function AlbumContent({ initialAlbum }: Props) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: session } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const canEdit = Boolean(session?.user);
 
   const preparedMedia = useMemo(
@@ -126,6 +129,17 @@ export default function AlbumContent({ initialAlbum }: Props) {
   useEffect(() => {
     setAlbum(initialAlbum);
   }, [initialAlbum]);
+  useEffect(() => {
+    const mediaId = searchParams?.get('media');
+    if (!mediaId || activeIndex !== null) {
+      return;
+    }
+    const index = preparedMedia.findIndex((item) => item.id === mediaId);
+    if (index >= 0) {
+      setActiveIndex(index);
+    }
+  }, [activeIndex, preparedMedia, searchParams]);
+
 
   useEffect(() => {
     const handleAlbumRefresh = (event: Event) => {
@@ -143,7 +157,13 @@ export default function AlbumContent({ initialAlbum }: Props) {
 
   const closeViewer = useCallback(() => {
     setActiveIndex(null);
-  }, []);
+    if (searchParams?.has('media')) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('media');
+      const nextQuery = params.toString();
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
+    }
+  }, [pathname, router, searchParams]);
 
   const toggleSelectionMode = useCallback(() => {
     setIsSelecting((current) => {
@@ -403,7 +423,6 @@ export default function AlbumContent({ initialAlbum }: Props) {
                         alt={item.alt || album.name}
                         fill
                         sizes="(min-width: 1280px) 16vw, (min-width: 1024px) 18vw, (min-width: 768px) 22vw, 33vw"
-                        unoptimized
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       />
                     ) : item.kind === 'video' ? (

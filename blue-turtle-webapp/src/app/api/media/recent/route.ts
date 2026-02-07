@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
+import { buildSignedMediaUrl } from '@/lib/signedUrl';
 
 const MAX_TAKE = 24;
 const DEFAULT_TAKE = 8;
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     const items = media.map((item) => ({
       id: item.id,
-      url: item.url,
+      url: buildSignedMediaUrl(item.url, item.mimeType ?? null),
       mimeType: item.mimeType ?? null,
       createdAt: item.createdAt,
       albumId: item.album.id,

@@ -2,8 +2,8 @@ import BottomNav from '@/components/layout/BottomNav';
 import Container from '@/components/layout/Container';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
-import GeomapClient from '@/components/geomap/GeomapClient';
 import { getGeomapData } from '@/lib/geomap';
+import GeomapClientWrapper from '@/components/geomap/GeomapClientWrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +44,7 @@ export default async function GeomapPage() {
               </div>
             </section>
 
-            <GeomapClient albums={data.albums} media={data.media} />
+            <GeomapClientWrapper albums={data.albums} media={data.media} />
           </div>
         </Container>
       </main>

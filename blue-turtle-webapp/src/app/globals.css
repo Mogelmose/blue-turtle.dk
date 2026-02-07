@@ -45,6 +45,21 @@ html::-webkit-scrollbar {
   height: 0px;
 }
 
+@layer base {
+  @supports (-webkit-touch-callout: none) {
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
+
+  input[type='password']::-ms-reveal,
+  input[type='password']::-ms-clear {
+    display: none;
+  }
+}
+
 @layer utilities {
   /* Background utilities */
   .bg-page { background-color: var(--color-ocean-50); }
@@ -54,6 +69,7 @@ html::-webkit-scrollbar {
   /* Text utilities */
   .text-main { color: var(--color-ocean-900); }
   .text-muted { color: var(--color-ocean-700); }
+  .text-primary { color: var(--color-ocean-500); }
 
   /* Border utilities */
   .border-default { border-color: var(--color-ocean-300); }
@@ -264,6 +280,9 @@ html::-webkit-scrollbar {
   .scrollbar-gutter-stable {
     scrollbar-gutter: stable both-edges;
   }
+  .tap-highlight-none {
+    -webkit-tap-highlight-color: transparent;
+  }
   /* Geomap marker styles */
   .geomap-album-icon {
     background: transparent;
@@ -391,6 +410,17 @@ html::-webkit-scrollbar {
     :root:not(.light) .btn-secondary:hover:not(:disabled) {
       background-color: var(--color-ocean-600);
       border-color: var(--color-ocean-300);
+    }
+
+    :root:not(.light) .leaflet-container .leaflet-popup-content-wrapper,
+    :root:not(.light) .leaflet-container .leaflet-popup-tip {
+      background-color: var(--color-ocean-900) !important;
+      border: 1px solid var(--color-ocean-700) !important;
+      color: var(--color-ocean-50) !important;
+      box-shadow: 0 12px 24px rgba(2, 6, 23, 0.45) !important;
+    }
+    :root:not(.light) .leaflet-container .leaflet-popup-content {
+      color: var(--color-ocean-50) !important;
     }
 
     :root:not(.light) .btn:focus-visible {
