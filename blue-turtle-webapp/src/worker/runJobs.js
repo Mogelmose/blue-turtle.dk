@@ -1,6 +1,7 @@
 import { copyFile, mkdir, open } from 'fs/promises';
 import path from 'path';
 import { spawn } from 'child_process';
+import exifr from 'exifr';
 import prisma from '../lib/prisma.js';
 import { convertHeicToJpeg } from '../lib/heic.js';
 
@@ -53,7 +54,12 @@ function buildPreviewRelativePath(albumId, mediaId, extension = '.jpg') {
 const POLL_INTERVAL_MS = 4000;
 const MAX_ATTEMPTS = 3;
 const CONCURRENCY = 2;
-const JOB_TYPES = ['CONVERT_HEIC', 'GENERATE_VIDEO_PREVIEW'];
+const JOB_TYPES = ['EXTRACT_METADATA', 'CONVERT_HEIC', 'GENERATE_VIDEO_PREVIEW'];
+
+const IMAGE_MIME_PREFIX = 'image/';
+const VIDEO_MIME_PREFIX = 'video/';
+const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic', '.heif']);
+const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.mov']);
 
 let activeCount = 0;
 let isShuttingDown = false;
@@ -184,6 +190,238 @@ function runFfmpeg(inputPath, outputPath, extraArgs = []) {
   });
 }
 
+function runFfprobe(inputPath) {
+  return new Promise((resolve, reject) => {
+    const args = [
+      '-v',
+      'error',
+      '-print_format',
+      'json',
+      '-show_format',
+      '-show_streams',
+      inputPath,
+    ];
+    const proc = spawn('ffprobe', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let output = '';
+    let errorOutput = '';
+
+    proc.stdout.on('data', (chunk) => {
+      output += chunk.toString();
+    });
+    proc.stderr.on('data', (chunk) => {
+      errorOutput += chunk.toString();
+    });
+    proc.on('error', (error) => {
+      reject(new Error(`ffprobe failed to start: ${error.message}`));
+    });
+    proc.on('close', (code) => {
+      if (code === 0) {
+        try {
+          resolve(JSON.parse(output));
+        } catch (error) {
+          reject(new Error('ffprobe output could not be parsed.'));
+        }
+      } else {
+        reject(new Error(`ffprobe exited with code ${code}: ${errorOutput}`));
+      }
+    });
+  });
+}
+
+function inferMediaKind(media) {
+  const mimeType = media?.mimeType?.toLowerCase() ?? '';
+  if (mimeType.startsWith(IMAGE_MIME_PREFIX)) {
+    return 'image';
+  }
+  if (mimeType.startsWith(VIDEO_MIME_PREFIX)) {
+    return 'video';
+  }
+
+  const extension = path.extname(media?.filename ?? media?.storagePath ?? '').toLowerCase();
+  if (IMAGE_EXTENSIONS.has(extension)) {
+    return 'image';
+  }
+  if (VIDEO_EXTENSIONS.has(extension)) {
+    return 'video';
+  }
+  return 'unknown';
+}
+
+function toNumber(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return null;
+}
+
+function normalizeExifCoordinate(value) {
+  const numeric = toNumber(value);
+  if (numeric !== null) {
+    return numeric;
+  }
+
+  if (Array.isArray(value) && value.length >= 2) {
+    const [deg, min, sec] = value.map((part) => toNumber(part));
+    if (deg === null || min === null) {
+      return null;
+    }
+    const seconds = sec ?? 0;
+    const sign = deg < 0 ? -1 : 1;
+    const absDeg = Math.abs(deg);
+    return sign * (absDeg + min / 60 + seconds / 3600);
+  }
+
+  return null;
+}
+
+function isValidCoordinate(lat, lng) {
+  return (
+    typeof lat === 'number' &&
+    typeof lng === 'number' &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  );
+}
+
+function normalizeCapturedAt(value) {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const direct = new Date(value);
+    if (!Number.isNaN(direct.getTime())) {
+      return direct;
+    }
+    const exifMatch = value.match(
+      /^(\d{4}):(\d{2}):(\d{2})(?:[ T](\d{2}):(\d{2}):(\d{2}))?/,
+    );
+    if (exifMatch) {
+      const [, year, month, day, hour = '0', minute = '0', second = '0'] = exifMatch;
+      return new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+        Number(second),
+      );
+    }
+  }
+  return null;
+}
+
+function parseIso6709(value) {
+  if (!value || typeof value !== 'string') {
+    return null;
+  }
+  const match = value.match(/([+-]\d+(?:\.\d+)?)([+-]\d+(?:\.\d+)?)/);
+  if (!match) {
+    return null;
+  }
+  const lat = toNumber(match[1]);
+  const lng = toNumber(match[2]);
+  if (lat === null || lng === null) {
+    return null;
+  }
+  return { lat, lng };
+}
+
+function parseLatLngPair(value) {
+  if (!value || typeof value !== 'string') {
+    return null;
+  }
+  const match = value.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+  if (!match) {
+    return null;
+  }
+  const lat = toNumber(match[1]);
+  const lng = toNumber(match[2]);
+  if (lat === null || lng === null) {
+    return null;
+  }
+  return { lat, lng };
+}
+
+function extractVideoLocation(tags) {
+  const candidates = [
+    tags?.location,
+    tags?.LOCATION,
+    tags?.['com.apple.quicktime.location.ISO6709'],
+    tags?.['com.apple.quicktime.location.iso6709'],
+    tags?.['com.apple.quicktime.location'],
+  ];
+
+  for (const candidate of candidates) {
+    const iso = parseIso6709(candidate);
+    if (iso) {
+      return iso;
+    }
+    const pair = parseLatLngPair(candidate);
+    if (pair) {
+      return pair;
+    }
+  }
+
+  return null;
+}
+
+async function extractImageMetadata(absolutePath) {
+  const parseFn = exifr?.parse ?? exifr?.default?.parse;
+  if (typeof parseFn !== 'function') {
+    throw new Error('exifr parse function is not available.');
+  }
+
+  const data = await parseFn(absolutePath, { gps: true });
+  const latitude = normalizeExifCoordinate(
+    data?.latitude ?? data?.lat ?? data?.GPSLatitude,
+  );
+  const longitude = normalizeExifCoordinate(
+    data?.longitude ?? data?.lng ?? data?.lon ?? data?.GPSLongitude,
+  );
+  const capturedAt = normalizeCapturedAt(
+    data?.DateTimeOriginal ?? data?.CreateDate ?? data?.ModifyDate ?? data?.DateTime,
+  );
+
+  return { latitude, longitude, capturedAt };
+}
+
+async function extractVideoMetadata(absolutePath) {
+  const probe = await runFfprobe(absolutePath);
+  const tags = {
+    ...(probe?.format?.tags ?? {}),
+  };
+  for (const stream of probe?.streams ?? []) {
+    if (stream?.tags) {
+      Object.assign(tags, stream.tags);
+    }
+  }
+  const location = extractVideoLocation(tags);
+  const capturedAt = normalizeCapturedAt(
+    tags?.creation_time ??
+      tags?.['com.apple.quicktime.creationdate'] ??
+      tags?.['com.apple.quicktime.creationDate'],
+  );
+
+  return {
+    latitude: location?.lat ?? null,
+    longitude: location?.lng ?? null,
+    capturedAt,
+  };
+}
+
 async function handleGenerateVideoPreview(job) {
   const payload = job.payload ?? {};
   const mediaId = payload.mediaId;
@@ -231,9 +469,90 @@ async function handleGenerateVideoPreview(job) {
   }
 }
 
+async function handleExtractMetadata(job) {
+  const payload = job.payload ?? {};
+  const mediaId = payload.mediaId;
+
+  if (!mediaId || typeof mediaId !== 'string') {
+    throw new Error('Missing mediaId in job payload.');
+  }
+
+  const media = await prisma.media.findUnique({
+    where: { id: mediaId },
+    select: {
+      id: true,
+      storagePath: true,
+      mimeType: true,
+      filename: true,
+    },
+  });
+
+  if (!media?.storagePath) {
+    throw new Error('Media record missing storagePath.');
+  }
+
+  await prisma.media.update({
+    where: { id: media.id },
+    data: { metadataStatus: 'PROCESSING' },
+  });
+
+  const absolutePath = resolveUploadPath(media.storagePath);
+  const kind = inferMediaKind(media);
+
+  try {
+    let latitude = null;
+    let longitude = null;
+    let capturedAt = null;
+    let locationSource = 'NONE';
+
+    if (kind === 'image') {
+      const result = await extractImageMetadata(absolutePath);
+      latitude = result.latitude;
+      longitude = result.longitude;
+      capturedAt = result.capturedAt ?? null;
+      if (isValidCoordinate(latitude, longitude)) {
+        locationSource = 'EXIF';
+      } else {
+        latitude = null;
+        longitude = null;
+      }
+    } else if (kind === 'video') {
+      const result = await extractVideoMetadata(absolutePath);
+      latitude = result.latitude;
+      longitude = result.longitude;
+      capturedAt = result.capturedAt ?? null;
+      if (isValidCoordinate(latitude, longitude)) {
+        locationSource = 'VIDEO_META';
+      } else {
+        latitude = null;
+        longitude = null;
+      }
+    }
+
+    await prisma.media.update({
+      where: { id: media.id },
+      data: {
+        metadataStatus: 'DONE',
+        capturedAt,
+        locationAutoLat: latitude,
+        locationAutoLng: longitude,
+        locationSource,
+      },
+    });
+  } catch (error) {
+    await prisma.media.update({
+      where: { id: media.id },
+      data: { metadataStatus: 'FAILED' },
+    });
+    throw error;
+  }
+}
+
 async function processJob(job) {
   try {
-    if (job.type === 'CONVERT_HEIC') {
+    if (job.type === 'EXTRACT_METADATA') {
+      await handleExtractMetadata(job);
+    } else if (job.type === 'CONVERT_HEIC') {
       await handleConvertHeic(job);
     } else if (job.type === 'GENERATE_VIDEO_PREVIEW') {
       await handleGenerateVideoPreview(job);
@@ -270,7 +589,7 @@ async function runOnce() {
 }
 
 async function start() {
-  console.log('Worker started: CONVERT_HEIC, GENERATE_VIDEO_PREVIEW');
+  console.log('Worker started: EXTRACT_METADATA, CONVERT_HEIC, GENERATE_VIDEO_PREVIEW');
   await runOnce();
   const interval = setInterval(() => {
     if (isShuttingDown) {
