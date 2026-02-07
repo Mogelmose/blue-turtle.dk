@@ -438,7 +438,7 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
             <div className="space-y-3">
               <div>
                 <p className="text-sm text-muted pb-2">Du er i gang med at uploade til</p>
-                <p className="text-base font-semibold text-main pb-2">
+                <p className="text-lg font-semibold text-main pb-2">
                   {selectedAlbum?.name || 'Ukendt album'}
                 </p>
               </div>

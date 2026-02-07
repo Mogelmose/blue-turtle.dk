@@ -250,6 +250,7 @@ html::-webkit-scrollbar {
     background-color: var(--color-danger-500);
     border: 2px solid var(--color-danger-600);
   }
+  
   .btn-danger:hover:not(:disabled) {
     background-color: var(--color-danger-600);
     border-color: var(--color-danger-600);

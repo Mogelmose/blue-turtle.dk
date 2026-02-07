@@ -13,10 +13,21 @@ export async function GET() {
   }
 
   try {
+    const onlineWindowMs = 2 * 60 * 1000;
+    const now = Date.now();
     const users = await prisma.user.findMany({
-      select: { id: true, username: true, role: true },
+      select: { id: true, username: true, role: true, lastSeenAt: true },
     });
-    return NextResponse.json(users);
+    const normalized = users.map((user) => ({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      lastSeenAt: user.lastSeenAt,
+      isOnline:
+        user.lastSeenAt instanceof Date &&
+        now - user.lastSeenAt.getTime() <= onlineWindowMs,
+    }));
+    return NextResponse.json(normalized);
   } catch (error) {
     const errorId = crypto.randomUUID();
     console.error(`[${errorId}] Error fetching users:`, error);

@@ -39,9 +39,9 @@ export default function HomeHero({ userName, isAdmin }: Props) {
             Velkommen til Blue Turtle
           </h1>
         </div>
-        <div className="flex pt-2 gap-2">
+        <div className="flex pt-2 gap-3">
           {isAdmin ? (
-            <Link href="/admin" className="btn btn-secondary">
+            <Link href="/admin" className="btn btn-secondary h-10 w-20">
               Admin
             </Link>
           ) : null}
