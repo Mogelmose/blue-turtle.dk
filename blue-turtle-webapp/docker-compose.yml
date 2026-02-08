@@ -19,7 +19,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: webapp
+    image: blue-turtle:1.0
+    container_name: web
     restart: unless-stopped
     depends_on:
       db:
@@ -44,7 +45,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: migrate
-    container_name: webapp-migrate
+    container_name: web-migrate
     restart: "no"
     depends_on:
       db:
