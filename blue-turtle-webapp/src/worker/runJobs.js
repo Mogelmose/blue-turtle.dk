@@ -1,7 +1,8 @@
-import { copyFile, mkdir, open } from 'fs/promises';
+import { copyFile, mkdir, open, readFile, stat } from 'fs/promises';
 import path from 'path';
 import { spawn } from 'child_process';
 import exifr from 'exifr';
+import ExifReader from 'exifreader';
 import prisma from '../lib/prisma.js';
 import { convertHeicToJpeg } from '../lib/heic.js';
 
@@ -53,8 +54,8 @@ function buildPreviewRelativePath(albumId, mediaId, extension = '.jpg') {
 
 const POLL_INTERVAL_MS = 4000;
 const MAX_ATTEMPTS = 3;
-const CONCURRENCY = 2;
-const JOB_TYPES = ['EXTRACT_METADATA', 'CONVERT_HEIC', 'GENERATE_VIDEO_PREVIEW'];
+const CONCURRENCY = 6;
+const JOB_TYPES = ['GENERATE_VIDEO_PREVIEW', 'CONVERT_HEIC', 'EXTRACT_METADATA'];
 
 const IMAGE_MIME_PREFIX = 'image/';
 const VIDEO_MIME_PREFIX = 'video/';
@@ -422,6 +423,184 @@ async function extractVideoMetadata(absolutePath) {
   };
 }
 
+function isUnknownFormatError(error) {
+  if (!error) {
+    return false;
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes('unknown file format') ||
+    normalized.includes('invalid image format') ||
+    normalized.includes('unsupported format')
+  );
+}
+
+function extractNumbersFromString(value) {
+  if (typeof value !== 'string') {
+    return [];
+  }
+  const matches = value.match(/-?\d+(?:\.\d+)?/g);
+  return matches ? matches.map((entry) => Number(entry)).filter(Number.isFinite) : [];
+}
+
+function toExifReaderNumber(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (Array.isArray(value) && value.length >= 2) {
+    const numerator = toExifReaderNumber(value[0]);
+    const denominator = toExifReaderNumber(value[1]);
+    if (numerator === null || denominator === null || denominator === 0) {
+      return null;
+    }
+    return numerator / denominator;
+  }
+  if (value && typeof value === 'object') {
+    const numerator = toExifReaderNumber(value.numerator ?? value.num);
+    const denominator = toExifReaderNumber(value.denominator ?? value.den);
+    if (numerator !== null && denominator && denominator !== 0) {
+      return numerator / denominator;
+    }
+    if (numerator !== null && denominator === null) {
+      return numerator;
+    }
+  }
+  return null;
+}
+
+function getExifReaderValue(tag) {
+  if (!tag) {
+    return null;
+  }
+  if (typeof tag.value !== 'undefined') {
+    return tag.value;
+  }
+  if (typeof tag.description !== 'undefined') {
+    return tag.description;
+  }
+  return null;
+}
+
+function normalizeExifReaderCoordinate(tag, refTag) {
+  const raw = getExifReaderValue(tag);
+  const ref = getExifReaderValue(refTag);
+  let numeric = null;
+
+  if (Array.isArray(raw)) {
+    const parts = raw
+      .map((part) => toExifReaderNumber(part))
+      .filter((part) => part !== null);
+    if (parts.length > 0) {
+      numeric = normalizeExifCoordinate(parts);
+    }
+  } else {
+    numeric = normalizeExifCoordinate(raw);
+  }
+
+  if (numeric === null && typeof tag?.description === 'string') {
+    const parts = extractNumbersFromString(tag.description);
+    if (parts.length > 0) {
+      numeric = normalizeExifCoordinate(parts);
+    }
+  }
+
+  if (numeric !== null && typeof ref === 'string') {
+    const normalizedRef = ref.trim().toUpperCase();
+    if (normalizedRef.startsWith('S') || normalizedRef.startsWith('W')) {
+      numeric = -Math.abs(numeric);
+    }
+  }
+
+  return numeric;
+}
+
+async function extractExifReaderMetadata(absolutePath) {
+  const buffer = await readFile(absolutePath);
+  const arrayBuffer = buffer.buffer.slice(
+    buffer.byteOffset,
+    buffer.byteOffset + buffer.byteLength,
+  );
+  const tags = ExifReader.load(arrayBuffer);
+
+  const latitude = normalizeExifReaderCoordinate(
+    tags.GPSLatitude,
+    tags.GPSLatitudeRef,
+  );
+  const longitude = normalizeExifReaderCoordinate(
+    tags.GPSLongitude,
+    tags.GPSLongitudeRef,
+  );
+  const capturedAt = normalizeCapturedAt(
+    getExifReaderValue(tags.DateTimeOriginal) ??
+      getExifReaderValue(tags.CreateDate) ??
+      getExifReaderValue(tags.ModifyDate) ??
+      getExifReaderValue(tags.DateTime),
+  );
+
+  return { latitude, longitude, capturedAt };
+}
+
+async function fileExists(absolutePath) {
+  try {
+    await stat(absolutePath);
+    return true;
+  } catch (error) {
+    if (error && typeof error === 'object' && error.code === 'ENOENT') {
+      return false;
+    }
+    return false;
+  }
+}
+
+async function extractImageMetadataWithFallback(media, originalAbsolutePath) {
+  try {
+    return await extractImageMetadata(originalAbsolutePath);
+  } catch (error) {
+    if (!isUnknownFormatError(error)) {
+      throw error;
+    }
+  }
+
+  try {
+    return await extractExifReaderMetadata(originalAbsolutePath);
+  } catch (error) {
+    if (!isUnknownFormatError(error)) {
+      throw error;
+    }
+  }
+
+  if (!media?.convertedPath) {
+    return null;
+  }
+
+  const convertedAbsolutePath = resolveUploadPath(media.convertedPath);
+  if (!(await fileExists(convertedAbsolutePath))) {
+    return null;
+  }
+
+  try {
+    return await extractImageMetadata(convertedAbsolutePath);
+  } catch (error) {
+    if (!isUnknownFormatError(error)) {
+      throw error;
+    }
+  }
+
+  try {
+    return await extractExifReaderMetadata(convertedAbsolutePath);
+  } catch (error) {
+    if (isUnknownFormatError(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 async function handleGenerateVideoPreview(job) {
   const payload = job.payload ?? {};
   const mediaId = payload.mediaId;
@@ -482,6 +661,7 @@ async function handleExtractMetadata(job) {
     select: {
       id: true,
       storagePath: true,
+      convertedPath: true,
       mimeType: true,
       filename: true,
     },
@@ -506,7 +686,20 @@ async function handleExtractMetadata(job) {
     let locationSource = 'NONE';
 
     if (kind === 'image') {
-      const result = await extractImageMetadata(absolutePath);
+      const result = await extractImageMetadataWithFallback(media, absolutePath);
+      if (!result) {
+        await prisma.media.update({
+          where: { id: media.id },
+          data: {
+            metadataStatus: 'DONE',
+            capturedAt: null,
+            locationAutoLat: null,
+            locationAutoLng: null,
+            locationSource: 'NONE',
+          },
+        });
+        return;
+      }
       latitude = result.latitude;
       longitude = result.longitude;
       capturedAt = result.capturedAt ?? null;
