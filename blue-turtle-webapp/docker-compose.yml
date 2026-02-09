@@ -68,6 +68,9 @@ volumes:
   pgdata:
 
 networks:
+  app_network:
+    internal: true
+    name: app_network
   proxy_network:
     external: true
     name: proxy_network
