@@ -39,7 +39,6 @@ services:
       - ${HOST_UPLOAD_ROOT:-./.data/uploads}:/uploads
     networks:
       - proxy_network
-      - cloudflare_tunnel
       - app_network
 
   migrate:
@@ -74,6 +73,3 @@ networks:
   proxy_network:
     external: true
     name: proxy_network
-  cloudflare_tunnel:
-    external: true
-    name: cloudflare_tunnel_network
