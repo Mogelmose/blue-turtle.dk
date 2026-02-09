@@ -47,7 +47,6 @@ as runtime uploads.
 
 4. Add seed values to `.env`:
 
-- `DATABASE_URL=postgresql://<user>:<pass>@db:5432/<db>?schema=public`
 - `PASSWORD_*` entries that match the `passwordEnvVar` values in `prisma/seed.js`
 Optional:
 - `SEED_OVERWRITE_ASSETS=true` in seed.js to overwrite existing seeded images
@@ -105,7 +104,6 @@ cp .env.example .env
 Edit `.env` and set:
 
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
-- `DATABASE_URL` to match your active run target - for local dev use "localhost"
 - `DEV_UPLOAD_ROOT` (recommended, e.g. `./.data/uploads`)
 - `NEXTAUTH_SECRET`, `NEXTAUTH_URL`
 
@@ -136,7 +134,7 @@ bun prisma/seed.js
 bun run dev
 ```
 
-Note: For Docker production runs, `DATABASE_URL` should point to `db` instead of `localhost`.
+Note: For Docker production runs, `DATABASE_URL` should point to `db` instead of `localhost`. This can be changed in the docker-compose.yml file (both web and migrate)
 
 ## Background Jobs (Docker)
 
@@ -144,6 +142,7 @@ The web container starts a lightweight job runner (in the same container) for:
 
 - HEIC/HEIF conversion caching
 - Video poster generation (for previews)
+- EXIF metadata extraction
 
 It starts automatically with the web server. To disable it, set `RUN_WORKER=false` in your environment. If disabled, conversions will only happen on-demand.
 ## Upload Root Variables
