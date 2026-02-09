@@ -46,6 +46,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: migrate
+    image: blue-turtle-migrate:1.0
     container_name: web-migrate
     restart: "no"
     depends_on:

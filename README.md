@@ -55,7 +55,14 @@ Optional:
 5. Build and start the stack:
 
 ```bash
-docker-compose build
+Use buildkit to only keep the final images and base images from the build process
+
+**Linux/macOS**
+DOCKER_BUILDKIT=1 docker compose build web migrate
+
+**Powershell**
+$env:DOCKER_BUILDKIT=1; docker compose build web migrate
+
 docker-compose --profile migrate run --rm migrate
 docker-compose up -d
 ```
