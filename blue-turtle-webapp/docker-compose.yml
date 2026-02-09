@@ -61,7 +61,7 @@ services:
 volumes:
   pgdata:
 
-  networks:
+networks:
   proxy_network:
     external: true
     name: proxy_network
