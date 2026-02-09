@@ -6,7 +6,7 @@ Vibecoded Website for the Turtle Boys. This is a full-stack web application buil
 
 Before you begin, ensure you have the following installed on your system:
 
-**Docker + docker-compose** (recommended for running the full stack).
+**Docker + docker compose** (recommended for running the full stack).
 **Bun** (required for local dev outside Docker).
 
 ## Run With Docker (recommended)
@@ -63,8 +63,8 @@ DOCKER_BUILDKIT=1 docker compose build web migrate
 **Powershell**
 $env:DOCKER_BUILDKIT=1; docker compose build web migrate
 
-docker-compose --profile migrate run --rm migrate
-docker-compose up -d
+docker compose --profile migrate run --rm migrate
+docker compose up -d
 ```
 
 Run the migrate step whenever you add new migrations. It no longer runs automatically on container startup.
@@ -72,7 +72,7 @@ Run the migrate step whenever you add new migrations. It no longer runs automati
 6. Seed the database once
 
 ```bash
-docker-compose exec web node prisma/seed.js
+docker compose exec web node prisma/seed.js
 ```
 
 The app should now be running at <http://localhost:3000>
@@ -112,10 +112,10 @@ Edit `.env` and set:
 3. Start Postgres only (with a host port):
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
+docker compose -f docker compose.yml -f docker compose.dev.yml up -d db
 ```
 
-Tip: if you want a shorter command, set `COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml` in your shell and then use `docker compose up -d db`.
+Tip: if you want a shorter command, set `COMPOSE_FILE=docker compose.yml:docker compose.dev.yml` in your shell and then use `docker compose up -d db`.
 
 4. Install deps and apply migrations:
 
