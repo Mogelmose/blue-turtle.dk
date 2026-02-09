@@ -50,14 +50,14 @@ function LoginPageInner() {
         setProfiles(data);
       } catch (error) {
         console.error("Error fetching profiles:", error);
-        setFejlbesked("Kunne ikke hente profiler. PrÃ¸v at genindlÃ¦se siden.");
+        setFejlbesked("Kunne ikke hente profiler. Prøv at genindlæse siden.");
       }
     }
     fetchProfiles();
 
     const error = searchParams.get("error");
     if (error === "AccessDenied") {
-      setFejlbesked("Adgang nÃ¦gtet. Du har ikke tilladelse til at se denne side.");
+      setFejlbesked("Adgang nægtet. Du har ikke tilladelse til at se denne side.");
     }
   }, [searchParams]);
   useEffect(() => {
