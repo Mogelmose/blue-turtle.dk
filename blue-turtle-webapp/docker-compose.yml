@@ -35,6 +35,9 @@ services:
       DEV_UPLOAD_ROOT: /uploads
     volumes:
       - ${HOST_UPLOAD_ROOT:-./.data/uploads}:/uploads
+    networks:
+      - proxy_network
+      - cloudflare_tunnel
 
   migrate:
     profiles:
@@ -57,3 +60,11 @@ services:
 
 volumes:
   pgdata:
+
+  networks:
+  proxy_network:
+    external: true
+    name: proxy_network
+  cloudflare_tunnel:
+    external: true
+    name: cloudflare_tunnel_network
