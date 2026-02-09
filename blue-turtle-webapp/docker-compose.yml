@@ -68,6 +68,7 @@ volumes:
 
 networks:
   app_network:
+    driver: bridge
     internal: true
     name: app_network
   proxy_network:
