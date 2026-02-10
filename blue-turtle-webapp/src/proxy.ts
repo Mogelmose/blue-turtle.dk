@@ -59,6 +59,10 @@ function hasSignature(req: NextRequest) {
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  if (pathname === '/api/health') {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith('/_next/image')) {
     const targetPath = getImageTargetPath(req);
     if (isPublicImagePath(targetPath)) {
@@ -109,5 +113,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api/auth|api/profiles|_next/static).*)'],
+  matcher: ['/((?!api/auth|api/profiles|api/health|_next/static).*)'],
 };

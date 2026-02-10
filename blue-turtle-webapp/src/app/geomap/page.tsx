@@ -18,7 +18,7 @@ export default async function GeomapPage() {
         <Header />
       </div>
       <main className="flex-1">
-        <Container className="w-full py-6 pb-24 md:pb-6">
+        <Container className="geomap-layout w-full py-6 pb-24 md:pb-6">
           <div className="space-y-6">
             <section className="card card-gradient">
               <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

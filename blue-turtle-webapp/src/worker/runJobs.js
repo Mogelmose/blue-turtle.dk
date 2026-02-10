@@ -1,4 +1,5 @@
-import { copyFile, mkdir, open, readFile, stat } from 'fs/promises';
+import { copyFile, mkdir, open, readFile, stat, writeFile } from 'fs/promises';
+import os from 'os';
 import path from 'path';
 import { spawn } from 'child_process';
 import exifr from 'exifr';
@@ -7,7 +8,7 @@ import prisma from '../lib/prisma.js';
 import { convertHeicToJpeg } from '../lib/heic.js';
 
 function getUploadRoot() {
-  const configured = process.env.DEV_UPLOAD_ROOT?.trim();
+  const configured = process.env.UPLOAD_ROOT?.trim();
   return configured || '/uploads';
 }
 
@@ -16,7 +17,7 @@ function resolveUploadPath(relativePath) {
   const resolvedPath = path.resolve(root, relativePath);
 
   if (resolvedPath !== root && !resolvedPath.startsWith(`${root}${path.sep}`)) {
-    throw new Error('Resolved path is outside of DEV_UPLOAD_ROOT.');
+    throw new Error('Resolved path is outside of UPLOAD_ROOT.');
   }
 
   return resolvedPath;
@@ -56,6 +57,8 @@ const POLL_INTERVAL_MS = 4000;
 const MAX_ATTEMPTS = 3;
 const CONCURRENCY = 6;
 const JOB_TYPES = ['GENERATE_VIDEO_PREVIEW', 'CONVERT_HEIC', 'EXTRACT_METADATA'];
+const WORKER_HEALTH_PATH =
+  process.env.WORKER_HEALTH_FILE?.trim() || path.join(os.tmpdir(), 'blue-turtle-worker-health.json');
 
 const IMAGE_MIME_PREFIX = 'image/';
 const VIDEO_MIME_PREFIX = 'video/';
@@ -64,6 +67,22 @@ const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.mov']);
 
 let activeCount = 0;
 let isShuttingDown = false;
+
+async function writeWorkerHeartbeat(status = 'running') {
+  const payload = {
+    status,
+    updatedAt: new Date().toISOString(),
+    activeCount,
+    isShuttingDown,
+  };
+
+  try {
+    await writeFile(WORKER_HEALTH_PATH, JSON.stringify(payload), 'utf8');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Failed to write worker heartbeat:', message);
+  }
+}
 
 async function claimJob(type) {
   const result = await prisma.$queryRaw`
@@ -775,21 +794,27 @@ async function runOnce() {
     }
 
     activeCount += 1;
+    void writeWorkerHeartbeat();
     void processJob(job).finally(() => {
       activeCount -= 1;
+      void writeWorkerHeartbeat();
     });
   }
 }
 
 async function start() {
   console.log('Worker started: EXTRACT_METADATA, CONVERT_HEIC, GENERATE_VIDEO_PREVIEW');
+  await writeWorkerHeartbeat('starting');
   await runOnce();
+  await writeWorkerHeartbeat();
   const interval = setInterval(() => {
     if (isShuttingDown) {
       clearInterval(interval);
       return;
     }
-    void runOnce();
+    void runOnce().finally(() => {
+      void writeWorkerHeartbeat();
+    });
   }, POLL_INTERVAL_MS);
 }
 
@@ -799,6 +824,7 @@ function shutdown() {
   }
   isShuttingDown = true;
   console.log('Worker shutting down...');
+  void writeWorkerHeartbeat('stopping');
   setTimeout(() => process.exit(0), POLL_INTERVAL_MS);
 }
 

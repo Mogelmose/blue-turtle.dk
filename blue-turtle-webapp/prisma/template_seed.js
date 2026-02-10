@@ -97,7 +97,7 @@ const albumsToCreate = [
 ];
 
 function getUploadRoot() {
-  const configured = process.env.DEV_UPLOAD_ROOT?.trim();
+  const configured = process.env.UPLOAD_ROOT?.trim();
   return configured || "/uploads";
 }
 
@@ -108,7 +108,7 @@ function resolveUploadPath(relativePath) {
     resolvedPath !== RESOLVED_UPLOAD_ROOT &&
     !resolvedPath.startsWith(`${RESOLVED_UPLOAD_ROOT}${path.sep}`)
   ) {
-    throw new Error("Resolved path is outside of DEV_UPLOAD_ROOT.");
+    throw new Error("Resolved path is outside of UPLOAD_ROOT.");
   }
 
   return resolvedPath;

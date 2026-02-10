@@ -98,7 +98,7 @@ export default function AlbumContent({ initialAlbum }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const canEdit = Boolean(session?.user);
+  const canEdit = Boolean(session?.user?.id);
 
   const preparedMedia = useMemo(
     () => (album?.media ?? []).map((item) => normalizeMedia(item)),

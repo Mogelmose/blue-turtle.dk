@@ -96,7 +96,7 @@ export async function GET(_request, { params }) {
 export async function PATCH(request, { params }) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user?.id) {
     return NextResponse.json(
       { success: false, error: 'Not authorized' },
       { status: 401 },

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
 import AdminUsersClient from '@/components/admin/AdminUsersClient';
+import AdminHealthIndicator from '@/components/admin/AdminHealthIndicator';
 import BottomNav from '@/components/layout/BottomNav';
 import Container from '@/components/layout/Container';
 import Footer from '@/components/layout/Footer';
@@ -19,7 +20,7 @@ type UserRow = {
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user?.id) {
     redirect('/login');
   }
 
@@ -62,6 +63,7 @@ export default async function AdminPage() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
+                <AdminHealthIndicator />
                 <span className="rounded-full border border-default bg-surface-elevated px-3 py-1 text-xs font-semibold text-main">
                   {initialUsers.length}{' '}
                   {initialUsers.length === 1 ? 'bruger' : 'brugere'}

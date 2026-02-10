@@ -15,6 +15,7 @@ type Props = {
 };
 
 const REFRESH_INTERVAL_MS = 30_000;
+const ONLINE_WINDOW_MS = 2 * 60 * 1000;
 
 function sortUsers(users: UserRow[]): UserRow[] {
   return [...users].sort((a, b) => {
@@ -29,6 +30,13 @@ export default function AdminUsersClient({ initialUsers }: Props) {
   const [users, setUsers] = useState<UserRow[]>(() => sortUsers(initialUsers));
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastCheckedAt, setLastCheckedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     let isActive = true;
@@ -48,12 +56,14 @@ export default function AdminUsersClient({ initialUsers }: Props) {
         if (Array.isArray(data)) {
           setUsers(sortUsers(data));
         }
+        setLastCheckedAt(Date.now());
       } catch (fetchError) {
         if (!isActive) {
           return;
         }
         console.error('Error fetching users:', fetchError);
         setError('Kunne ikke hente brugere.');
+        setLastCheckedAt(Date.now());
       } finally {
         if (isActive) {
           setIsLoading(false);
@@ -70,6 +80,9 @@ export default function AdminUsersClient({ initialUsers }: Props) {
     };
   }, []);
 
+  const checkedAgoSeconds =
+    lastCheckedAt === null ? null : Math.max(0, Math.floor((now - lastCheckedAt) / 1000));
+
   return (
     <section className="card space-y-3">
       <div className="flex items-center justify-between">
@@ -78,6 +91,11 @@ export default function AdminUsersClient({ initialUsers }: Props) {
           <span className="text-xs text-muted">Opdaterer...</span>
         ) : null}
       </div>
+      <p className="text-xs text-muted">
+        Online hvis set inden for {Math.floor(ONLINE_WINDOW_MS / 60000)} min. Opdateres hver{' '}
+        {Math.floor(REFRESH_INTERVAL_MS / 1000)}s
+        {checkedAgoSeconds !== null ? ` · sidst tjekket ${checkedAgoSeconds}s siden` : ''}.
+      </p>
 
       {error ? <p className="text-sm text-danger">{error}</p> : null}
 

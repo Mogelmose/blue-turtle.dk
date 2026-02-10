@@ -21,7 +21,7 @@ function parsePositiveInt(value: string | null, fallback: number): number {
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

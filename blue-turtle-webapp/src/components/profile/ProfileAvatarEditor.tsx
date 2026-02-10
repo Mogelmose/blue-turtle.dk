@@ -136,6 +136,7 @@ export default function ProfileAvatarEditor({
           src={avatarUrl}
           alt={`Avatar for ${username}`}
           fill
+          sizes="(max-width: 768px) 10rem, (max-width: 1280px) 15rem, 17.5rem"
           unoptimized
           className="object-cover"
           onError={() => setAvatarUrl('/static/logo.png')}

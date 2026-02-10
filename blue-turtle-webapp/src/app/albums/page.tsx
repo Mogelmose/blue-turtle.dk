@@ -45,7 +45,7 @@ async function getAlbums(): Promise<AlbumWithCategory[]> {
 export default async function AlbumsPage() {
   const albums = await getAlbums();
   const session = await getServerSession(authOptions);
-  const isAuthenticated = Boolean(session?.user);
+  const isAuthenticated = Boolean(session?.user?.id);
 
   return (
     <div className="min-h-screen flex flex-col bg-page">

@@ -73,7 +73,7 @@ function isSafeAlbumId(value: unknown): value is string {
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user?.id) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 

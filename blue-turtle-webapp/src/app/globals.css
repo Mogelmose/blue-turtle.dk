@@ -337,7 +337,7 @@ html::-webkit-scrollbar {
     border: 2px solid #f97316;
   }
   @media (min-width: 1280px) {
-    .max-w-7xl:has(.leaflet-container) {
+    .geomap-layout.max-w-7xl:has(.leaflet-container) {
       max-width: 108rem;
     }
   }

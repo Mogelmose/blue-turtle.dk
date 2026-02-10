@@ -29,7 +29,7 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
       {profiles.length > 0 ? (
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 p-3 lg:gap-3 justify-center">
-            {profiles.map((profile) => (
+            {profiles.map((profile, index) => (
               <div
                 key={profile.name}
                 onClick={() => handleProfileClick(profile)}
@@ -48,6 +48,8 @@ const ProfileSelection: React.FC<ProfileSelectionProps> = ({ profiles, handlePro
                     src={profile.img}
                     alt={`Profilbillede af ${profile.name}`}
                     fill
+                    sizes="(max-width: 640px) 9rem, (max-width: 1024px) 9rem, (max-width: 1280px) 10rem, 12rem"
+                    priority={index === 0}
                     className={
                       profile.isPlaceholder
                         ? 'object-contain transition-all duration-300'

@@ -39,7 +39,7 @@ export default function Header() {
             href="/homepage"
             className="flex items-center gap-3 transition-transform duration-200 hover:scale-[1.03]"
           >
-            <Image src={logoImage} alt="Blue Turtle Logo" width={50} height={50} className="full-w-fit" />
+            <Image src={logoImage} alt="Blue Turtle Logo" width={50} height={50} className="h-auto w-auto" />
             <span className="text-xl sm:text-2xl font-bold tracking-tight">Blue Turtle</span>
           </Link>
 

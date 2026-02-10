@@ -5,14 +5,14 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 function getUploadRoot() {
-  return process.env.DEV_UPLOAD_ROOT?.trim() || '/uploads';
+  return process.env.UPLOAD_ROOT?.trim() || '/uploads';
 }
 
 function resolveUploadPath(relativePath) {
   const root = path.resolve(getUploadRoot());
   const resolved = path.resolve(root, relativePath);
   if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) {
-    throw new Error('Resolved path is outside of DEV_UPLOAD_ROOT.');
+    throw new Error('Resolved path is outside of UPLOAD_ROOT.');
   }
   return resolved;
 }

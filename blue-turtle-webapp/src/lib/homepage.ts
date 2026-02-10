@@ -50,7 +50,6 @@ export async function getHomepageData(): Promise<HomepageData> {
         longitude: { not: null },
       },
       orderBy: { updatedAt: 'desc' },
-      take: 3,
       select: {
         id: true,
         name: true,

@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { changePasswordSchema } from '@/lib/passwordSchema';
 import { z } from 'zod';
+import { assertSessionVersionSupport } from '@/lib/sessionVersion';
 
 export const runtime = 'nodejs';
 
@@ -26,6 +27,7 @@ export async function POST(request) {
     // Validate request data
     const validatedData = changePasswordSchema.parse(body);
     const { currentPassword, newPassword } = validatedData;
+    assertSessionVersionSupport('/api/password-change');
 
     // Fetch user from database
     const user = await prisma.user.findUnique({
@@ -76,7 +78,10 @@ export async function POST(request) {
     // Update password in database
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { hashedPassword: newHashedPassword },
+      data: {
+        hashedPassword: newHashedPassword,
+        sessionVersion: { increment: 1 },
+      },
     });
 
     return NextResponse.json(

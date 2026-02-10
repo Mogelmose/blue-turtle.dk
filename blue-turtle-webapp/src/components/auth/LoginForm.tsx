@@ -54,6 +54,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             src={selectedProfile.img}
             alt={`Profilbillede af ${selectedProfile.name}`}
             fill
+            sizes="(max-width: 768px) 10rem, (max-width: 1280px) 13rem, 14rem"
             className={selectedProfile.isPlaceholder ? 'object-contain' : 'object-cover'}
           />
         </div>

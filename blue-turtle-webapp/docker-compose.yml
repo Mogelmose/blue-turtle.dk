@@ -29,6 +29,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(async (r) => { const body = await r.json(); if (r.status !== 200 || !body?.ok) process.exit(1); }).catch(() => process.exit(1));",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     env_file:
       - .env
     environment:
@@ -36,7 +48,8 @@ services:
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
       NODE_ENV: production
-      DEV_UPLOAD_ROOT: /uploads
+      UPLOAD_ROOT: ${UPLOAD_ROOT:-/uploads}
+      REQUIRE_SESSION_VERSION: ${REQUIRE_SESSION_VERSION:-true}
     volumes:
       - ${HOST_UPLOAD_ROOT:-./.data/uploads}:/uploads
     networks:

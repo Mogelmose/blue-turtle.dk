@@ -1,6 +1,7 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from './prisma';
 import bcrypt from "bcryptjs";
+import { assertSessionVersionSupport } from './sessionVersion';
 
 const pages = {
   signIn: "/login",
@@ -20,14 +21,50 @@ const jwt = {
 
 const callbacks = {
   async jwt({ token, user }) {
+    assertSessionVersionSupport('NextAuth jwt callback');
+
     if (user) {
       token.id = user.id;
       token.role = user.role;
+      token.sessionVersion = user.sessionVersion ?? 0;
+      return token;
     }
+
+    if (!token?.id) {
+      return token;
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { id: token.id },
+      select: { role: true, sessionVersion: true },
+    });
+
+    if (!dbUser) {
+      delete token.id;
+      delete token.role;
+      token.sessionVersion = 0;
+      return token;
+    }
+
+    const tokenSessionVersion =
+      typeof token.sessionVersion === 'number' ? token.sessionVersion : 0;
+    if (tokenSessionVersion !== dbUser.sessionVersion) {
+      delete token.id;
+      delete token.role;
+      token.sessionVersion = dbUser.sessionVersion;
+      return token;
+    }
+
+    token.role = dbUser.role;
     return token;
   },
   async session({ session, token }) {
     if (token && session?.user) {
+      if (!token.id) {
+        delete session.user.id;
+        delete session.user.role;
+        return session;
+      }
       session.user.id = token.id;
       session.user.role = token.role;
     }
@@ -46,12 +83,28 @@ export function getAuthOptions() {
           password: { label: "Adgangskode", type: "password" },
         },
         async authorize(credentials) {
+          assertSessionVersionSupport('NextAuth credentials authorize');
+
           if (!credentials?.username || !credentials?.password) {
             return null;
           }
 
-          const user = await prisma.user.findUnique({
-            where: { username: credentials.username },
+          const normalizedUsername = credentials.username.trim().normalize('NFC');
+
+          const user = await prisma.user.findFirst({
+            where: {
+              username: {
+                equals: normalizedUsername,
+                mode: 'insensitive',
+              },
+            },
+            select: {
+              id: true,
+              username: true,
+              role: true,
+              hashedPassword: true,
+              sessionVersion: true,
+            },
           });
 
           if (!user) {
@@ -67,6 +120,7 @@ export function getAuthOptions() {
             id: user.id,
             name: user.username,
             role: user.role,
+            sessionVersion: user.sessionVersion ?? 0,
           };
         },
       }),
