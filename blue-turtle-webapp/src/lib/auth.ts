@@ -1,25 +1,24 @@
-import CredentialsProvider from "next-auth/providers/credentials";
+import type { AuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
 import prisma from './prisma';
-import bcrypt from "bcryptjs";
 import { assertSessionVersionSupport } from './sessionVersion';
 
-const pages = {
-  signIn: "/login",
+const pages: AuthOptions['pages'] = {
+  signIn: '/login',
 };
 
-/** @type {import('next-auth').AuthOptions['session']} */
-const session = {
-  strategy: "jwt",
-  maxAge: 14 * 24 * 60 * 60, // 14 days
-  updateAge: 60 * 60, // 1 hour
+const session: AuthOptions['session'] = {
+  strategy: 'jwt',
+  maxAge: 14 * 24 * 60 * 60,
+  updateAge: 60 * 60,
 };
 
-/** @type {import('next-auth').AuthOptions['jwt']} */
-const jwt = {
-  maxAge: 14 * 24 * 60 * 60, // 14 days
+const jwt: AuthOptions['jwt'] = {
+  maxAge: 14 * 24 * 60 * 60,
 };
 
-const callbacks = {
+const callbacks: NonNullable<AuthOptions['callbacks']> = {
   async jwt({ token, user }) {
     assertSessionVersionSupport('NextAuth jwt callback');
 
@@ -72,15 +71,14 @@ const callbacks = {
   },
 };
 
-// Build full NextAuth options (evaluates providers) — import only in the auth route
-export function getAuthOptions() {
+export function getAuthOptions(): AuthOptions {
   return {
     providers: [
-      (typeof CredentialsProvider === "function" ? CredentialsProvider : CredentialsProvider?.default)({
-        name: "Credentials",
+      CredentialsProvider({
+        name: 'Credentials',
         credentials: {
-          username: { label: "Bruger", type: "text" },
-          password: { label: "Adgangskode", type: "password" },
+          username: { label: 'Bruger', type: 'text' },
+          password: { label: 'Adgangskode', type: 'password' },
         },
         async authorize(credentials) {
           assertSessionVersionSupport('NextAuth credentials authorize');
@@ -111,7 +109,10 @@ export function getAuthOptions() {
             return null;
           }
 
-          const isValidPassword = await bcrypt.compare(credentials.password, user.hashedPassword);
+          const isValidPassword = await bcrypt.compare(
+            credentials.password,
+            user.hashedPassword,
+          );
           if (!isValidPassword) {
             return null;
           }
@@ -132,10 +133,11 @@ export function getAuthOptions() {
   };
 }
 
-// Minimal options for getServerSession (no providers) — safe during build/config collection
+// Minimal options for getServerSession (no providers) - safe during build/config collection
 export const sessionAuthOptions = {
   pages,
   session,
   jwt,
   callbacks,
-};
+} as AuthOptions;
+

@@ -4,7 +4,8 @@ import path from 'path';
 import { spawn } from 'child_process';
 import exifr from 'exifr';
 import ExifReader from 'exifreader';
-import prisma from '../lib/prisma.js';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 import { convertHeicToJpeg } from '../lib/heic.js';
 
 function getUploadRoot() {
@@ -832,3 +833,4 @@ process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
 void start();
+

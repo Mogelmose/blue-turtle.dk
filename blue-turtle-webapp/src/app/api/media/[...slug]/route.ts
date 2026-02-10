@@ -257,7 +257,7 @@ function createStaticJpegResponse({ absolutePath, filename, size, signal, cacheH
   });
 }
 
-async function getMediaContext(slug) {
+async function getMediaContext(slug): Promise<any> {
   if (!slug || slug.length < 1 || slug.length > 2) {
     return {
       error: NextResponse.json({ error: "Invalid file path." }, { status: 400 }),
@@ -491,3 +491,4 @@ export async function GET(request, { params }) {
     );
   }
 }
+

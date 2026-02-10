@@ -52,7 +52,6 @@ COPY --from=builder --chown=node:node /app/node_modules/exifr ./node_modules/exi
 COPY --from=builder --chown=node:node /app/node_modules/exifreader ./node_modules/exifreader
 COPY --from=builder --chown=node:node /app/package.json ./package.json
 COPY --from=builder --chown=node:node /app/src/worker ./src/worker
-COPY --from=builder --chown=node:node /app/src/lib/prisma.js ./src/lib/prisma.js
 COPY --chown=node:node docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh \
   && mkdir -p /app/.next/cache/images \

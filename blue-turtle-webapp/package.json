@@ -8,7 +8,7 @@
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint .",
-    "worker": "bun src/worker/runJobs.js",
+    "worker": "node src/worker/runJobs.js",
     "backfill:video-previews": "bun src/worker/backfillVideoPreviews.js"
   },
   "dependencies": {
