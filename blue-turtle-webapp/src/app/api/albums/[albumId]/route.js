@@ -15,6 +15,7 @@ import {
   sanitizeExtension,
 } from '../../../../lib/storage';
 import { convertHeicToJpeg } from '../../../../lib/heic';
+import { createNotificationsForOtherUsers, NOTIFICATION_TYPES } from '../../../../lib/notifications';
 
 export const runtime = 'nodejs';
 
@@ -247,17 +248,28 @@ export async function PATCH(request, { params }) {
     let updatedAlbum = null;
 
     try {
-      updatedAlbum = await prisma.album.update({
-        where: { id: albumId },
-        data: {
-          name,
-          infoText: infoTextValue,
-          category,
-          coverImage: coverImagePath,
-          latitude: latitude ? parseFloat(latitude) : null,
-          longitude: longitude ? parseFloat(longitude) : null,
-          locationName: locationName || null,
-        },
+      updatedAlbum = await prisma.$transaction(async (tx) => {
+        const album = await tx.album.update({
+          where: { id: albumId },
+          data: {
+            name,
+            infoText: infoTextValue,
+            category,
+            coverImage: coverImagePath,
+            latitude: latitude ? parseFloat(latitude) : null,
+            longitude: longitude ? parseFloat(longitude) : null,
+            locationName: locationName || null,
+          },
+        });
+
+        await createNotificationsForOtherUsers(tx, {
+          actorUserId: session.user.id,
+          type: NOTIFICATION_TYPES.ALBUM_UPDATED,
+          message: `${album.name} blev opdateret`,
+          albumId: album.id,
+        });
+
+        return album;
       });
     } catch (updateError) {
       if (

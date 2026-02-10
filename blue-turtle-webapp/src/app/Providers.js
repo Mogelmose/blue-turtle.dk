@@ -1,6 +1,7 @@
 "use client";
 import { SessionProvider } from "next-auth/react";
 import PresencePing from "@/components/auth/PresencePing";
+import RealtimeEvents from "@/components/notifications/RealtimeEvents";
 
 export default function Providers({ children }) {
   return (
@@ -10,6 +11,7 @@ export default function Providers({ children }) {
       refetchOnWindowFocus={true}
     >
       <PresencePing />
+      <RealtimeEvents />
       {children}
     </SessionProvider>
   );

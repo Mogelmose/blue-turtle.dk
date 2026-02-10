@@ -20,6 +20,7 @@ model User {
   role      Role     @default(REGULAR)
   image     String?
   sessionVersion Int @default(0)
+  notifications Notification[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   lastSeenAt DateTime?
@@ -106,4 +107,19 @@ model Job {
 
   @@index([status])
   @@index([type, status])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  albumId   String?
+  mediaId   String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
 }

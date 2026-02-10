@@ -9,6 +9,7 @@ import mime from 'mime-types';
 import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
+import { createNotificationsForOtherUsers, NOTIFICATION_TYPES } from '@/lib/notifications';
 import {
   buildMediaRelativePath,
   buildConvertedRelativePath,
@@ -166,6 +167,14 @@ export async function POST(request: NextRequest) {
             payload: { mediaId: created.id },
             status: 'PENDING',
           },
+        });
+
+        await createNotificationsForOtherUsers(tx, {
+          actorUserId: session.user.id,
+          type: NOTIFICATION_TYPES.MEDIA_UPLOADED,
+          message: `${created.originalName || created.filename || 'Et medie'} blev uploadet`,
+          albumId,
+          mediaId: created.id,
         });
 
         if (isHeic) {

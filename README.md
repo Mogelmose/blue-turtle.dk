@@ -167,7 +167,7 @@ It starts automatically with the web server. To disable it, set `RUN_WORKER=fals
 
 Set only one of these depending on how you run the app:
 - `HOST_UPLOAD_ROOT` when running the webapp in Docker (maps host uploads to `/uploads`).
-- `DEV_UPLOAD_ROOT` when running the webapp locally (where the app reads/writes uploads).
+- `UPLOAD_ROOT` when running the webapp locally (where the app reads/writes uploads).
 
-Note: the Docker container defaults to `/uploads`, so you can omit `DEV_UPLOAD_ROOT` there.
-For local dev, keep `DEV_UPLOAD_ROOT` set so seeded and uploaded images resolve correctly.
+Note: the Docker container defaults to `/uploads`, so you can omit `UPLOAD_ROOT` there.
+For local dev, keep `UPLOAD_ROOT` set so seeded and uploaded images resolve correctly.

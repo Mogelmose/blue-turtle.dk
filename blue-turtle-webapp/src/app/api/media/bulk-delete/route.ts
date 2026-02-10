@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
 import { resolveUploadPath } from '@/lib/storage';
+import { createNotificationsForOtherUsers, NOTIFICATION_TYPES } from '@/lib/notifications';
 
 export const runtime = 'nodejs';
 
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
       where: { id: { in: mediaIds } },
       select: {
         id: true,
+        albumId: true,
         storagePath: true,
         convertedPath: true,
         previewPath: true,
@@ -57,8 +59,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, deleted: 0 });
     }
 
-    await prisma.media.deleteMany({
-      where: { id: { in: media.map((item) => item.id) } },
+    const deletedMedia = media.map((item) => ({
+      id: item.id,
+      albumId: item.albumId,
+    }));
+
+    await prisma.$transaction(async (tx) => {
+      await tx.media.deleteMany({
+        where: { id: { in: deletedMedia.map((item) => item.id) } },
+      });
+
+      const primaryAlbumId = deletedMedia[0]?.albumId ?? null;
+      await createNotificationsForOtherUsers(tx, {
+        actorUserId: session.user.id,
+        type: NOTIFICATION_TYPES.MEDIA_DELETED,
+        message:
+          deletedMedia.length === 1
+            ? '1 medie blev slettet'
+            : `${deletedMedia.length} medier blev slettet`,
+        albumId: primaryAlbumId,
+        mediaId: deletedMedia.length === 1 ? deletedMedia[0].id : null,
+      });
     });
 
     const paths = media.flatMap((item) =>

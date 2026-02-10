@@ -5,6 +5,7 @@ import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
 import { resolveUploadPath } from '@/lib/storage';
+import { createNotificationsForOtherUsers, NOTIFICATION_TYPES } from '@/lib/notifications';
 
 export const runtime = 'nodejs';
 
@@ -65,18 +66,44 @@ export async function POST(request: NextRequest) {
     const media = await prisma.media.findMany({
       where: { albumId: { in: albumIds } },
       select: {
+        id: true,
+        albumId: true,
         storagePath: true,
         convertedPath: true,
         previewPath: true,
       },
     });
 
-    await prisma.media.deleteMany({
-      where: { albumId: { in: albumIds } },
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.media.deleteMany({
+        where: { albumId: { in: albumIds } },
+      });
 
-    await prisma.album.deleteMany({
-      where: { id: { in: albumIds } },
+      await tx.album.deleteMany({
+        where: { id: { in: albumIds } },
+      });
+
+      await createNotificationsForOtherUsers(tx, {
+        actorUserId: session.user.id,
+        type: NOTIFICATION_TYPES.ALBUM_DELETED,
+        message:
+          albumIds.length === 1
+            ? '1 album blev slettet'
+            : `${albumIds.length} albums blev slettet`,
+        albumId: albumIds.length === 1 ? albumIds[0] : null,
+      });
+
+      if (media.length > 0) {
+        await createNotificationsForOtherUsers(tx, {
+          actorUserId: session.user.id,
+          type: NOTIFICATION_TYPES.MEDIA_DELETED,
+          message:
+            media.length === 1
+              ? '1 medie blev slettet'
+              : `${media.length} medier blev slettet`,
+          albumId: albumIds.length === 1 ? albumIds[0] : null,
+        });
+      }
     });
 
     const paths = [

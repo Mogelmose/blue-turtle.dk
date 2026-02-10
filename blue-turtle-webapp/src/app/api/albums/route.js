@@ -15,6 +15,7 @@ import {
   sanitizeExtension,
 } from '@/lib/storage';
 import { convertHeicToJpeg } from '@/lib/heic';
+import { createNotificationsForOtherUsers, NOTIFICATION_TYPES } from '@/lib/notifications';
 
 export const runtime = 'nodejs';
 
@@ -238,17 +239,28 @@ export async function POST(request) {
     let newAlbum = null;
 
     try {
-      newAlbum = await prisma.album.create({
-        data: {
-          id: albumId,
-          name,
-          infoText,
-          category,
-          coverImage: coverImagePath,
-          latitude: latitude ? parseFloat(latitude) : null,
-          longitude: longitude ? parseFloat(longitude) : null,
-          locationName: locationName || null,
-        },
+      newAlbum = await prisma.$transaction(async (tx) => {
+        const createdAlbum = await tx.album.create({
+          data: {
+            id: albumId,
+            name,
+            infoText,
+            category,
+            coverImage: coverImagePath,
+            latitude: latitude ? parseFloat(latitude) : null,
+            longitude: longitude ? parseFloat(longitude) : null,
+            locationName: locationName || null,
+          },
+        });
+
+        await createNotificationsForOtherUsers(tx, {
+          actorUserId: session.user.id,
+          type: NOTIFICATION_TYPES.ALBUM_CREATED,
+          message: `${createdAlbum.name} blev oprettet`,
+          albumId: createdAlbum.id,
+        });
+
+        return createdAlbum;
       });
     } catch (error) {
       if (coverAbsolutePath) {
