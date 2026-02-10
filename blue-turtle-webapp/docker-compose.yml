@@ -24,6 +24,8 @@ services:
     image: blue-turtle:1.0
     container_name: web
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     depends_on:
       db:
         condition: service_healthy

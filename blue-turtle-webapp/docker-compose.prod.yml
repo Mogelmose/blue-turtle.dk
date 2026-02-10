@@ -6,3 +6,7 @@ networks:
   proxy_network:
     external: true
     name: proxy_network
+
+services:
+  web:
+    ports: []
