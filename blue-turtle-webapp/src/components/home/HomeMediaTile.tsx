@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { MediaSummary } from '../../lib/types/homepage';
@@ -80,14 +80,46 @@ function getDisplayUrl(url: string, mimeType?: string | null): string {
   return `${url}${separator}format=jpeg`;
 }
 
+function getIsMobilePreviewSnapshot(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  const isCoarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+  const ua = window.navigator.userAgent?.toLowerCase() ?? '';
+  const isIOS = ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod');
+  return isCoarse || isIOS;
+}
+
+function subscribeToMobilePreviewChanges(onStoreChange: () => void): () => void {
+  if (typeof window === 'undefined' || !window.matchMedia) {
+    return () => {};
+  }
+
+  const mediaQuery = window.matchMedia('(pointer: coarse)');
+  const handleChange = () => onStoreChange();
+
+  mediaQuery.addEventListener('change', handleChange);
+  window.addEventListener('orientationchange', handleChange);
+
+  return () => {
+    mediaQuery.removeEventListener('change', handleChange);
+    window.removeEventListener('orientationchange', handleChange);
+  };
+}
+
 export default function HomeMediaTile({ item }: Props) {
   const kind = getMediaKind(item.url, item.mimeType);
   const badgeLabel =
     kind === 'video' ? 'Video' : kind === 'image' ? 'Billede' : 'Fil';
   const displayUrl = getDisplayUrl(item.url, item.mimeType);
   const [posterSrc, setPosterSrc] = useState(FALLBACK_VIDEO_POSTER);
-  const [isMobilePreview, setIsMobilePreview] = useState(false);
   const previewUrl = `/api/media/${item.id}/preview`;
+  const isMobileEnvironment = useSyncExternalStore(
+    subscribeToMobilePreviewChanges,
+    getIsMobilePreviewSnapshot,
+    () => false,
+  );
+  const isMobilePreview = kind === 'video' && isMobileEnvironment;
 
   useEffect(() => {
     if (kind !== 'video') {
@@ -111,16 +143,6 @@ export default function HomeMediaTile({ item }: Props) {
     };
   }, [kind, previewUrl]);
 
-  useEffect(() => {
-    if (kind !== 'video') {
-      return;
-    }
-    const isCoarse = window.matchMedia?.('(pointer: coarse)').matches ?? false;
-    const ua = navigator.userAgent?.toLowerCase() ?? '';
-    const isIOS = ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod');
-    setIsMobilePreview(isCoarse || isIOS);
-  }, [kind]);
-
   return (
     <Link
       href={`/albums/${item.albumId}`}
@@ -137,11 +159,13 @@ export default function HomeMediaTile({ item }: Props) {
           />
         ) : kind === 'video' ? (
           isMobilePreview ? (
-            <img
+            <Image
               src={posterSrc}
               alt={item.albumName}
-              className="h-full w-full object-cover"
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 240px"
+              className="object-cover"
+              unoptimized
               onError={() => setPosterSrc(FALLBACK_VIDEO_POSTER)}
             />
           ) : (

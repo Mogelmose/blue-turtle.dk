@@ -36,7 +36,7 @@ Edit `.env` and set:
 
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`
 - `NEXTAUTH_SECRET` (generate with `bunx auth secret` or `openssl rand -base64 32`)
-- `NEXTAUTH_URL` (usually `http://localhost:3000`)
+- `NEXTAUTH_URL` (defaults to `http://localhost:3000`)
 - `HOST_UPLOAD_ROOT` (optional, defaults to `./.data/uploads`)
 
 3. Create a seed script from the template:

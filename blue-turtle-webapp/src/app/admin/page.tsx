@@ -16,8 +16,6 @@ type UserRow = {
   lastSeenAt: string | null;
 };
 
-const ONLINE_WINDOW_MS = 2 * 60 * 1000;
-
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
@@ -29,7 +27,6 @@ export default async function AdminPage() {
     redirect('/homepage');
   }
 
-  const now = Date.now();
   const users = await prisma.user.findMany({
     select: { id: true, username: true, role: true, lastSeenAt: true },
     orderBy: { createdAt: 'desc' },
@@ -41,15 +38,10 @@ export default async function AdminPage() {
       username: user.username,
       role: user.role,
       lastSeenAt: user.lastSeenAt ? user.lastSeenAt.toISOString() : null,
-      isOnline:
-        user.lastSeenAt instanceof Date &&
-        now - user.lastSeenAt.getTime() <= ONLINE_WINDOW_MS,
+      isOnline: false,
     }))
     .sort((a, b) => {
-      if (a.isOnline === b.isOnline) {
-        return a.username.localeCompare(b.username);
-      }
-      return a.isOnline ? -1 : 1;
+      return a.username.localeCompare(b.username);
     });
 
   return (

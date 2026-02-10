@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { Album, Category } from '@prisma/client';
@@ -253,10 +254,12 @@ export default function CreateAlbumModal({
                 aria-label="Vælg albumcover"
               >
                 {displayCoverUrl ? (
-                  <img
+                  <Image
                     src={displayCoverUrl}
                     alt="Albumcover"
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-muted">

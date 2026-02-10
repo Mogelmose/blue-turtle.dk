@@ -9,19 +9,24 @@ type Props = {
   isAdmin: boolean;
 };
 
+function getInitialTheme(): 'light' | 'dark' {
+  if (typeof window === 'undefined') {
+    return 'dark';
+  }
+
+  const stored = window.localStorage.getItem('theme');
+  if (stored === 'light' || stored === 'dark') {
+    return stored;
+  }
+
+  const prefersLight =
+    window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  return prefersLight ? 'light' : 'dark';
+}
+
 export default function HomeHero({ userName, isAdmin }: Props) {
   const greeting = userName ? `Hej ${userName}` : 'Hej';
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem('theme');
-    const prefersLight =
-      window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-    const initialTheme =
-      stored === 'light' || stored === 'dark' ? stored : prefersLight ? 'light' : 'dark';
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle('light', initialTheme === 'light');
-  }, []);
+  const [theme, setTheme] = useState<'light' | 'dark'>(getInitialTheme);
 
   useEffect(() => {
     document.documentElement.classList.toggle('light', theme === 'light');

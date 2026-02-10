@@ -19,12 +19,7 @@ export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const [bottomOffset, setBottomOffset] = useState(0);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.visualViewport) {
@@ -57,7 +52,7 @@ export default function BottomNav() {
     };
   }, []);
 
-  const safePathname = isMounted ? pathname : '';
+  const safePathname = pathname ?? '';
 
   const items: NavItem[] = [
     {

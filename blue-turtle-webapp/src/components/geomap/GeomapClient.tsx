@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { icon, latLngBounds } from 'leaflet';
@@ -174,20 +175,20 @@ export default function GeomapClient({ albums, media }: Props) {
               {albumCount + mediaCount} punkter på kortet i alt
             </span>
           </div>
-          <div className="space-y-2 text-sm text-muted">
-            <div className="flex items-center gap-2">
-              <img src="/geomap/album-pin.svg" alt="Album ikon" className="h-6 w-6" />
-              {albumCount} Album lokationer
+            <div className="space-y-2 text-sm text-muted">
+              <div className="flex items-center gap-2">
+                <Image src="/geomap/album-pin.svg" alt="Album ikon" width={24} height={24} />
+                {albumCount} Album lokationer
+              </div>
+              <div className="flex items-center gap-2">
+                <Image src="/geomap/picture-pin.svg" alt="Billede ikon" width={24} height={24} />
+                {pictureCount} Billede lokationer
+              </div>
+              <div className="flex items-center gap-2">
+                <Image src="/geomap/video-pin.svg" alt="Video ikon" width={24} height={24} />
+                {videoCount} Video lokationer
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <img src="/geomap/picture-pin.svg" alt="Billede ikon" className="h-6 w-6" />
-              {pictureCount} Billede lokationer
-            </div>
-            <div className="flex items-center gap-2">
-              <img src="/geomap/video-pin.svg" alt="Video ikon" className="h-6 w-6" />
-              {videoCount} Video lokationer
-            </div>
-          </div>
           <p className="text-xs text-muted">
             Lokationer for albummer er valgt af brugeren, mens lokationer for medier er automatisk udledt fra metadata. Klik på et punkt på kortet for at se detaljer og navigere til det relevante album/medie.
           </p>

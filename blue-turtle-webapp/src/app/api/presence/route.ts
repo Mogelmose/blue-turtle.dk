@@ -13,10 +13,15 @@ export async function POST() {
   }
 
   try {
-    await prisma.user.update({
+    const result = await prisma.user.updateMany({
       where: { id: session.user.id },
       data: { lastSeenAt: new Date() },
     });
+
+    if (result.count === 0) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Presence update failed:', error);

@@ -7,7 +7,7 @@
     "dev": "next dev --turbopack",
     "build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "worker": "bun src/worker/runJobs.js",
     "backfill:video-previews": "bun src/worker/backfillVideoPreviews.js"
   },
