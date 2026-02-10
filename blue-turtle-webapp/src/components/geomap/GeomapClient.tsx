@@ -141,7 +141,7 @@ export default function GeomapClient({ albums, media }: Props) {
                         <p className="text-base font-semibold text-primary">
                           {getMediaLabel(item.mimeType)}
                         </p>
-                        <p className="text-sm text-main">{item.albumName}</p>
+                        <p className="text-sm text-main">Album: {item.albumName}</p>
                       </div>
                       {sourceLabel ? (
                         <p className="text-xs text-muted">Kilde: {sourceLabel}</p>
@@ -189,7 +189,7 @@ export default function GeomapClient({ albums, media }: Props) {
             </div>
           </div>
           <p className="text-xs text-muted">
-            Lokationer for albummer er valgt at brugeren, mens lokationer for medier er automatisk udledt fra metadata. Klik på et punkt på kortet for at se detaljer og navigere til det relevante album/medie.
+            Lokationer for albummer er valgt af brugeren, mens lokationer for medier er automatisk udledt fra metadata. Klik på et punkt på kortet for at se detaljer og navigere til det relevante album/medie.
           </p>
         </div>
 
