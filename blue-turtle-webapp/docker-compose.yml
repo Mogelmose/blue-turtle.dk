@@ -67,9 +67,5 @@ volumes:
   pgdata:
 
 networks:
-  app_network:
-    external: true # Had to make the network external so the driver does not recreate on up/down. This is beacuse i had to add the docker network interface to firewall-cmd "trusted" on the server for the app and db to communicate. without external: true, the network would be recreated on docker-compose down/up and get a new interface id.
-    name: app_network
-  proxy_network:
-    external: true
-    name: proxy_network
+  app_network: {}
+  proxy_network: {}

@@ -11,6 +11,12 @@ Before you begin, ensure you have the following installed on your system:
 
 ## Run With Docker (recommended)
 
+### Compose files
+
+- `docker-compose.yml` is the base stack and uses internal networks.
+- `docker-compose.prod.yml` only defines external networks for live deployment.
+- `docker-compose.dev.yml` only exposes the DB port for local `bun run dev`.
+
 ### First-time setup
 
 1. Clone the repo and enter the webapp directory:
@@ -76,6 +82,18 @@ docker compose exec web node prisma/seed.js
 
 The app should now be running at <http://localhost:3000>
 
+### Production (external networks)
+
+The live deployment uses external networks so their interface names stay stable for firewall rules.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+This expects the external networks to already exist:
+- `app_network`
+- `proxy_network`
+
 ### Subsequent starts
 
 On later runs, you do not need to seed again:
@@ -110,7 +128,7 @@ Edit `.env` and set:
 3. Start Postgres only (with a host port):
 
 ```bash
-docker compose -f docker compose.yml -f docker compose.dev.yml up -d db
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db
 ```
 
 Tip: if you want a shorter command, set `COMPOSE_FILE=docker compose.yml:docker compose.dev.yml` in your shell and then use `docker compose up -d db`.
@@ -134,7 +152,7 @@ bun prisma/seed.js
 bun run dev
 ```
 
-Note: For Docker production runs, `DATABASE_URL` should point to `db` instead of `localhost`. This can be changed in the docker-compose.yml file (both web and migrate)
+Note: For Docker production runs, `DATABASE_URL` should point to `db` instead of `localhost`. This is already set in `docker-compose.yml` for `web` and `migrate`.
 
 ## Background Jobs (Docker)
 

@@ -1,0 +1,8 @@
+networks:
+  app_network:
+    external: true
+    # Keep external so the interface name stays stable for firewall-cmd trust rules.
+    name: app_network
+  proxy_network:
+    external: true
+    name: proxy_network
