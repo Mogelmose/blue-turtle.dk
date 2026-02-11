@@ -356,7 +356,7 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
           onClick={() => {
             void handleRefreshNotificationsClick();
           }}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-primary transition-colors hover:bg-surface-elevated hover:text-main disabled:opacity-60"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-main transition-colors hover:bg-surface-elevated hover:text-main disabled:opacity-60"
           aria-label="Opdater notifikationer"
           title="Opdater notifikationer"
           disabled={isNotificationsRefreshing}
@@ -394,7 +394,7 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
               return (
                 <li
                   key={item.id}
-                  className="rounded-lg border border-default bg-surface-elevated px-3 py-2"
+                  className="rounded-xl border-2 border-default card-gradient px-3 py-2 shadow-lg"
                 >
                   <p className="text-xs text-muted">{createdAtLabel}</p>
                   <p className="mt-1 text-sm text-main">{item.message}</p>

@@ -11,7 +11,7 @@ export default function ActivityList({ items }: Props) {
     <section id="home-activity" className="space-y-4">
       <h2 className="text-2xl font-semibold text-main">Seneste aktivitet</h2>
       {items.length > 0 ? (
-        <ul className="space-y-3">
+        <ul className="space-y-2.5">
           {items.map((item) => (
             <li key={`${item.type}-${item.id}`}>
               <Link

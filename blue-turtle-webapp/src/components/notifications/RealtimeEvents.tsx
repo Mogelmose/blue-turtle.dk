@@ -149,8 +149,7 @@ function NotificationToast({ toast, onDismiss, setRef }: NotificationToastProps)
       type="button"
       onClick={handleClick}
       className={[
-        'tap-highlight-none pointer-events-auto w-fit max-w-full self-center rounded-xl border border-default bg-surface-elevated px-3 py-2 text-left shadow-lg md:self-start',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-ocean-500',
+        'pointer-events-auto w-fit max-w-full self-center rounded-xl border-2 border-default bg-surface px-3 py-2 text-left shadow-lg md:self-start'
       ].join(' ')}
       aria-label="Luk notifikation"
     >
