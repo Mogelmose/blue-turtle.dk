@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, TouchEvent as ReactTouchEvent } from 'react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import ReactDOM from 'react-dom';
@@ -164,6 +165,26 @@ export default function AlbumContent({ initialAlbum }: Props) {
       router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
     }
   }, [pathname, router, searchParams]);
+  const stopLightboxControlGesture = useCallback(
+    (
+      event:
+        | ReactPointerEvent<HTMLButtonElement>
+        | ReactTouchEvent<HTMLButtonElement>
+        | ReactMouseEvent<HTMLButtonElement>,
+    ) => {
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [],
+  );
+  const handleCloseButtonClick = useCallback(
+    (event: ReactMouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeViewer();
+    },
+    [closeViewer],
+  );
 
   const toggleSelectionMode = useCallback(() => {
     setIsSelecting((current) => {
@@ -486,7 +507,10 @@ export default function AlbumContent({ initialAlbum }: Props) {
           <div className="pointer-events-none absolute inset-x-0 top-[calc(env(safe-area-inset-top)+1rem)] z-10 flex items-center justify-between px-4 text-white md:top-[calc(env(safe-area-inset-top)+5.25rem)]">
             <button
               type="button"
-              onClick={closeViewer}
+              onClick={handleCloseButtonClick}
+              onPointerDownCapture={stopLightboxControlGesture}
+              onTouchStartCapture={stopLightboxControlGesture}
+              onMouseDownCapture={stopLightboxControlGesture}
               className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-2 text-xs font-semibold uppercase tracking-wide transition hover:bg-white/20"
               aria-label="Luk"
             >

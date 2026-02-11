@@ -105,6 +105,7 @@ export async function PATCH(request, { params }) {
   }
 
   try {
+    const actorName = session.user.name?.trim() || 'En bruger';
     const { albumId } = await params;
     const existingAlbum = await prisma.album.findUnique({
       where: { id: albumId },
@@ -265,7 +266,7 @@ export async function PATCH(request, { params }) {
         await createNotificationsForOtherUsers(tx, {
           actorUserId: session.user.id,
           type: NOTIFICATION_TYPES.ALBUM_UPDATED,
-          message: `${album.name} blev opdateret`,
+          message: `${actorName} opdaterede albummet "${album.name}".`,
           albumId: album.id,
         });
 

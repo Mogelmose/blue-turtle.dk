@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { MapPinOff } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { icon, latLngBounds } from 'leaflet';
 import type { GeomapAlbum, GeomapMedia } from '@/lib/types/geomap';
@@ -10,12 +11,12 @@ import type { GeomapAlbum, GeomapMedia } from '@/lib/types/geomap';
 type Props = {
   albums: GeomapAlbum[];
   media: GeomapMedia[];
+  totalMediaCount: number;
 };
 
 const DEFAULT_CENTER: [number, number] = [56.2639, 9.5018];
 const DEFAULT_ZOOM = 5;
 const MAX_FIT_ZOOM = 12;
-
 
 const albumIcon = icon({
   iconUrl: '/geomap/album-pin.svg',
@@ -37,7 +38,6 @@ const videoIcon = icon({
   iconAnchor: [10, 28],
   popupAnchor: [0, -20],
 });
-
 
 function FitBounds({ points }: { points: [number, number][] }) {
   const map = useMap();
@@ -73,26 +73,74 @@ function getSourceLabel(source: GeomapMedia['locationSource']) {
   return source === 'VIDEO_META' ? 'Video metadata' : 'EXIF';
 }
 
-export default function GeomapClient({ albums, media }: Props) {
+export default function GeomapClient({ albums, media, totalMediaCount }: Props) {
   const albumIconMemo = useMemo(() => albumIcon, []);
   const pictureIconMemo = useMemo(() => pictureIcon, []);
   const videoIconMemo = useMemo(() => videoIcon, []);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const updateIsDarkMode = () => {
+      const forceLight = document.documentElement.classList.contains('light');
+      setIsDarkMode(mediaQuery.matches && !forceLight);
+    };
+
+    updateIsDarkMode();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', updateIsDarkMode);
+    } else {
+      mediaQuery.addListener(updateIsDarkMode);
+    }
+
+    const observer = new MutationObserver(updateIsDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => {
+      if (typeof mediaQuery.removeEventListener === 'function') {
+        mediaQuery.removeEventListener('change', updateIsDarkMode);
+      } else {
+        mediaQuery.removeListener(updateIsDarkMode);
+      }
+      observer.disconnect();
+    };
+  }, []);
+
   const points = useMemo<[number, number][]>(() => {
-    const albumPoints = albums.map((album) => [album.latitude, album.longitude] as [number, number]);
-    const mediaPoints = media.map((item) => [item.locationAutoLat, item.locationAutoLng] as [number, number]);
+    const albumPoints = albums.map(
+      (album) => [album.latitude, album.longitude] as [number, number],
+    );
+    const mediaPoints = media.map(
+      (item) => [item.locationAutoLat, item.locationAutoLng] as [number, number],
+    );
     return [...albumPoints, ...mediaPoints];
   }, [albums, media]);
 
   const albumCount = albums.length;
-  const mediaCount = media.length;
+  const mediaWithLocationCount = media.length;
+  const mediaWithoutLocationCount = Math.max(totalMediaCount - mediaWithLocationCount, 0);
+  const mediaWithLocationPct =
+    totalMediaCount > 0 ? Math.round((mediaWithLocationCount / totalMediaCount) * 100) : 0;
+  const mediaWithoutLocationPct =
+    totalMediaCount > 0 ? Math.max(100 - mediaWithLocationPct, 0) : 0;
+  const coverageOpacity = 0.35 + (mediaWithLocationPct / 100) * 0.65;
+  const coverageFillColor = isDarkMode ? 'hsl(195, 100%, 46%)' : 'hsl(217, 91%, 27%)';
   const videoCount = media.filter((item) => item.mimeType?.startsWith('video/')).length;
-  const pictureCount = mediaCount - videoCount;
+  const pictureCount = mediaWithLocationCount - videoCount;
   const hasPoints = points.length > 0;
 
   return (
     <section className="grid gap-6 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
       <div className="card card-gradient p-4 sm:p-5">
-        <div className="relative h-[52vh] min-h-52 md:h-[76vh] lg:h-[84vh] overflow-hidden rounded-xl border-2 border-default bg-surface">
+        <div className="relative h-[52vh] min-h-52 overflow-hidden rounded-xl border-2 border-default bg-surface md:h-[76vh] lg:h-[84vh]">
           <MapContainer
             center={DEFAULT_CENTER}
             zoom={DEFAULT_ZOOM}
@@ -114,11 +162,11 @@ export default function GeomapClient({ albums, media }: Props) {
                   <div className="space-y-2">
                     <div>
                       <p className="text-base font-semibold text-primary">{album.name}</p>
-                      <p className="text-sm text-main">
-                        {album.locationName || 'Album-lokation'}
-                      </p>
+                      <p className="text-sm text-main">{album.locationName || 'Album-lokation'}</p>
                     </div>
-                    <p className="text-xs text-muted">{album.mediaCount} medier</p>
+                    <p className="text-xs text-muted">
+                      {album.mediaWithLocationCount}/{album.mediaCount} medier med lokation
+                    </p>
                     <Link className="link text-sm" href={`/albums/${album.id}`}>
                       Åbn album
                     </Link>
@@ -126,10 +174,12 @@ export default function GeomapClient({ albums, media }: Props) {
                 </Popup>
               </Marker>
             ))}
+
             {media.map((item) => {
               const sourceLabel = getSourceLabel(item.locationSource);
               const isVideo = Boolean(item.mimeType?.startsWith('video/'));
               const mediaIcon = isVideo ? videoIconMemo : pictureIconMemo;
+
               return (
                 <Marker
                   key={`media-${item.id}`}
@@ -155,8 +205,10 @@ export default function GeomapClient({ albums, media }: Props) {
                 </Marker>
               );
             })}
+
             <FitBounds points={points} />
           </MapContainer>
+
           {!hasPoints ? (
             <div className="absolute inset-0 flex items-center justify-center bg-surface/80">
               <div className="text-center text-sm text-muted">
@@ -172,35 +224,65 @@ export default function GeomapClient({ albums, media }: Props) {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-main">Overblik</h2>
             <span className="text-xs font-semibold text-muted">
-              {albumCount + mediaCount} punkter på kortet i alt
+              {albumCount + mediaWithLocationCount} punkter på kortet i alt
             </span>
           </div>
-            <div className="space-y-2 text-sm text-muted">
-              <div className="flex items-center gap-2">
-                <Image src="/geomap/album-pin.svg" alt="Album ikon" width={24} height={24} />
-                {albumCount} Album lokationer
+          <div className="space-y-2 text-sm text-muted">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs font-semibold text-main">
+                <span>
+                  {mediaWithLocationCount}/{totalMediaCount} med lokation ({mediaWithLocationPct}%)
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Image src="/geomap/picture-pin.svg" alt="Billede ikon" width={24} height={24} />
-                {pictureCount} Billede lokationer
+              <div className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated">
+                <div
+                  className="h-full transition-all duration-300"
+                  style={{
+                    width: `${mediaWithLocationPct}%`,
+                    backgroundColor: coverageFillColor,
+                    opacity: coverageOpacity,
+                  }}
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <Image src="/geomap/video-pin.svg" alt="Video ikon" width={24} height={24} />
-                {videoCount} Video lokationer
-              </div>
+              <p className="flex justify-end text-xs text-muted">
+                {mediaWithoutLocationCount}/{totalMediaCount} uden lokation ({mediaWithoutLocationPct}%)
+              </p>
             </div>
+            <div className="flex items-center gap-2">
+              <Image src="/geomap/album-pin.svg" alt="Album ikon" width={24} height={24} />
+              {albumCount} albums med lokationer
+            </div>
+            <div className="flex items-center gap-2">
+              <Image src="/geomap/picture-pin.svg" alt="Billede ikon" width={24} height={24} />
+              {pictureCount} billedelokationer
+            </div>
+            <div className="flex items-center gap-2">
+              <Image src="/geomap/video-pin.svg" alt="Video ikon" width={24} height={24} />
+              {videoCount} videolokationer
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPinOff
+                size={30}
+                strokeWidth={1.75}
+                className="-ml-1 shrink-0"
+                aria-hidden
+              />
+              {mediaWithoutLocationCount} medier uden lokation
+            </div>
+          </div>
           <p className="text-xs text-muted">
-            Lokationer for albummer er valgt af brugeren, mens lokationer for medier er automatisk udledt fra metadata. Klik på et punkt på kortet for at se detaljer og navigere til det relevante album/medie.
+            Lokationer for albums er valgt af brugeren, mens medielokationer er
+            udledt fra metadata. Kun medier med fundet GPS vises på kortet.
           </p>
         </div>
 
         <div className="card space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-main">Album lokationer</h3>
+            <h3 className="text-base font-semibold text-main">Albums med lokationer</h3>
             <span className="text-xs text-muted">{albumCount} i alt</span>
           </div>
           {albumCount === 0 ? (
-            <p className="text-sm text-muted">Ingen album-lokationer endnu.</p>
+            <p className="text-sm text-muted">Ingen albums med lokationer endnu.</p>
           ) : (
             <div className="max-h-64 space-y-2 overflow-y-auto pr-2 text-sm text-muted scrollbar-subtle">
               {albums.map((album) => (
@@ -215,7 +297,7 @@ export default function GeomapClient({ albums, media }: Props) {
                     </p>
                   </div>
                   <span className="rounded-full border border-default bg-surface px-2 py-1 text-xs font-semibold text-main">
-                    {album.mediaCount}
+                    {album.mediaWithLocationCount}/{album.mediaCount}
                   </span>
                 </div>
               ))}

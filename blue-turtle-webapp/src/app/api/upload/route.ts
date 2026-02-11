@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const actorName = session.user.name?.trim() || 'En bruger';
     const data = await request.formData();
 
     const albumIdRaw = data.get('albumId');
@@ -111,7 +112,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Filen er for stor.' }, { status: 400 });
     }
 
-    const album = await prisma.album.findUnique({ where: { id: albumId }, select: { id: true } });
+    const album = await prisma.album.findUnique({
+      where: { id: albumId },
+      select: { id: true, name: true },
+    });
     if (!album) {
       return NextResponse.json({ success: false, error: 'Album ikke fundet' }, { status: 404 });
     }
@@ -172,7 +176,7 @@ export async function POST(request: NextRequest) {
         await createNotificationsForOtherUsers(tx, {
           actorUserId: session.user.id,
           type: NOTIFICATION_TYPES.MEDIA_UPLOADED,
-          message: `${created.originalName || created.filename || 'Et medie'} blev uploadet`,
+          message: `${actorName} uploadede "${created.originalName || created.filename || 'et medie'}" til "${album.name}".`,
           albumId,
           mediaId: created.id,
         });

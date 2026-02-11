@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type UploadMenuProps = {
   isOpen: boolean;
@@ -76,6 +77,7 @@ function validateFile(file: File): string | null {
 }
 
 export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
+  const router = useRouter();
   const [step, setStep] = useState<'album' | 'files'>('album');
   const [albums, setAlbums] = useState<AlbumOption[]>([]);
   const [selectedAlbumId, setSelectedAlbumId] = useState('');
@@ -279,6 +281,7 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
           detail: { albumId: selectedAlbumId },
         }),
       );
+      router.refresh();
     }
   };
 

@@ -545,7 +545,11 @@ async function extractExifReaderMetadata(absolutePath) {
     buffer.byteOffset,
     buffer.byteOffset + buffer.byteLength,
   );
-  const tags = ExifReader.load(arrayBuffer);
+  const tags = ExifReader.load(arrayBuffer, {
+    excludeTags: {
+      xmp: true,
+    },
+  });
 
   const latitude = normalizeExifReaderCoordinate(
     tags.GPSLatitude,

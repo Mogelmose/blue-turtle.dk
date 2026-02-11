@@ -7,6 +7,7 @@ export type GeomapAlbum = {
   longitude: number;
   locationName: string | null;
   mediaCount: number;
+  mediaWithLocationCount: number;
 };
 
 export type GeomapMedia = {
@@ -23,4 +24,5 @@ export type GeomapMedia = {
 export type GeomapData = {
   albums: GeomapAlbum[];
   media: GeomapMedia[];
+  totalMediaCount: number;
 };

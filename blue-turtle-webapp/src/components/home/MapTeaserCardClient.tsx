@@ -103,11 +103,7 @@ export default function MapTeaserCardClient({ mapAlbums }: Props) {
     <section id="home-map" className="mb-2 space-y-4 md:mb-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-main">Lokationer</h2>
-        <Link href="/geomap" className="link text-sm">
-          Åbn kort
-        </Link>
       </div>
-
       <div className="card space-y-4">
         <div className="relative h-64 sm:h-96 lg:h-128 xl:h-160 overflow-hidden rounded-lg border-2 border-default">
           <MapContainer
@@ -144,7 +140,7 @@ export default function MapTeaserCardClient({ mapAlbums }: Props) {
           ) : null}
 
           <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 bg-slate-900/65 px-4 py-3 text-xs font-semibold text-white backdrop-blur-sm">
-            <span>{locations.length} lokationer markeret</span>
+            <span>Albums på kortet: {locations.length}</span>
             <Link
               href="/geomap"
               className="rounded-full border border-white/35 bg-white/10 px-3 py-1 text-[11px] uppercase tracking-widest text-white transition hover:bg-white/20"

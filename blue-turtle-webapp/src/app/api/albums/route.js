@@ -119,6 +119,7 @@ export async function POST(request) {
   }
 
   try {
+    const actorName = session.user.name?.trim() || 'En bruger';
     const formData = await request.formData();
     const name = formData.get('name');
     const infoText = formData.get('infoText');
@@ -256,7 +257,7 @@ export async function POST(request) {
         await createNotificationsForOtherUsers(tx, {
           actorUserId: session.user.id,
           type: NOTIFICATION_TYPES.ALBUM_CREATED,
-          message: `${createdAlbum.name} blev oprettet`,
+          message: `${actorName} oprettede albummet "${createdAlbum.name}".`,
           albumId: createdAlbum.id,
         });
 

@@ -10,7 +10,14 @@ export const dynamic = 'force-dynamic';
 export default async function GeomapPage() {
   const data = await getGeomapData();
   const albumCount = data.albums.length;
-  const mediaCount = data.media.length;
+  const mediaWithLocationCount = data.media.length;
+  const mediaWithoutLocationCount = Math.max(data.totalMediaCount - mediaWithLocationCount, 0);
+  const mediaWithLocationPct =
+    data.totalMediaCount > 0
+      ? Math.round((mediaWithLocationCount / data.totalMediaCount) * 100)
+      : 0;
+  const mediaWithoutLocationPct =
+    data.totalMediaCount > 0 ? Math.max(100 - mediaWithLocationPct, 0) : 0;
 
   return (
     <div className="min-h-screen flex flex-col bg-page">
@@ -29,22 +36,26 @@ export default async function GeomapPage() {
                   <h1 className="mt-2 text-3xl font-bold text-main sm:text-4xl">
                     Se lokationer for albums og medier
                   </h1>
-                  <p className="mt-2 text-sm text-muted">
-                    Se album lokationer sat manuelt og metadata fra medier.
-                  </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="rounded-full border border-default bg-surface-elevated px-3 py-1 text-xs font-semibold text-main">
                     {albumCount} album
                   </span>
                   <span className="rounded-full border border-default bg-surface-elevated px-3 py-1 text-xs font-semibold text-main">
-                    {mediaCount} medier
+                    {mediaWithLocationCount} medier med lokation
+                  </span>
+                  <span className="rounded-full border border-default bg-surface-elevated px-3 py-1 text-xs font-semibold text-main">
+                    {mediaWithoutLocationCount} medier uden lokation
                   </span>
                 </div>
               </div>
             </section>
 
-            <GeomapClientWrapper albums={data.albums} media={data.media} />
+            <GeomapClientWrapper
+              albums={data.albums}
+              media={data.media}
+              totalMediaCount={data.totalMediaCount}
+            />
           </div>
         </Container>
       </main>

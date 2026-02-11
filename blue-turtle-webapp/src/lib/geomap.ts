@@ -2,7 +2,7 @@ import prisma from './prisma';
 import type { GeomapData } from './types/geomap';
 
 export async function getGeomapData(): Promise<GeomapData> {
-  const [albumsRaw, mediaRaw] = await prisma.$transaction([
+  const [albumsRaw, mediaRaw, totalMediaCount] = await prisma.$transaction([
     prisma.album.findMany({
       where: {
         latitude: { not: null },
@@ -34,7 +34,13 @@ export async function getGeomapData(): Promise<GeomapData> {
         album: { select: { id: true, name: true } },
       },
     }),
+    prisma.media.count(),
   ]);
+
+  const mediaWithLocationCountByAlbumId: Record<string, number> = {};
+  for (const item of mediaRaw) {
+    mediaWithLocationCountByAlbumId[item.album.id] = (mediaWithLocationCountByAlbumId[item.album.id] ?? 0) + 1;
+  }
 
   const albums = albumsRaw.map((album) => ({
     id: album.id,
@@ -43,6 +49,7 @@ export async function getGeomapData(): Promise<GeomapData> {
     longitude: album.longitude ?? 0,
     locationName: album.locationName,
     mediaCount: album._count.media,
+    mediaWithLocationCount: mediaWithLocationCountByAlbumId[album.id] ?? 0,
   }));
 
   const media = mediaRaw.map((item) => ({
@@ -56,5 +63,5 @@ export async function getGeomapData(): Promise<GeomapData> {
     locationSource: item.locationSource ?? null,
   }));
 
-  return { albums, media };
+  return { albums, media, totalMediaCount };
 }

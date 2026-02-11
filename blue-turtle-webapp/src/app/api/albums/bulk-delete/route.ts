@@ -52,9 +52,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const actorName = session.user.name?.trim() || 'En bruger';
     const albums = await prisma.album.findMany({
       where: { id: { in: requestedIds } },
-      select: { id: true, coverImage: true },
+      select: { id: true, name: true, coverImage: true },
     });
 
     if (albums.length === 0) {
@@ -83,24 +84,40 @@ export async function POST(request: NextRequest) {
         where: { id: { in: albumIds } },
       });
 
+      const albumNames = albums.map((album) => album.name);
+      const albumPreview = albumNames.slice(0, 3).map((name) => `"${name}"`).join(', ');
+      const albumSummaryMessage =
+        albumIds.length === 1
+          ? `${actorName} slettede albummet "${albumNames[0]}".`
+          : albumIds.length <= 3
+            ? `${actorName} slettede ${albumIds.length} albums: ${albumPreview}.`
+            : `${actorName} slettede ${albumIds.length} albums: ${albumPreview} og ${albumIds.length - 3} flere.`;
+
       await createNotificationsForOtherUsers(tx, {
         actorUserId: session.user.id,
         type: NOTIFICATION_TYPES.ALBUM_DELETED,
-        message:
-          albumIds.length === 1
-            ? '1 album blev slettet'
-            : `${albumIds.length} albums blev slettet`,
+        message: albumSummaryMessage,
         albumId: albumIds.length === 1 ? albumIds[0] : null,
       });
 
       if (media.length > 0) {
+        const albumNameById = new Map(albums.map((album) => [album.id, album.name]));
+        const mediaAlbumNames = Array.from(
+          new Set(
+            media
+              .map((item) => albumNameById.get(item.albumId))
+              .filter((name): name is string => Boolean(name)),
+          ),
+        );
+        const mediaSummaryMessage =
+          mediaAlbumNames.length === 1
+            ? `${actorName} slettede ${media.length} medier fra "${mediaAlbumNames[0]}".`
+            : `${actorName} slettede ${media.length} medier fordelt på ${mediaAlbumNames.length} albums.`;
+
         await createNotificationsForOtherUsers(tx, {
           actorUserId: session.user.id,
           type: NOTIFICATION_TYPES.MEDIA_DELETED,
-          message:
-            media.length === 1
-              ? '1 medie blev slettet'
-              : `${media.length} medier blev slettet`,
+          message: mediaSummaryMessage,
           albumId: albumIds.length === 1 ? albumIds[0] : null,
         });
       }

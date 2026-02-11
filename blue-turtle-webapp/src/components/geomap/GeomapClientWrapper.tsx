@@ -6,6 +6,7 @@ import type { GeomapAlbum, GeomapMedia } from '@/lib/types/geomap';
 type Props = {
   albums: GeomapAlbum[];
   media: GeomapMedia[];
+  totalMediaCount: number;
 };
 
 const GeomapClient = dynamic(() => import('./GeomapClient'), {

@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const actorName = session.user.name?.trim() || 'En bruger';
     const media = await prisma.media.findMany({
       where: { id: { in: mediaIds } },
       select: {
@@ -52,6 +53,11 @@ export async function POST(request: NextRequest) {
         storagePath: true,
         convertedPath: true,
         previewPath: true,
+        album: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 
@@ -70,13 +76,26 @@ export async function POST(request: NextRequest) {
       });
 
       const primaryAlbumId = deletedMedia[0]?.albumId ?? null;
+      const albumNames = Array.from(
+        new Set(
+          media
+            .map((item) => item.album?.name)
+            .filter((name): name is string => Boolean(name)),
+        ),
+      );
+      const summaryMessage =
+        deletedMedia.length === 1
+          ? albumNames.length === 1
+            ? `${actorName} slettede 1 medie fra "${albumNames[0]}".`
+            : `${actorName} slettede 1 medie.`
+          : albumNames.length === 1
+            ? `${actorName} slettede ${deletedMedia.length} medier fra "${albumNames[0]}".`
+            : `${actorName} slettede ${deletedMedia.length} medier fordelt på ${albumNames.length} albums.`;
+
       await createNotificationsForOtherUsers(tx, {
         actorUserId: session.user.id,
         type: NOTIFICATION_TYPES.MEDIA_DELETED,
-        message:
-          deletedMedia.length === 1
-            ? '1 medie blev slettet'
-            : `${deletedMedia.length} medier blev slettet`,
+        message: summaryMessage,
         albumId: primaryAlbumId,
         mediaId: deletedMedia.length === 1 ? deletedMedia[0].id : null,
       });
