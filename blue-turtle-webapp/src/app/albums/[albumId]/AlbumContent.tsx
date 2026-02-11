@@ -14,6 +14,7 @@ import Container from '@/components/layout/Container';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import EditAlbumModal from '@/components/album/EditAlbumModal';
+import UploadMenu from '@/components/media/UploadMenu';
 
 type AlbumMedia = {
   id: string;
@@ -92,6 +93,7 @@ function normalizeMedia(item: AlbumMedia): PreparedMedia {
 export default function AlbumContent({ initialAlbum }: Props) {
   const [album, setAlbum] = useState<AlbumData>(initialAlbum);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -348,7 +350,7 @@ export default function AlbumContent({ initialAlbum }: Props) {
       <main className="flex-1">
         <Container className="w-full py-6 pb-24 md:pb-6">
           <section className="card card-gradient mb-2 md:mb-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-4">
               <div>
                 <p className="text-xl font-semibold uppercase tracking-[0.3em] text-muted sm:text-2xl">
                   {CATEGORY_LABELS[album.category]}
@@ -360,12 +362,19 @@ export default function AlbumContent({ initialAlbum }: Props) {
                   <p className="mt-2 text-sm text-muted break-all">{album.infoText}</p>
                 ) : null}
               </div>
-              <div className="flex flex-wrap items-center gap-3 md:w-full md:flex-col md:items-end">
+              <div className="flex flex-wrap items-center gap-3">
                 <span className="rounded-full border border-default bg-surface-elevated px-3 py-1 text-xs font-semibold text-main">
                   {preparedMedia.length} medier
                 </span>
                 {canEdit ? (
                   <>
+                    <button
+                      type="button"
+                      onClick={() => setIsUploadModalOpen(true)}
+                      className="btn btn-primary btn-sm"
+                    >
+                      Upload
+                    </button>
                     <button
                       type="button"
                       onClick={toggleSelectionMode}
@@ -576,6 +585,11 @@ export default function AlbumContent({ initialAlbum }: Props) {
           />,
           document.body,
         )}
+      <UploadMenu
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        initialAlbumId={album.id}
+      />
     </div>
   );
 }

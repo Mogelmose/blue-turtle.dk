@@ -95,7 +95,7 @@ export default function AdminHealthIndicator() {
         : 'System: Degraded';
   const className =
     derivedState === 'ok'
-      ? 'border-emerald-400 bg-emerald-200/60 text-success shadow-sm dark:border-emerald-500/40 dark:text-emerald-300'
+      ? 'border-emerald-400 bg-emerald-300/20 text-success shadow-sm dark:border-emerald-500/40 dark:text-emerald-300'
       : derivedState === 'loading'
         ? 'border-sky-400 bg-ocean-200/20 text-sky-900 shadow-sm dark:border-sky-500/40 dark:text-sky-300'
         : 'border-red-400 bg-red-200/60 text-red-900 shadow-sm dark:border-red-500/40 dark:text-red-300';

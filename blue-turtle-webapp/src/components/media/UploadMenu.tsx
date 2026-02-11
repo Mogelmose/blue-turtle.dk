@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 type UploadMenuProps = {
   isOpen: boolean;
   onClose: () => void;
+  initialAlbumId?: string;
 };
 
 type AlbumOption = {
@@ -77,7 +78,7 @@ function validateFile(file: File): string | null {
   return null;
 }
 
-export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
+export default function UploadMenu({ isOpen, onClose, initialAlbumId }: UploadMenuProps) {
   const router = useRouter();
   const [step, setStep] = useState<'album' | 'files'>('album');
   const [albums, setAlbums] = useState<AlbumOption[]>([]);
@@ -140,10 +141,19 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
       return;
     }
 
+    if (initialAlbumId) {
+      setSelectedAlbumId(initialAlbumId);
+      setStep('files');
+      setAlbumError(null);
+    } else {
+      setStep('album');
+      setSelectedAlbumId('');
+    }
+
     if (albums.length === 0 && !isLoadingAlbums && !albumError) {
       void fetchAlbums();
     }
-  }, [albumError, albums.length, fetchAlbums, isLoadingAlbums, isOpen]);
+  }, [albumError, albums.length, fetchAlbums, initialAlbumId, isLoadingAlbums, isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
