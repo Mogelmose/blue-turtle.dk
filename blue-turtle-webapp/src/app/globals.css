@@ -146,6 +146,12 @@ html::-webkit-scrollbar {
   .animate-status-toast {
     animation: status-toast 10s ease-in-out forwards;
   }
+  .animate-notification-drop {
+    animation: notification-drop 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-notification-pop {
+    animation: notification-pop 220ms ease-in both;
+  }
  .input {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -448,4 +454,30 @@ html::-webkit-scrollbar {
   12% { opacity: 1; transform: translateY(0); }
   82% { opacity: 1; }
   100% { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes notification-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-26px) scale(0.94);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(3px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes notification-pop {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.96);
+  }
 }

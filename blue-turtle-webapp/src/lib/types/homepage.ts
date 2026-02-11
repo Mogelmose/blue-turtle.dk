@@ -35,7 +35,12 @@ export type ActivityItem = {
 export type HomepageStats = {
   albumCount: number;
   mediaCount: number;
+  imageCount: number;
+  videoCount: number;
+  categoryCount: number;
+  oldestUploadAt: Date | null;
   lastUploadAt: Date | null;
+  onlineNowCount: number;
 };
 
 export type HomepageData = {

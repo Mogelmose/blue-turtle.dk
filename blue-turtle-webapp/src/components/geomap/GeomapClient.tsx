@@ -17,6 +17,7 @@ type Props = {
 const DEFAULT_CENTER: [number, number] = [56.2639, 9.5018];
 const DEFAULT_ZOOM = 5;
 const MAX_FIT_ZOOM = 12;
+const LEGEND_ICON_SIZE_PX = 36;
 
 const albumIcon = icon({
   iconUrl: '/geomap/album-pin.svg',
@@ -71,6 +72,23 @@ function getSourceLabel(source: GeomapMedia['locationSource']) {
     return null;
   }
   return source === 'VIDEO_META' ? 'Video metadata' : 'EXIF';
+}
+
+function LegendIcon({ src, alt }: { src: string; alt: string }) {
+  return (
+    <span
+      className="relative shrink-0"
+      style={{ width: LEGEND_ICON_SIZE_PX, height: LEGEND_ICON_SIZE_PX }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={`${LEGEND_ICON_SIZE_PX}px`}
+        className="object-contain"
+      />
+    </span>
+  );
 }
 
 export default function GeomapClient({ albums, media, totalMediaCount }: Props) {
@@ -249,22 +267,22 @@ export default function GeomapClient({ albums, media, totalMediaCount }: Props) 
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Image src="/geomap/album-pin.svg" alt="Album ikon" width={24} height={24} />
+              <LegendIcon src="/geomap/album-pin.svg" alt="Album ikon" />
               {albumCount} albums med lokationer
             </div>
             <div className="flex items-center gap-2">
-              <Image src="/geomap/picture-pin.svg" alt="Billede ikon" width={24} height={24} />
+              <LegendIcon src="/geomap/picture-pin.svg" alt="Billede ikon" />
               {pictureCount} billedelokationer
             </div>
             <div className="flex items-center gap-2">
-              <Image src="/geomap/video-pin.svg" alt="Video ikon" width={24} height={24} />
+              <LegendIcon src="/geomap/video-pin.svg" alt="Video ikon" />
               {videoCount} videolokationer
             </div>
             <div className="flex items-center gap-2">
               <MapPinOff
                 size={30}
                 strokeWidth={1.75}
-                className="-ml-1 shrink-0"
+                className="ml-0.5 mr-1 shrink-0"
                 aria-hidden
               />
               {mediaWithoutLocationCount} medier uden lokation

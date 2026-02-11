@@ -35,7 +35,7 @@ export default function HomeAlbumCard({ album }: Props) {
           {album.name}
         </h3>
         <p className="mt-1 text-xs text-muted">
-          {album.mediaCount} medier | {formatShortDate(album.createdAt)}
+          {album.mediaCount} medier | oprettet {formatShortDate(album.createdAt)}
         </p>
       </div>
     </Link>

@@ -71,6 +71,15 @@ function isSafeAlbumId(value: unknown): value is string {
   return typeof value === 'string' && /^[a-zA-Z0-9_-]+$/.test(value);
 }
 
+function parseBooleanFlag(value: FormDataEntryValue | null): boolean {
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  return normalized === '1' || normalized === 'true' || normalized === 'yes';
+}
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
@@ -93,6 +102,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Mangler fil' }, { status: 400 });
     }
     const file = fileRaw;
+    const suppressNotification = parseBooleanFlag(data.get('suppressNotification'));
 
     let resolvedMimeType = resolveMimeType(file);
     const extension = path.extname(file.name).slice(1).toLowerCase();
@@ -173,13 +183,15 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        await createNotificationsForOtherUsers(tx, {
-          actorUserId: session.user.id,
-          type: NOTIFICATION_TYPES.MEDIA_UPLOADED,
-          message: `${actorName} uploadede "${created.originalName || created.filename || 'et medie'}" til "${album.name}".`,
-          albumId,
-          mediaId: created.id,
-        });
+        if (!suppressNotification) {
+          await createNotificationsForOtherUsers(tx, {
+            actorUserId: session.user.id,
+            type: NOTIFICATION_TYPES.MEDIA_UPLOADED,
+            message: `${actorName} uploadede "${created.originalName || created.filename || 'et medie'}" til "${album.name}".`,
+            albumId,
+            mediaId: created.id,
+          });
+        }
 
         if (isHeic) {
           await tx.job.create({

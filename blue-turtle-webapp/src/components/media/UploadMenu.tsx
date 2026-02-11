@@ -47,6 +47,7 @@ const ALLOWED_EXTENSIONS = new Set([
 ]);
 
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+const UPLOAD_NOTIFICATION_SUMMARY_THRESHOLD = 3;
 
 const CATEGORY_LABELS: Record<AlbumOption['category'], string> = {
   REJSER: 'Rejser',
@@ -236,6 +237,8 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
     let successCount = 0;
     let failureCount = 0;
     const errors: string[] = [];
+    const shouldSummarizeNotifications =
+      files.length > UPLOAD_NOTIFICATION_SUMMARY_THRESHOLD;
 
     for (let i = 0; i < files.length; i += 1) {
       const file = files[i];
@@ -251,6 +254,9 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('albumId', selectedAlbumId);
+      if (shouldSummarizeNotifications) {
+        formData.append('suppressNotification', '1');
+      }
 
       try {
         const response = await fetch('/api/upload', {
@@ -274,6 +280,25 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
     setUploading(false);
     setUploadErrors(errors);
     setUploadSummary({ successCount, failureCount, totalCount: files.length });
+
+    if (shouldSummarizeNotifications && successCount > 0) {
+      try {
+        const response = await fetch('/api/notifications/upload-summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            albumId: selectedAlbumId,
+            uploadedCount: successCount,
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to create upload summary notification.');
+        }
+      } catch (error) {
+        console.error('Failed to create upload summary notification:', error);
+      }
+    }
 
     if (successCount > 0) {
       window.dispatchEvent(

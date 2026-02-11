@@ -1,4 +1,5 @@
 import prisma from './prisma';
+import { Category } from '@prisma/client';
 import type {
   ActivityItem,
   AlbumSummary,
@@ -10,24 +11,37 @@ import { buildSignedMediaUrl, buildSignedUrl } from './signedUrl';
 
 const RECENT_MEDIA_LIMIT = 8;
 const ACTIVITY_LIMIT = 6;
+const ONLINE_WINDOW_MS = 2 * 60 * 1000;
+const CATEGORY_COUNT = Object.keys(Category).length;
 
 export async function getHomepageData(): Promise<HomepageData> {
+  const onlineSince = new Date(Date.now() - ONLINE_WINDOW_MS);
+
   const [
     recentAlbumsRaw,
     recentMediaRaw,
     albumCount,
     mediaCount,
+    imageCount,
+    videoCount,
+    oldestUploadAggregate,
+    onlineNowCount,
     mapAlbumsRaw,
     recentAlbumsForActivity,
     recentMediaForActivity,
   ] = await prisma.$transaction([
     prisma.album.findMany({
-      orderBy: { updatedAt: 'desc' },
       select: {
         id: true,
         name: true,
         coverImage: true,
         createdAt: true,
+        updatedAt: true,
+        media: {
+          select: { createdAt: true },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
         _count: { select: { media: true } },
       },
     }),
@@ -44,6 +58,32 @@ export async function getHomepageData(): Promise<HomepageData> {
     }),
     prisma.album.count(),
     prisma.media.count(),
+    prisma.media.count({
+      where: {
+        mimeType: {
+          startsWith: 'image/',
+        },
+      },
+    }),
+    prisma.media.count({
+      where: {
+        mimeType: {
+          startsWith: 'video/',
+        },
+      },
+    }),
+    prisma.media.aggregate({
+      _min: {
+        createdAt: true,
+      },
+    }),
+    prisma.user.count({
+      where: {
+        lastSeenAt: {
+          gte: onlineSince,
+        },
+      },
+    }),
     prisma.album.findMany({
       where: {
         latitude: { not: null },
@@ -78,7 +118,20 @@ export async function getHomepageData(): Promise<HomepageData> {
     }),
   ]);
 
-  const recentAlbums: AlbumSummary[] = recentAlbumsRaw.map((album) => ({
+  const sortedRecentAlbumsRaw = [...recentAlbumsRaw].sort((a, b) => {
+    const aLatestMediaAt = a.media[0]?.createdAt?.getTime() ?? 0;
+    const bLatestMediaAt = b.media[0]?.createdAt?.getTime() ?? 0;
+    const aMostRecentAt = Math.max(a.updatedAt.getTime(), aLatestMediaAt);
+    const bMostRecentAt = Math.max(b.updatedAt.getTime(), bLatestMediaAt);
+
+    if (aMostRecentAt !== bMostRecentAt) {
+      return bMostRecentAt - aMostRecentAt;
+    }
+
+    return b.createdAt.getTime() - a.createdAt.getTime();
+  });
+
+  const recentAlbums: AlbumSummary[] = sortedRecentAlbumsRaw.map((album) => ({
     id: album.id,
     name: album.name,
     coverImage: album.coverImage,
@@ -134,7 +187,12 @@ export async function getHomepageData(): Promise<HomepageData> {
     stats: {
       albumCount,
       mediaCount,
+      imageCount,
+      videoCount,
+      categoryCount: CATEGORY_COUNT,
+      oldestUploadAt: oldestUploadAggregate._min.createdAt ?? null,
       lastUploadAt: recentMedia[0]?.createdAt ?? null,
+      onlineNowCount,
     },
   };
 }
