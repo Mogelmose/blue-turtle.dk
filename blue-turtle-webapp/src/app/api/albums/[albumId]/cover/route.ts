@@ -9,6 +9,7 @@ import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
 import { resolveUploadPath } from '@/lib/storage';
 import { isSignedRequest } from '@/lib/signedUrl';
+import { getErrorCode } from '@/lib/error';
 
 export const runtime = 'nodejs';
 
@@ -139,8 +140,8 @@ export async function HEAD(request: Request, { params }: RouteContext) {
         ...cacheHeaders,
       },
     });
-  } catch (error: any) {
-    if (error?.code === 'ENOENT') {
+  } catch (error: unknown) {
+    if (getErrorCode(error) === 'ENOENT') {
       return NextResponse.json({ error: 'Cover not found.' }, { status: 404 });
     }
 
@@ -185,8 +186,8 @@ export async function GET(request: Request, { params }: RouteContext) {
         ...cacheHeaders,
       },
     });
-  } catch (error: any) {
-    if (error?.code === 'ENOENT') {
+  } catch (error: unknown) {
+    if (getErrorCode(error) === 'ENOENT') {
       return NextResponse.json({ error: 'Cover not found.' }, { status: 404 });
     }
 

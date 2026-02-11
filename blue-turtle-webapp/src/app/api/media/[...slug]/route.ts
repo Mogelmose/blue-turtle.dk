@@ -1,27 +1,62 @@
-import { NextResponse } from "next/server";
-import { createReadStream } from "fs";
-import { mkdtemp, open, rm, stat } from "fs/promises";
-import mime from "mime-types";
-import os from "os";
-import path from "path";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/prisma";
-import { sessionAuthOptions as authOptions } from "@/lib/auth";
-import { resolveUploadPath } from "@/lib/storage";
-import { convertHeicToJpeg } from "@/lib/heic";
-import { isSignedRequest } from "@/lib/signedUrl";
+import { NextResponse } from 'next/server';
+import { createReadStream } from 'fs';
+import { mkdtemp, open, rm, stat } from 'fs/promises';
+import mime from 'mime-types';
+import os from 'os';
+import path from 'path';
+import { Readable } from 'stream';
+import { getServerSession } from 'next-auth';
+import prisma from '@/lib/prisma';
+import { sessionAuthOptions as authOptions } from '@/lib/auth';
+import { resolveUploadPath } from '@/lib/storage';
+import { convertHeicToJpeg } from '@/lib/heic';
+import { isSignedRequest } from '@/lib/signedUrl';
+import { getErrorCode } from '@/lib/error';
 
-export const runtime = "nodejs";
-const HEIC_MIME_TYPES = new Set(["image/heic", "image/heif"]);
-const HEIC_EXTENSIONS = [".heic", ".heif"];
-const CACHE_CONTROL = "private, max-age=300, stale-while-revalidate=86400";
+export const runtime = 'nodejs';
+const HEIC_MIME_TYPES = new Set(['image/heic', 'image/heif']);
+const HEIC_EXTENSIONS = ['.heic', '.heif'];
+const CACHE_CONTROL = 'private, max-age=300, stale-while-revalidate=86400';
 
-function createWebReadableStream(nodeStream, abortSignal) {
+type FileStat = Awaited<ReturnType<typeof stat>>;
+type ByteRange = { start: number; end: number };
+type RouteContext = { params: Promise<{ slug: string[] }> };
+type MediaRecord = {
+  storagePath: string | null;
+  mimeType: string | null;
+  filename: string | null;
+  convertedPath: string | null;
+};
+type MediaContext =
+  | {
+      absolutePath: string;
+      size: number;
+      contentType: string;
+      filename: string;
+      storagePath: string;
+      mimeType: string | null;
+      convertedPath: string | null;
+      etag: string;
+      lastModified: string;
+      fileStat: FileStat;
+    }
+  | { error: NextResponse };
+type HeicAssetCandidate = {
+  contentType: string;
+  mimeType: string | null;
+  filename: string;
+  storagePath: string;
+};
+
+function createWebReadableStream(
+  nodeStream: Readable,
+  abortSignal?: AbortSignal,
+): ReadableStream<Uint8Array> {
   let closed = false;
-  let cleanup = () => {};
-  let onAbort = null;
+  let cleanup: () => void = () => {};
+  let onAbort: (() => void) | null = null;
 
-  const safeClose = (controller) => {
+  const safeClose = (controller: ReadableStreamDefaultController<Uint8Array>) => {
     if (closed) {
       return;
     }
@@ -30,7 +65,10 @@ function createWebReadableStream(nodeStream, abortSignal) {
     controller.close();
   };
 
-  const safeError = (controller, error) => {
+  const safeError = (
+    controller: ReadableStreamDefaultController<Uint8Array>,
+    error: unknown,
+  ) => {
     if (closed) {
       return;
     }
@@ -39,16 +77,16 @@ function createWebReadableStream(nodeStream, abortSignal) {
     controller.error(error);
   };
 
-  return new ReadableStream({
+  return new ReadableStream<Uint8Array>({
     start(controller) {
-      const onData = (chunk) => {
+      const onData = (chunk: Buffer) => {
         if (closed) {
           return;
         }
         try {
           controller.enqueue(chunk);
         } catch (error) {
-          if (error?.code === "ERR_INVALID_STATE") {
+          if (getErrorCode(error) === 'ERR_INVALID_STATE') {
             safeClose(controller);
             return;
           }
@@ -58,8 +96,8 @@ function createWebReadableStream(nodeStream, abortSignal) {
 
       const onEnd = () => safeClose(controller);
 
-      const onError = (error) => {
-        if (abortSignal?.aborted || error?.code === "ERR_STREAM_PREMATURE_CLOSE") {
+      const onError = (error: unknown) => {
+        if (abortSignal?.aborted || getErrorCode(error) === 'ERR_STREAM_PREMATURE_CLOSE') {
           safeClose(controller);
           return;
         }
@@ -72,22 +110,22 @@ function createWebReadableStream(nodeStream, abortSignal) {
       };
 
       cleanup = () => {
-        nodeStream.off("data", onData);
-        nodeStream.off("end", onEnd);
-        nodeStream.off("close", onEnd);
-        nodeStream.off("error", onError);
+        nodeStream.off('data', onData);
+        nodeStream.off('end', onEnd);
+        nodeStream.off('close', onEnd);
+        nodeStream.off('error', onError);
         if (abortSignal && onAbort) {
-          abortSignal.removeEventListener("abort", onAbort);
+          abortSignal.removeEventListener('abort', onAbort);
         }
       };
 
-      nodeStream.on("data", onData);
-      nodeStream.on("end", onEnd);
-      nodeStream.on("close", onEnd);
-      nodeStream.on("error", onError);
+      nodeStream.on('data', onData);
+      nodeStream.on('end', onEnd);
+      nodeStream.on('close', onEnd);
+      nodeStream.on('error', onError);
 
       if (abortSignal) {
-        abortSignal.addEventListener("abort", onAbort, { once: true });
+        abortSignal.addEventListener('abort', onAbort, { once: true });
       }
     },
     cancel() {
@@ -96,7 +134,7 @@ function createWebReadableStream(nodeStream, abortSignal) {
       }
       closed = true;
       if (abortSignal && onAbort) {
-        abortSignal.removeEventListener("abort", onAbort);
+        abortSignal.removeEventListener('abort', onAbort);
       }
       nodeStream.destroy();
       cleanup();
@@ -104,7 +142,7 @@ function createWebReadableStream(nodeStream, abortSignal) {
   });
 }
 
-function parseRangeHeader(rangeHeader, size) {
+function parseRangeHeader(rangeHeader: string | null, size: number): ByteRange | null {
   if (!rangeHeader) {
     return null;
   }
@@ -136,42 +174,42 @@ function parseRangeHeader(rangeHeader, size) {
   return { start, end };
 }
 
-function isHeicAsset({ contentType, mimeType, filename, storagePath }) {
-  const normalizedMime = (mimeType || contentType || "").toLowerCase();
+function isHeicAsset({ contentType, mimeType, filename, storagePath }: HeicAssetCandidate) {
+  const normalizedMime = (mimeType || contentType || '').toLowerCase();
   if (HEIC_MIME_TYPES.has(normalizedMime)) {
     return true;
   }
 
-  const reference = `${filename ?? ""} ${storagePath ?? ""}`.toLowerCase();
-  return HEIC_EXTENSIONS.some((ext) => reference.endsWith(ext));
+  const reference = `${filename} ${storagePath}`.toLowerCase();
+  return HEIC_EXTENSIONS.some((extension) => reference.endsWith(extension));
 }
 
-function wantsJpeg(request) {
+function wantsJpeg(request: Request): boolean {
   const url = new URL(request.url);
-  const format = url.searchParams.get("format");
-  return format === "jpg" || format === "jpeg";
+  const format = url.searchParams.get('format');
+  return format === 'jpg' || format === 'jpeg';
 }
 
-function getJpegFilename(filename) {
-  const base = filename?.replace(/\.[^/.]+$/, "") || "media";
+function getJpegFilename(filename: string): string {
+  const base = filename.replace(/\.[^/.]+$/, '') || 'media';
   return `${base}.jpg`;
 }
 
-function buildCacheHeaders(fileStat) {
-  const etag = `W/\"${fileStat.size}-${fileStat.mtimeMs}\"`;
+function buildCacheHeaders(fileStat: FileStat) {
+  const etag = `W/"${fileStat.size}-${fileStat.mtimeMs}"`;
   return {
-    "Cache-Control": CACHE_CONTROL,
+    'Cache-Control': CACHE_CONTROL,
     ETag: etag,
-    "Last-Modified": fileStat.mtime.toUTCString(),
+    'Last-Modified': fileStat.mtime.toUTCString(),
   };
 }
 
-function isNotModified(request, etag, lastModified) {
-  const ifNoneMatch = request.headers.get("if-none-match");
+function isNotModified(request: Request, etag: string, lastModified: string): boolean {
+  const ifNoneMatch = request.headers.get('if-none-match');
   if (ifNoneMatch && ifNoneMatch === etag) {
     return true;
   }
-  const ifModifiedSince = request.headers.get("if-modified-since");
+  const ifModifiedSince = request.headers.get('if-modified-since');
   if (ifModifiedSince) {
     const since = new Date(ifModifiedSince).getTime();
     const modified = new Date(lastModified).getTime();
@@ -182,8 +220,8 @@ function isNotModified(request, etag, lastModified) {
   return false;
 }
 
-async function isJpegFile(absolutePath) {
-  const file = await open(absolutePath, "r");
+async function isJpegFile(absolutePath: string): Promise<boolean> {
+  const file = await open(absolutePath, 'r');
   try {
     const buffer = Buffer.alloc(3);
     await file.read(buffer, 0, 3, 0);
@@ -193,7 +231,15 @@ async function isJpegFile(absolutePath) {
   }
 }
 
-async function createTempJpegResponse({ absolutePath, filename, signal }) {
+async function createTempJpegResponse({
+  absolutePath,
+  filename,
+  signal,
+}: {
+  absolutePath: string;
+  filename: string;
+  signal?: AbortSignal;
+}): Promise<Response> {
   if (await isJpegFile(absolutePath)) {
     const fileStat = await stat(absolutePath);
     return createStaticJpegResponse({
@@ -205,8 +251,8 @@ async function createTempJpegResponse({ absolutePath, filename, signal }) {
     });
   }
 
-  const tempDir = await mkdtemp(path.join(os.tmpdir(), "heic-"));
-  const tempOutput = path.join(tempDir, "converted.jpg");
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'heic-'));
+  const tempOutput = path.join(tempDir, 'converted.jpg');
 
   await convertHeicToJpeg(absolutePath, tempOutput);
   const tempStat = await stat(tempOutput);
@@ -223,10 +269,10 @@ async function createTempJpegResponse({ absolutePath, filename, signal }) {
     await rm(tempDir, { recursive: true, force: true });
   };
 
-  stream.on("close", () => {
+  stream.on('close', () => {
     void cleanup();
   });
-  stream.on("error", () => {
+  stream.on('error', () => {
     void cleanup();
   });
 
@@ -234,37 +280,49 @@ async function createTempJpegResponse({ absolutePath, filename, signal }) {
   return new Response(body, {
     status: 200,
     headers: {
-      "Content-Type": "image/jpeg",
-      "Content-Length": tempStat.size.toString(),
-      "Content-Disposition": `inline; filename="${getJpegFilename(filename)}"`,
+      'Content-Type': 'image/jpeg',
+      'Content-Length': tempStat.size.toString(),
+      'Content-Disposition': `inline; filename="${getJpegFilename(filename)}"`,
       ...buildCacheHeaders(sourceStat),
     },
   });
 }
 
-function createStaticJpegResponse({ absolutePath, filename, size, signal, cacheHeaders }) {
+function createStaticJpegResponse({
+  absolutePath,
+  filename,
+  size,
+  signal,
+  cacheHeaders,
+}: {
+  absolutePath: string;
+  filename: string;
+  size: number;
+  signal?: AbortSignal;
+  cacheHeaders?: Record<string, string>;
+}): Response {
   const stream = createReadStream(absolutePath);
   const body = createWebReadableStream(stream, signal);
 
   return new Response(body, {
     status: 200,
     headers: {
-      "Content-Type": "image/jpeg",
-      "Content-Length": size.toString(),
-      "Content-Disposition": `inline; filename="${getJpegFilename(filename)}"`,
+      'Content-Type': 'image/jpeg',
+      'Content-Length': size.toString(),
+      'Content-Disposition': `inline; filename="${getJpegFilename(filename)}"`,
       ...(cacheHeaders || {}),
     },
   });
 }
 
-async function getMediaContext(slug): Promise<any> {
+async function getMediaContext(slug: string[]): Promise<MediaContext> {
   if (!slug || slug.length < 1 || slug.length > 2) {
     return {
-      error: NextResponse.json({ error: "Invalid file path." }, { status: 400 }),
+      error: NextResponse.json({ error: 'Invalid file path.' }, { status: 400 }),
     };
   }
 
-  let mediaRecord = null;
+  let mediaRecord: MediaRecord | null = null;
 
   if (slug.length === 1) {
     const [mediaId] = slug;
@@ -292,25 +350,25 @@ async function getMediaContext(slug): Promise<any> {
 
   if (!mediaRecord?.storagePath) {
     return {
-      error: NextResponse.json({ error: "File not found." }, { status: 404 }),
+      error: NextResponse.json({ error: 'File not found.' }, { status: 404 }),
     };
   }
 
   const absolutePath = resolveUploadPath(mediaRecord.storagePath);
   const fileStat = await stat(absolutePath);
-  const lookup = mime.lookup(mediaRecord.filename || mediaRecord.storagePath || "");
+  const lookup = mime.lookup(mediaRecord.filename || mediaRecord.storagePath || '');
   const contentType =
     mediaRecord.mimeType ||
-    (typeof lookup === "string" ? lookup : null) ||
-    "application/octet-stream";
-  const etag = `W/\"${fileStat.size}-${fileStat.mtimeMs}\"`;
+    (typeof lookup === 'string' ? lookup : null) ||
+    'application/octet-stream';
+  const etag = `W/"${fileStat.size}-${fileStat.mtimeMs}"`;
   const lastModified = fileStat.mtime.toUTCString();
 
   return {
     absolutePath,
     size: fileStat.size,
     contentType,
-    filename: mediaRecord.filename ?? "media",
+    filename: mediaRecord.filename ?? 'media',
     storagePath: mediaRecord.storagePath,
     mimeType: mediaRecord.mimeType ?? null,
     convertedPath: mediaRecord.convertedPath ?? null,
@@ -320,18 +378,18 @@ async function getMediaContext(slug): Promise<any> {
   };
 }
 
-export async function HEAD(request, { params }) {
+export async function HEAD(request: Request, { params }: RouteContext) {
   const signed = isSignedRequest(request);
   const session = signed ? null : await getServerSession(authOptions);
   if (!signed && !session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const { slug } = await params;
     const context = await getMediaContext(slug);
 
-    if (context.error) {
+    if ('error' in context) {
       return context.error;
     }
 
@@ -348,9 +406,9 @@ export async function HEAD(request, { params }) {
           return new NextResponse(null, {
             status: 200,
             headers: {
-              "Content-Type": "image/jpeg",
-              "Content-Length": convertedStat.size.toString(),
-              "Content-Disposition": `inline; filename="${getJpegFilename(context.filename)}"`,
+              'Content-Type': 'image/jpeg',
+              'Content-Length': convertedStat.size.toString(),
+              'Content-Disposition': `inline; filename="${getJpegFilename(context.filename)}"`,
               ...cacheHeaders,
             },
           });
@@ -362,8 +420,8 @@ export async function HEAD(request, { params }) {
       return new NextResponse(null, {
         status: 200,
         headers: {
-          "Content-Type": "image/jpeg",
-          "Content-Disposition": `inline; filename="${getJpegFilename(context.filename)}"`,
+          'Content-Type': 'image/jpeg',
+          'Content-Disposition': `inline; filename="${getJpegFilename(context.filename)}"`,
           ...cacheHeaders,
         },
       });
@@ -372,38 +430,38 @@ export async function HEAD(request, { params }) {
     return new NextResponse(null, {
       status: 200,
       headers: {
-        "Content-Type": context.contentType,
-        "Content-Length": context.size.toString(),
-        "Accept-Ranges": "bytes",
-        "Content-Disposition": `inline; filename="${context.filename}"`,
+        'Content-Type': context.contentType,
+        'Content-Length': context.size.toString(),
+        'Accept-Ranges': 'bytes',
+        'Content-Disposition': `inline; filename="${context.filename}"`,
         ...cacheHeaders,
       },
     });
   } catch (error) {
-    if (error.code === "ENOENT") {
-      return NextResponse.json({ error: "File not found." }, { status: 404 });
+    if (getErrorCode(error) === 'ENOENT') {
+      return NextResponse.json({ error: 'File not found.' }, { status: 404 });
     }
 
-    console.error("Media stream error:", error);
+    console.error('Media stream error:', error);
     return NextResponse.json(
-      { error: "Internal server error." },
+      { error: 'Internal server error.' },
       { status: 500 },
     );
   }
 }
 
-export async function GET(request, { params }) {
+export async function GET(request: Request, { params }: RouteContext) {
   const signed = isSignedRequest(request);
   const session = signed ? null : await getServerSession(authOptions);
   if (!signed && !session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const { slug } = await params;
     const context = await getMediaContext(slug);
 
-    if (context.error) {
+    if ('error' in context) {
       return context.error;
     }
 
@@ -434,14 +492,14 @@ export async function GET(request, { params }) {
 
     const { absolutePath, size, contentType, filename } = context;
 
-    const rangeHeader = request.headers.get("range");
+    const rangeHeader = request.headers.get('range');
     const range = parseRangeHeader(rangeHeader, size);
 
     if (rangeHeader && !range) {
       return new NextResponse(null, {
         status: 416,
         headers: {
-          "Content-Range": `bytes */${size}`,
+          'Content-Range': `bytes */${size}`,
         },
       });
     }
@@ -455,11 +513,11 @@ export async function GET(request, { params }) {
       return new Response(body, {
         status: 206,
         headers: {
-          "Content-Type": contentType,
-          "Content-Length": chunkSize.toString(),
-          "Content-Range": `bytes ${start}-${end}/${size}`,
-          "Accept-Ranges": "bytes",
-          "Content-Disposition": `inline; filename="${filename}"`,
+          'Content-Type': contentType,
+          'Content-Length': chunkSize.toString(),
+          'Content-Range': `bytes ${start}-${end}/${size}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Disposition': `inline; filename="${filename}"`,
           ...cacheHeaders,
         },
       });
@@ -470,25 +528,22 @@ export async function GET(request, { params }) {
     return new Response(body, {
       status: 200,
       headers: {
-        "Content-Type": contentType,
-        "Content-Length": size.toString(),
-        "Accept-Ranges": "bytes",
-        "Content-Disposition": `inline; filename="${filename}"`,
+        'Content-Type': contentType,
+        'Content-Length': size.toString(),
+        'Accept-Ranges': 'bytes',
+        'Content-Disposition': `inline; filename="${filename}"`,
         ...cacheHeaders,
       },
     });
-
   } catch (error) {
-    // If the file doesn't exist (ENOENT), return a 404
-    if (error.code === "ENOENT") {
-      return NextResponse.json({ error: "File not found." }, { status: 404 });
+    if (getErrorCode(error) === 'ENOENT') {
+      return NextResponse.json({ error: 'File not found.' }, { status: 404 });
     }
 
-    console.error("Media stream error:", error);
+    console.error('Media stream error:', error);
     return NextResponse.json(
-      { error: "Internal server error." },
+      { error: 'Internal server error.' },
       { status: 500 },
     );
   }
 }
-

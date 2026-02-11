@@ -8,15 +8,15 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const FALLBACK_PROFILE_IMAGE = '/static/logo.png';
-const LEGACY_PROFILE_DIR = path.resolve(
-  process.cwd(),
-  'public',
-  'uploads',
-  'profile',
-);
-const LEGACY_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
 
-async function fileExists(absolutePath) {
+type ProfileItem = {
+  id: string;
+  name: string;
+  img: string;
+  isPlaceholder: boolean;
+};
+
+async function fileExists(absolutePath: string): Promise<boolean> {
   try {
     await access(absolutePath);
     return true;
@@ -25,7 +25,7 @@ async function fileExists(absolutePath) {
   }
 }
 
-function resolvePublicPath(urlPath) {
+function resolvePublicPath(urlPath: string): string | null {
   const publicRoot = path.resolve(process.cwd(), 'public');
   const relative = urlPath.replace(/^\/+/, '');
   const resolved = path.resolve(publicRoot, relative);
@@ -37,7 +37,7 @@ function resolvePublicPath(urlPath) {
   return resolved;
 }
 
-async function resolveUserImagePath(imagePath) {
+async function resolveUserImagePath(imagePath: string | null): Promise<string | null> {
   if (!imagePath) {
     return null;
   }
@@ -53,7 +53,7 @@ async function resolveUserImagePath(imagePath) {
     normalized = `/${normalized.slice('public'.length)}`;
   }
 
-  const candidates = [];
+  const candidates: Array<string | null> = [];
 
   if (normalized.startsWith('/')) {
     candidates.push(resolvePublicPath(normalized));
@@ -65,40 +65,11 @@ async function resolveUserImagePath(imagePath) {
     }
 
     candidates.push(resolvePublicPath(`/${normalized}`));
-
-    if (normalized.startsWith('uploads/profile/')) {
-      candidates.unshift(resolvePublicPath(`/${normalized}`));
-    }
   }
 
   for (const candidate of candidates) {
     if (candidate && (await fileExists(candidate))) {
       return candidate;
-    }
-  }
-
-  return null;
-}
-
-async function resolveLegacyProfileUrl(username) {
-  const trimmed = username?.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  const baseNames = new Set([
-    trimmed.toLowerCase(),
-    trimmed.toLowerCase().replace(/\s+/g, '-'),
-  ]);
-
-  for (const baseName of baseNames) {
-    for (const extension of LEGACY_EXTENSIONS) {
-      const fileName = `${baseName}${extension}`;
-      const absolutePath = path.join(LEGACY_PROFILE_DIR, fileName);
-
-      if (await fileExists(absolutePath)) {
-        return `/uploads/profile/${fileName}`;
-      }
     }
   }
 
@@ -111,7 +82,7 @@ export async function GET() {
       select: { id: true, username: true, image: true },
     });
 
-    const profiles = await Promise.all(
+    const profiles: ProfileItem[] = await Promise.all(
       users.map(async (user) => {
         const resolvedImage = await resolveUserImagePath(user.image);
 
@@ -120,17 +91,6 @@ export async function GET() {
             id: user.id,
             name: user.username,
             img: `/api/users/${user.id}/avatar`,
-            isPlaceholder: false,
-          };
-        }
-
-        const legacyUrl = await resolveLegacyProfileUrl(user.username);
-
-        if (legacyUrl) {
-          return {
-            id: user.id,
-            name: user.username,
-            img: legacyUrl,
             isPlaceholder: false,
           };
         }

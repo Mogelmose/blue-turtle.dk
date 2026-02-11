@@ -9,12 +9,9 @@ import { pipeline } from 'stream/promises';
 import { getServerSession } from 'next-auth';
 import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
-import {
-  buildUserAvatarRelativePath,
-  resolveUploadPath,
-  sanitizeExtension,
-} from '@/lib/storage';
+import { buildUserAvatarRelativePath, resolveUploadPath, sanitizeExtension } from '@/lib/storage';
 import { convertHeicToJpeg } from '@/lib/heic';
+import { getErrorCode } from '@/lib/error';
 
 export const runtime = 'nodejs';
 const CACHE_CONTROL = 'private, max-age=300, stale-while-revalidate=86400';
@@ -173,8 +170,8 @@ export async function HEAD(request: Request, { params }: RouteContext) {
         ...cacheHeaders,
       },
     });
-  } catch (error: any) {
-    if (error?.code === 'ENOENT') {
+  } catch (error: unknown) {
+    if (getErrorCode(error) === 'ENOENT') {
       return NextResponse.json({ error: 'Avatar not found.' }, { status: 404 });
     }
 
@@ -216,8 +213,8 @@ export async function GET(request: Request, { params }: RouteContext) {
         ...cacheHeaders,
       },
     });
-  } catch (error: any) {
-    if (error?.code === 'ENOENT') {
+  } catch (error: unknown) {
+    if (getErrorCode(error) === 'ENOENT') {
       return NextResponse.json({ error: 'Avatar not found.' }, { status: 404 });
     }
 

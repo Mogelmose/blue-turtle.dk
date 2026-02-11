@@ -196,8 +196,8 @@ export default function EditAlbumModal({ isOpen, onClose, album, onAlbumUpdated 
 
         onAlbumUpdated(data);
         onClose();
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Noget gik galt');
       }
     });
   };

@@ -7,6 +7,7 @@ import prisma from '@/lib/prisma';
 import { sessionAuthOptions as authOptions } from '@/lib/auth';
 import { resolveUploadPath } from '@/lib/storage';
 import { isSignedRequest } from '@/lib/signedUrl';
+import { getErrorCode } from '@/lib/error';
 
 export const runtime = 'nodejs';
 const CACHE_CONTROL = 'private, max-age=300, stale-while-revalidate=86400';
@@ -73,8 +74,8 @@ export async function HEAD(
         ...cacheHeaders,
       },
     });
-  } catch (error: any) {
-    if (error?.code === 'ENOENT') {
+  } catch (error: unknown) {
+    if (getErrorCode(error) === 'ENOENT') {
       return new NextResponse(null, { status: 204 });
     }
     console.error('Preview head failed:', error);
@@ -124,8 +125,8 @@ export async function GET(
         ...cacheHeaders,
       },
     });
-  } catch (error: any) {
-    if (error?.code === 'ENOENT') {
+  } catch (error: unknown) {
+    if (getErrorCode(error) === 'ENOENT') {
       return new NextResponse(null, { status: 204 });
     }
     console.error('Preview fetch failed:', error);
