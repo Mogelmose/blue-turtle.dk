@@ -17,6 +17,7 @@ export default async function Homepage() {
   const data = await getHomepageData();
   const userName = session?.user?.name ?? null;
   const isAdmin = session?.user?.role === 'ADMIN';
+  const isAuthenticated = Boolean(session?.user?.id);
 
   return (
     <div className="min-h-screen flex flex-col bg-page">
@@ -26,7 +27,11 @@ export default async function Homepage() {
       <main className="flex-1">
         <Container className="w-full py-6 pb-24 md:pb-6">
           <div className="space-y-8">
-            <HomeHero userName={userName} isAdmin={isAdmin} />
+            <HomeHero
+              userName={userName}
+              isAdmin={isAdmin}
+              isAuthenticated={isAuthenticated}
+            />
             <RecentAlbums albums={data.recentAlbums} />
             <RecentMedia items={data.recentMedia} />
             <MapTeaserCard mapAlbums={data.mapAlbums} />

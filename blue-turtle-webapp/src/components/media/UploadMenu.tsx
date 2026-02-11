@@ -331,7 +331,8 @@ export default function UploadMenu({ isOpen, onClose }: UploadMenuProps) {
       onClick={onClose}
     >
       <div
-        className="card w-full max-w-lg overflow-y-auto shadow-xl overscroll-contain scrollbar-subtle scrollbar-gutter-stable"
+        className="card w-full max-w-lg max-h-[85svh] sm:max-h-[85vh] overflow-y-auto overscroll-contain touch-pan-y shadow-xl scrollbar-subtle scrollbar-gutter-stable"
+        style={{ WebkitOverflowScrolling: 'touch' }}
         role="dialog"
         aria-modal="true"
         aria-label="Upload medier"
