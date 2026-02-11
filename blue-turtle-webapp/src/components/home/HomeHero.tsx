@@ -422,6 +422,11 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
           </h1>
         </div>
         <div className="flex pt-2 gap-3">
+          {isAdmin ? (
+            <Link href="/admin" className="btn btn-secondary h-10 w-20">
+              Admin
+            </Link>
+          ) : null}
           <div ref={notificationsRef} className="relative">
             <button
               ref={bellButtonRef}
@@ -441,11 +446,6 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
               ) : null}
             </button>
           </div>
-          {isAdmin ? (
-            <Link href="/admin" className="btn btn-secondary h-10 w-20">
-              Admin
-            </Link>
-          ) : null}
           <button
             type="button"
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
