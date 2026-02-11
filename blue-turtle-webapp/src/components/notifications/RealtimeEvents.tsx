@@ -32,8 +32,8 @@ const MAX_MOBILE_VISIBLE_TOASTS = 3;
 const TOAST_DURATION_MS = 8000;
 const REFRESH_DEBOUNCE_MS = 1200;
 const RECONNECT_DELAY_MS = 2500;
-const DISMISS_ANIMATION_MS = 250;
-const APPEAR_STAGGER_MS = 220;
+const DISMISS_ANIMATION_MS = 300;
+const APPEAR_STAGGER_MS = 300;
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px)';
 
 function subscribeIsDesktop(onStoreChange: () => void): () => void {

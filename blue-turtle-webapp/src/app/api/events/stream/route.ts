@@ -95,8 +95,11 @@ export async function GET(request: Request) {
           const latest = notifications[notifications.length - 1];
           cursor = latest.createdAt;
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          push({ event: 'error', data: { message } });
+          console.error('Notification stream poll failed:', {
+            userId,
+            error,
+          });
+          push({ event: 'error', data: { message: 'Midlertidig forbindelsesfejl.' } });
         }
       };
 

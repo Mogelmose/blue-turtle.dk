@@ -3,6 +3,12 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import prisma from './prisma';
 import { assertSessionVersionSupport } from './sessionVersion';
+import {
+  buildAuthRateLimitKeys,
+  clearAuthFailures,
+  getAuthRateLimitDecision,
+  recordAuthFailure,
+} from './authRateLimit';
 
 const pages: AuthOptions['pages'] = {
   signIn: '/login',
@@ -80,7 +86,7 @@ export function getAuthOptions(): AuthOptions {
           username: { label: 'Bruger', type: 'text' },
           password: { label: 'Adgangskode', type: 'password' },
         },
-        async authorize(credentials) {
+        async authorize(credentials, request) {
           assertSessionVersionSupport('NextAuth credentials authorize');
 
           if (!credentials?.username || !credentials?.password) {
@@ -88,6 +94,11 @@ export function getAuthOptions(): AuthOptions {
           }
 
           const normalizedUsername = credentials.username.trim().normalize('NFC');
+          const rateLimitKeys = buildAuthRateLimitKeys(normalizedUsername, request);
+          const rateLimit = getAuthRateLimitDecision(rateLimitKeys);
+          if (rateLimit.blocked) {
+            return null;
+          }
 
           const user = await prisma.user.findFirst({
             where: {
@@ -106,6 +117,7 @@ export function getAuthOptions(): AuthOptions {
           });
 
           if (!user) {
+            recordAuthFailure(rateLimitKeys);
             return null;
           }
 
@@ -114,8 +126,11 @@ export function getAuthOptions(): AuthOptions {
             user.hashedPassword,
           );
           if (!isValidPassword) {
+            recordAuthFailure(rateLimitKeys);
             return null;
           }
+
+          clearAuthFailures(rateLimitKeys);
 
           return {
             id: user.id,
@@ -140,4 +155,3 @@ export const sessionAuthOptions = {
   jwt,
   callbacks,
 } as AuthOptions;
-
