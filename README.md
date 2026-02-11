@@ -87,6 +87,8 @@ The app should now be running at <http://localhost:3000>
 The live deployment uses external networks so their interface names stay stable for firewall rules.
 
 ```bash
+DOCKER_BUILDKIT=1 docker compose build web migrate
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile migrate run --rm migrate
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
