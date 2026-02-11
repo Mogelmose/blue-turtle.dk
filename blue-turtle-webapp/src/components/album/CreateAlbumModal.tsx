@@ -45,6 +45,7 @@ export default function CreateAlbumModal({
   const [error, setError] = useState<string | null>(null);
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const infoTextRef = useRef<HTMLTextAreaElement | null>(null);
+  const nameRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!isOpen) {
@@ -225,10 +226,14 @@ export default function CreateAlbumModal({
               type="text"
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value.slice(0, 50))}
+              maxLength={50}
+              ref={nameRef}
+              placeholder="F.eks. Jylland rundt 2025"              
               className="input"
               required
             />
+            <p className="mt-2 text-xs text-muted">{name.length}/50</p>
           </div>
           <div>
             <label htmlFor="infoText" className="label">Infotekst</label>
@@ -239,6 +244,7 @@ export default function CreateAlbumModal({
               maxLength={300}
               rows={3}
               ref={infoTextRef}
+              placeholder="F.eks. En fantastisk tur rundt i Jylland med masser af sjove oplevelser og gode minder..."
               className="input min-h-22 resize-none overflow-hidden"
               required
             />
@@ -250,7 +256,7 @@ export default function CreateAlbumModal({
               <button
                 type="button"
                 onClick={() => coverInputRef.current?.click()}
-                className="group relative h-40 w-40 xl:h-70 xl:w-70 overflow-hidden rounded-lg border-2 border-default bg-surface-elevated transition hover:border-default-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-ocean-500"
+                className="group relative h-40 w-40 md:h-60 md:w-60 lg:h-96 xl:w-96 overflow-hidden rounded-lg border-2 border-default bg-surface-elevated transition hover:border-default-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-color-ocean-500"
                 aria-label="Vælg albumcover"
               >
                 {displayCoverUrl ? (
@@ -262,7 +268,7 @@ export default function CreateAlbumModal({
                     unoptimized
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-muted">
+                  <div className="flex items-center justify-center text-xs md:text-sm font-semibold text-muted">
                     Vælg cover
                   </div>
                 )}
