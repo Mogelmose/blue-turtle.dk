@@ -142,11 +142,11 @@ export default function Header() {
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/login' })}
-                  className={`${navButtonBase} text-muted cursor-pointer hover:bg-ocean-400`}
+                  className={`${navButtonBase} text-muted cursor-pointer hover:bg-ocean-400 hover:animate-pulse`}
                   title="Log ud"
                 >
-                  <LogOut size={18} className="transition-colors group-hover:text-danger-500" />
-                  <span className="transition-colors group-hover:text-danger-500">
+                  <LogOut size={18} className="transition-colors group-hover:text-danger-500 hover:animate-pulse" />
+                  <span className="transition-colors group-hover:text-danger-500 hover:animate-pulse">
                     Log ud
                   </span>
                 </button>

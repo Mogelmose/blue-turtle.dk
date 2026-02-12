@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Folder, Globe, Home, Plus, User } from 'lucide-react';
@@ -15,11 +15,16 @@ type NavItem = {
   onClick?: () => void;
 };
 
+const PRESS_RELEASE_DELAY_MS = 120;
+const NAV_FEEDBACK_DELAY_MS = 70;
+
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [bottomOffset, setBottomOffset] = useState(0);
+  const [pressedItem, setPressedItem] = useState<string | null>(null);
+  const releaseTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.visualViewport) {
@@ -52,7 +57,39 @@ export default function BottomNav() {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && releaseTimerRef.current !== null) {
+        window.clearTimeout(releaseTimerRef.current);
+      }
+    };
+  }, []);
+
   const safePathname = pathname ?? '';
+
+  const handlePressStart = useCallback((label: string) => {
+    if (typeof window !== 'undefined' && releaseTimerRef.current !== null) {
+      window.clearTimeout(releaseTimerRef.current);
+      releaseTimerRef.current = null;
+    }
+    setPressedItem(label);
+  }, []);
+
+  const handlePressEnd = useCallback((delay = PRESS_RELEASE_DELAY_MS) => {
+    if (typeof window === 'undefined') {
+      setPressedItem(null);
+      return;
+    }
+
+    if (releaseTimerRef.current !== null) {
+      window.clearTimeout(releaseTimerRef.current);
+    }
+
+    releaseTimerRef.current = window.setTimeout(() => {
+      setPressedItem(null);
+      releaseTimerRef.current = null;
+    }, delay);
+  }, []);
 
   const items: NavItem[] = [
     {
@@ -88,19 +125,31 @@ export default function BottomNav() {
   ];
 
   const handleNavigate = useCallback(
-    (href: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
+    (href: string, label: string) => (event: React.MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
-      router.push(href);
+      handlePressStart(label);
+
+      const navigate = () => {
+        router.push(href);
+        if (typeof window === 'undefined') {
+          return;
+        }
+        window.setTimeout(() => {
+          if (window.location.pathname !== href) {
+            window.location.assign(href);
+          }
+        }, 300);
+      };
+
       if (typeof window === 'undefined') {
+        navigate();
         return;
       }
-      window.setTimeout(() => {
-        if (window.location.pathname !== href) {
-          window.location.assign(href);
-        }
-      }, 300);
+
+      window.setTimeout(navigate, NAV_FEEDBACK_DELAY_MS);
+      handlePressEnd(PRESS_RELEASE_DELAY_MS + NAV_FEEDBACK_DELAY_MS);
     },
-    [router],
+    [router, handlePressStart, handlePressEnd],
   );
 
   return (
@@ -112,25 +161,40 @@ export default function BottomNav() {
         <div className="mx-auto flex max-w-3xl items-stretch px-2">
           {items.map((item) => {
             const isActive = item.isActive ? item.isActive(safePathname) : false;
+            const isPressed = pressedItem === item.label;
             const Icon = item.icon;
-            const baseClasses =
-              'flex flex-1 flex-col items-center justify-center gap-1 px-2 py-2 text-xs font-semibold transition-colors transition-transform duration-150 ease-out active:scale-[0.95] active:brightness-90';
-            const activeClasses = isActive ? 'text-main' : 'text-muted';
+            const baseClasses = 'flex flex-1 select-none touch-manipulation flex-col items-center justify-center gap-1 px-2 py-2 text-xs font-semibold transition-all duration-150 ease-out active:scale-[0.85] active:opacity-60';
+            const activeClasses = isActive ? 'text-primary' : 'text-main';
             const primaryClasses = item.isPrimary
-              ? 'my-2 rounded-full bg-surface-elevated text-main border border-default p-3 transition-transform duration-150 ease-out hover:border-default-hover active:scale-95'
+              ? 'my-2 rounded-full bg-surface-elevated text-main border-2 border-default-hover p-3 transition-transform duration-150 ease-out hover:border-default-hover active:scale-95'
               : '';
+            const pressedStyle = isPressed
+              ? { transform: 'scale(0.85)', opacity: 0.6 }
+              : undefined;
 
             if (!item.href && item.onClick) {
               return (
                 <button
                   key={item.label}
                   type="button"
-                  onClick={item.onClick}
+                  onClick={() => {
+                    handlePressStart(item.label);
+                    item.onClick?.();
+                    handlePressEnd();
+                  }}
+                  onPointerDown={() => handlePressStart(item.label)}
+                  onPointerUp={() => handlePressEnd()}
+                  onPointerCancel={() => handlePressEnd()}
+                  onPointerLeave={() => handlePressEnd()}
+                  onTouchStart={() => handlePressStart(item.label)}
+                  onTouchEnd={() => handlePressEnd()}
+                  onTouchCancel={() => handlePressEnd()}
                   className={`${baseClasses} ${activeClasses} ${primaryClasses}`}
+                  style={pressedStyle}
                   aria-pressed={item.isPrimary ? isUploadOpen : undefined}
                   aria-current={!item.isPrimary && isActive ? 'page' : undefined}
                 >
-                  <Icon size={20} />
+                  <Icon size={22} />
                   <span>{item.label}</span>
                 </button>
               );
@@ -144,11 +208,19 @@ export default function BottomNav() {
               <Link
                 key={item.label}
                 href={item.href}
-                onClick={handleNavigate(item.href)}
+                onClick={handleNavigate(item.href, item.label)}
+                onPointerDown={() => handlePressStart(item.label)}
+                onPointerUp={() => handlePressEnd()}
+                onPointerCancel={() => handlePressEnd()}
+                onPointerLeave={() => handlePressEnd()}
+                onTouchStart={() => handlePressStart(item.label)}
+                onTouchEnd={() => handlePressEnd()}
+                onTouchCancel={() => handlePressEnd()}
                 className={`${baseClasses} ${activeClasses} ${primaryClasses}`}
+                style={pressedStyle}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <Icon size={20} />
+                <Icon size={22} />
                 <span>{item.label}</span>
               </Link>
             );

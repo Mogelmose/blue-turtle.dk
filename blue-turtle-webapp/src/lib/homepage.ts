@@ -14,7 +14,9 @@ const ACTIVITY_LIMIT = 6;
 const ONLINE_WINDOW_MS = 2 * 60 * 1000;
 const CATEGORY_COUNT = Object.keys(Category).length;
 
-export async function getHomepageData(): Promise<HomepageData> {
+export async function getHomepageData(
+  activityUserId?: string | null,
+): Promise<HomepageData> {
   const onlineSince = new Date(Date.now() - ONLINE_WINDOW_MS);
 
   const [
@@ -175,9 +177,32 @@ export async function getHomepageData(): Promise<HomepageData> {
     href: `/albums/${media.album.id}`,
   }));
 
-  const activity = [...albumActivity, ...mediaActivity]
+  const fallbackActivity = [...albumActivity, ...mediaActivity]
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, ACTIVITY_LIMIT);
+  const notificationActivity: ActivityItem[] = activityUserId
+    ? (
+        await prisma.notification.findMany({
+          where: { userId: activityUserId },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          take: ACTIVITY_LIMIT,
+          select: {
+            id: true,
+            message: true,
+            createdAt: true,
+            albumId: true,
+          },
+        })
+      ).map((notification) => ({
+        id: notification.id,
+        type: 'notification',
+        label: notification.message,
+        createdAt: notification.createdAt,
+        href: notification.albumId ? `/albums/${notification.albumId}` : '/homepage',
+      }))
+    : [];
+  const activity =
+    notificationActivity.length > 0 ? notificationActivity : fallbackActivity;
 
   return {
     recentAlbums,

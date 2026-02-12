@@ -136,7 +136,9 @@ export async function saveAlbumCoverFile({
     const tempInput = path.join(tempDir, `input${inputExtension || '.heic'}`);
 
     try {
-      const nodeStream = Readable.fromWeb(file.stream());
+      const nodeStream = Readable.fromWeb(
+        file.stream() as unknown as import('stream/web').ReadableStream,
+      );
       await pipeline(nodeStream, createWriteStream(tempInput));
       await convertHeicToJpeg(tempInput, coverAbsolutePath);
     } catch (error) {
@@ -146,7 +148,9 @@ export async function saveAlbumCoverFile({
       await rm(tempDir, { recursive: true, force: true });
     }
   } else {
-    const nodeStream = Readable.fromWeb(file.stream());
+    const nodeStream = Readable.fromWeb(
+      file.stream() as unknown as import('stream/web').ReadableStream,
+    );
     await pipeline(nodeStream, createWriteStream(coverAbsolutePath));
   }
 

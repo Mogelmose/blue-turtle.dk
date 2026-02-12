@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Bell, Moon, RefreshCw, Sun } from 'lucide-react';
+import { Bell, ListFilter, Moon, RefreshCw, Sun } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatDateTime } from '../../lib/date';
 
@@ -14,12 +14,21 @@ type Props = {
 
 type NotificationItem = {
   id: string;
+  type: string;
   message: string;
   createdAt: string;
   readAt: string | null;
 };
 
-const NOTIFICATION_LIST_TAKE = 12;
+type NotificationFilter = 'all' | 'uploads' | 'albums' | 'unread';
+
+const NOTIFICATION_LIST_TAKE = 100;
+const NOTIFICATION_FILTER_OPTIONS: Array<{ value: NotificationFilter; label: string }> = [
+  { value: 'all', label: 'Alle' },
+  { value: 'uploads', label: 'Uploads' },
+  { value: 'albums', label: 'Albums' },
+  { value: 'unread', label: 'Ulæste' },
+];
 
 function getInitialTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') {
@@ -43,12 +52,17 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isNotificationsLoading, setIsNotificationsLoading] = useState(false);
   const [isNotificationsRefreshing, setIsNotificationsRefreshing] = useState(false);
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<NotificationFilter>('all');
   const [notificationsError, setNotificationsError] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const bellButtonRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const notificationListRef = useRef<HTMLDivElement | null>(null);
+  const filterMenuRef = useRef<HTMLDivElement | null>(null);
+  const filterButtonRef = useRef<HTMLButtonElement | null>(null);
   const refreshIconRef = useRef<HTMLSpanElement | null>(null);
   const refreshIconAnimationRef = useRef<Animation | null>(null);
   const [panelPosition, setPanelPosition] = useState<{ top: number; left: number; width: number }>({
@@ -164,6 +178,23 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
   }, [theme]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const updateViewportFlag = () => {
+      setIsMobileViewport(window.innerWidth < 768);
+    };
+
+    updateViewportFlag();
+    window.addEventListener('resize', updateViewportFlag);
+
+    return () => {
+      window.removeEventListener('resize', updateViewportFlag);
+    };
+  }, []);
+
+  useEffect(() => {
     const initialTimer = window.setTimeout(() => {
       void refreshUnreadCount();
     }, 0);
@@ -198,26 +229,21 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
 
   useEffect(() => {
     if (!isNotificationsOpen) {
+      setIsFilterMenuOpen(false);
       return;
     }
 
-    const handlePointerDown = (event: MouseEvent) => {
+    const handlePointerDown = (event: PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Node)) {
         return;
       }
       if (
-        !notificationsRef.current?.contains(target) &&
-        !panelRef.current?.contains(target)
+        isFilterMenuOpen &&
+        !filterMenuRef.current?.contains(target) &&
+        !filterButtonRef.current?.contains(target)
       ) {
-        setIsNotificationsOpen(false);
-      }
-    };
-
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) {
-        return;
+        setIsFilterMenuOpen(false);
       }
       if (
         !notificationsRef.current?.contains(target) &&
@@ -233,21 +259,19 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
       }
     };
 
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('click', handleClick);
+    document.addEventListener('pointerdown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
     window.addEventListener('resize', updatePanelPosition);
     window.addEventListener('scroll', updatePanelPosition, true);
     updatePanelPosition();
 
     return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('click', handleClick);
+      document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('resize', updatePanelPosition);
       window.removeEventListener('scroll', updatePanelPosition, true);
     };
-  }, [isNotificationsOpen, updatePanelPosition]);
+  }, [isNotificationsOpen, isFilterMenuOpen, updatePanelPosition]);
 
   useEffect(() => {
     if (!isNotificationsOpen) {
@@ -294,6 +318,32 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
     };
   }, [isNotificationsOpen]);
 
+  const filteredNotifications = notifications.filter((item) => {
+    if (activeFilter === 'all') {
+      return true;
+    }
+    if (activeFilter === 'uploads') {
+      return item.type === 'MEDIA_UPLOADED' || item.type === 'MEDIA_DELETED';
+    }
+    if (activeFilter === 'albums') {
+      return (
+        item.type === 'ALBUM_CREATED' ||
+        item.type === 'ALBUM_UPDATED' ||
+        item.type === 'ALBUM_DELETED'
+      );
+    }
+    return item.readAt === null;
+  });
+
+  const emptyByFilterLabel =
+    activeFilter === 'uploads'
+      ? 'Ingen upload notifikationer endnu.'
+      : activeFilter === 'albums'
+        ? 'Ingen album notifikationer endnu.'
+        : activeFilter === 'unread'
+          ? 'Ingen ulæste notifikationer.'
+          : 'Ingen notifikationer endnu.';
+
   const unreadLabel = unreadCount > 99 ? '99+' : String(unreadCount);
 
   const handleBellClick = () => {
@@ -307,6 +357,11 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
     updatePanelPosition();
     void refreshNotifications();
     void markNotificationsAsRead();
+  };
+
+  const handleFilterSelect = (filter: NotificationFilter) => {
+    setActiveFilter(filter);
+    setIsFilterMenuOpen(false);
   };
 
   const handleRefreshNotificationsClick = async () => {
@@ -342,7 +397,7 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
     <div
       ref={panelRef}
       id="home-notifications-panel"
-      className="fixed z-200 overflow-hidden rounded-xl border-2 border-default bg-surface shadow-lg"
+      className="fixed z-200 overflow-visible rounded-xl border-2 border-default bg-surface shadow-lg"
       style={{
         top: `${panelPosition.top}px`,
         left: `${panelPosition.left}px`,
@@ -351,27 +406,67 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
     >
       <div className="flex items-center justify-between border-b-2 border-default px-3 py-2">
         <p className="text-sm font-semibold text-main">Seneste notifikationer</p>
-        <button
-          type="button"
-          onClick={() => {
-            void handleRefreshNotificationsClick();
-          }}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-main transition-colors hover:bg-surface-elevated hover:text-main disabled:opacity-60"
-          aria-label="Opdater notifikationer"
-          title="Opdater notifikationer"
-          disabled={isNotificationsRefreshing}
-        >
-          <span ref={refreshIconRef} className="inline-flex">
-            <RefreshCw size={18} />
-          </span>
-        </button>
+        <div className="relative flex items-center gap-1.5">
+          <button
+            ref={filterButtonRef}
+            type="button"
+            onClick={() => setIsFilterMenuOpen((prev) => !prev)}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-main transition-colors hover:bg-surface-elevated"
+            aria-label="Filtrer notifikationer"
+            title="Filtrer notifikationer"
+            aria-expanded={isFilterMenuOpen}
+            aria-controls="home-notification-filter-menu"
+          >
+            <ListFilter size={18} />
+          </button>
+          {isFilterMenuOpen ? (
+            <div
+              ref={filterMenuRef}
+              id="home-notification-filter-menu"
+              className="absolute right-0 z-10 w-40 rounded-lg border-2 border-default bg-surface p-1 shadow-lg"
+              style={{ top: isMobileViewport ? 'calc(100% + 0.5rem)' : 'calc(100% + 0.5rem)' }}
+            >
+              <ul className="space-y-1">
+                {NOTIFICATION_FILTER_OPTIONS.map((option) => (
+                  <li key={option.value}>
+                    <button
+                      type="button"
+                      onClick={() => handleFilterSelect(option.value)}
+                      className={`flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-sm transition-colors ${
+                        activeFilter === option.value
+                          ? 'bg-surface-elevated font-semibold text-main'
+                          : 'text-muted hover:bg-surface-elevated hover:text-main'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              void handleRefreshNotificationsClick();
+            }}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-main"
+            aria-label="Opdater notifikationer"
+            title="Opdater notifikationer"
+            disabled={isNotificationsRefreshing}
+          >
+            <span ref={refreshIconRef} className="inline-flex">
+              <RefreshCw size={20} />
+            </span>
+          </button>
+        </div>
       </div>
       <div
         ref={notificationListRef}
         className="p-2 touch-pan-y scrollbar-subtle scrollbar-gutter-stable"
         style={{
-          height: '20rem',
-          maxHeight: '70svh',
+          height: '50svh',
+          maxHeight: '50svh',
           overflowY: 'auto',
           overscrollBehavior: 'contain',
           WebkitOverflowScrolling: 'touch',
@@ -381,11 +476,11 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
           <p className="px-2 py-3 text-base text-muted">Henter notifikationer...</p>
         ) : notificationsError ? (
           <p className="px-2 py-3 text-sm text-danger">{notificationsError}</p>
-        ) : notifications.length === 0 ? (
-          <p className="px-2 py-3 text-sm text-muted">Ingen notifikationer endnu.</p>
+        ) : filteredNotifications.length === 0 ? (
+          <p className="px-2 py-3 text-sm text-muted">{emptyByFilterLabel}</p>
         ) : (
           <ul className="space-y-2">
-            {notifications.map((item) => {
+            {filteredNotifications.map((item) => {
               const createdAt = new Date(item.createdAt);
               const createdAtLabel = Number.isNaN(createdAt.getTime())
                 ? item.createdAt
@@ -397,10 +492,12 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
                   className="rounded-xl border-2 border-default card-gradient px-3 py-2 shadow-lg"
                 >
                   <p className="text-xs text-muted">{createdAtLabel}</p>
-                  <p className="mt-1 text-sm text-main">{item.message}</p>
-                  {!item.readAt ? (
-                    <p className="mt-1 text-[11px] font-semibold text-primary">Ulæst</p>
-                  ) : null}
+                  <p className="mt-1 w-full text-sm text-main break-all">
+                    {item.message}
+                  </p>
+                  <p className={`mt-1 text-[11px] font-semibold ${item.readAt ? 'invisible' : 'text-primary'}`}>
+                    Ulæst
+                  </p>
                 </li>
               );
             })}
@@ -440,7 +537,7 @@ export default function HomeHero({ userName, isAdmin, isAuthenticated }: Props) 
             >
               <Bell size={16} className={unreadCount > 0 ? 'text-primary' : 'text-muted'} />
               {unreadCount > 0 ? (
-                <span className="absolute -right-1.5 -top-1.5 min-w-[1.15rem] rounded-full border border-default bg-surface-elevated px-1 text-[10px] font-semibold leading-4 text-main">
+                <span className="absolute -right-1.5 -top-1.5 min-w-[1.15rem] rounded-full border border-default-hover bg-surface-elevated px-1 text-[10px] font-semibold leading-4 text-primary">
                   {unreadLabel}
                 </span>
               ) : null}

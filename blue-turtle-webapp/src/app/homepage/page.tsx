@@ -14,7 +14,7 @@ import Header from '../../components/layout/Header';
 
 export default async function Homepage() {
   const session = await getServerSession(sessionAuthOptions);
-  const data = await getHomepageData();
+  const data = await getHomepageData(session?.user?.id ?? null);
   const userName = session?.user?.name ?? null;
   const isAdmin = session?.user?.role === 'ADMIN';
   const isAuthenticated = Boolean(session?.user?.id);

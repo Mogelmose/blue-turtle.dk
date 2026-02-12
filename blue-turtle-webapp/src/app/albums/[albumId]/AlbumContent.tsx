@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, TouchEvent as ReactTouchEvent } from 'react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
@@ -95,6 +95,8 @@ export default function AlbumContent({ initialAlbum }: Props) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [retainedLightboxIndex, setRetainedLightboxIndex] = useState(0);
+  const dismissedQueryMediaIdRef = useRef<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { data: session } = useSession();
@@ -123,7 +125,7 @@ export default function AlbumContent({ initialAlbum }: Props) {
       })),
     [preparedMedia, album.name],
   );
-  const lightboxIndex = activeIndex ?? 0;
+  const lightboxIndex = activeIndex ?? retainedLightboxIndex;
 
   const handleAlbumUpdated = (updatedAlbum: Album) => {
     setAlbum((prev) => ({ ...prev, ...updatedAlbum }));
@@ -134,7 +136,14 @@ export default function AlbumContent({ initialAlbum }: Props) {
   }, [initialAlbum]);
   useEffect(() => {
     const mediaId = searchParams?.get('media');
-    if (!mediaId || activeIndex !== null) {
+    if (!mediaId) {
+      dismissedQueryMediaIdRef.current = null;
+      return;
+    }
+    if (activeIndex !== null) {
+      return;
+    }
+    if (dismissedQueryMediaIdRef.current === mediaId) {
       return;
     }
     const index = preparedMedia.findIndex((item) => item.id === mediaId);
@@ -142,6 +151,18 @@ export default function AlbumContent({ initialAlbum }: Props) {
       setActiveIndex(index);
     }
   }, [activeIndex, preparedMedia, searchParams]);
+  useEffect(() => {
+    if (preparedMedia.length === 0) {
+      setRetainedLightboxIndex(0);
+      return;
+    }
+    setRetainedLightboxIndex((current) => {
+      if (activeIndex !== null) {
+        return activeIndex;
+      }
+      return current >= preparedMedia.length ? preparedMedia.length - 1 : current;
+    });
+  }, [activeIndex, preparedMedia.length]);
 
 
   useEffect(() => {
@@ -159,8 +180,12 @@ export default function AlbumContent({ initialAlbum }: Props) {
   }, [album.id, router]);
 
   const closeViewer = useCallback(() => {
+    const mediaId = searchParams?.get('media');
+    if (mediaId) {
+      dismissedQueryMediaIdRef.current = mediaId;
+    }
     setActiveIndex(null);
-    if (searchParams?.has('media')) {
+    if (mediaId) {
       const params = new URLSearchParams(searchParams.toString());
       params.delete('media');
       const nextQuery = params.toString();

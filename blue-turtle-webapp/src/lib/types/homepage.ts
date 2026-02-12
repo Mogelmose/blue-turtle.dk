@@ -26,7 +26,7 @@ export type MapAlbumSummary = {
 
 export type ActivityItem = {
   id: string;
-  type: 'album' | 'media';
+  type: 'album' | 'media' | 'notification';
   label: string;
   createdAt: Date;
   href: string;
